@@ -195,6 +195,22 @@ Rotation keeps only the newest three archive/signature pairs.
 `boudyos-restore-verify` uses a private temporary directory and never writes
 production.
 
+### Disabling scheduled backups
+
+Retire the schedule before removing its target directory:
+
+```bash
+systemctl disable --now boudyos-backup.timer
+systemctl reset-failed boudyos-backup.service
+```
+
+Removing `/var/backups/boudyos` while the timer is still enabled makes the
+oneshot unit fail with `status=226/NAMESPACE`, which then appears as a failed
+job even though backups were intentionally disabled. Re-enabling the timer
+requires recreating the directory with
+`systemd-tmpfiles --create /usr/lib/tmpfiles.d/boudyos.conf` and confirming the
+configured age recipient and HMAC key are still present.
+
 ## Health, readiness, and status
 
 The application writes readiness after initialization even with `LOG_OFF` and
