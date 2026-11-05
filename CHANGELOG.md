@@ -1,5 +1,21 @@
 # Changelog
 
+## Dockyard 3.1.0
+
+- Added `.q`, which turns a replied message into a dark-glass quote sticker
+  and adds it to an automatically managed Telegram sticker pack. The same
+  renderer produces a 1080x1350 PNG share card on request.
+- `.q` flags: `-e` for the sticker emoji, `-p` for a pack slot from 1 to 20,
+  `--preview` to skip the pack, `--photo` to blur the replied image into the
+  avatar disc, `-n` to quote the last 1 to 10 messages, `--link` to quote a
+  linked message, `--name` to override the display name, and `--png` to add
+  the share card.
+- Quote packs use `dq_<user>_<slot>_by_<assistant>` short names, are cached
+  per slot, and advance one slot when a short name is occupied or a set is
+  full or invalid. `.qpack` reports the current link and slot, and
+  `.qpack reset` clears the slot and moves to the next free one.
+- Added `quote` to the default media profile.
+
 ## Dockyard 3.0.1
 
 - Host migration no longer aborts when a historic workspace points at a

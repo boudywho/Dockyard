@@ -23,6 +23,7 @@ compatibility.
 
 - Dockyard 3.0 safe parsing, bounded processes, and release-aware status
 - Dashboard-based help for plugins, add-ons, voice chat, settings, and updates
+- Quote stickers with `.q`, automatic sticker-pack handling, and `.qpack`
 - Telegram assistant and private log-group integration
 - Verified trusted add-on workflow; untrusted install/load paths are opt-in
 - Optional plugin/dependency profiles and voice-chat components
