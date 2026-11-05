@@ -1,6 +1,6 @@
 [Unit]
 Description=Encrypted Dockyard backup
-After=redis-server.service dockyard-paths.service
+After=ultroid-redis.service dockyard-paths.service
 Requires=dockyard-paths.service
 
 [Service]

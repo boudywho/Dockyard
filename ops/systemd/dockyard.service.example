@@ -1,8 +1,8 @@
 [Unit]
 Description=Dockyard Telegram workspace
-After=network-online.target redis-server.service dockyard-paths.service
+After=network-online.target ultroid-redis.service dockyard-paths.service
 Wants=network-online.target
-Requires=dockyard-paths.service
+Requires=ultroid-redis.service dockyard-paths.service
 
 [Service]
 Type=simple

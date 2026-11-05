@@ -51,7 +51,8 @@ restores the snapshot and restarts `ultroid.service` on failure, and is a no-op
 after a verified successful migration. The Unix account and group remain
 `ultroid`, as do `/opt/ultroid`, the existing Dockyard runtime/state and
 environment values, Telegram identifiers, and the required
-`ultroid-redis.service` unit. A service rename does not authorize renaming any
+`ultroid-redis.service` unit, which is retained unchanged across the Dockyard
+rename. A service rename does not authorize renaming any
 of those surfaces. Nonstandard test or staging locations may override
 `DOCKYARD_UNIT_DIR`,
 `DOCKYARD_DEPLOY_CONFIG`, `DOCKYARD_BACKUP_CONFIG`,

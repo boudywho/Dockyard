@@ -1529,8 +1529,10 @@ PY
                     for value in line.split("=", 1)[1].split():
                         unit_provisioned.add("/run/" + value)
             if "ExecStart=" in text and unit.name != "dockyard-paths.service":
-                self.assertIn(
-                    "Requires=dockyard-paths.service", text, unit.name
+                self.assertRegex(
+                    text,
+                    r"(?m)^Requires=.*\bdockyard-paths\.service\b",
+                    unit.name,
                 )
                 self.assertIn(
                     "After=", text, unit.name

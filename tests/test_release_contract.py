@@ -288,6 +288,34 @@ class ReleaseContractTests(unittest.TestCase):
                     pattern, data, str(path.relative_to(ROOT))
                 )
 
+    def test_dockyard_units_reference_the_frozen_ultroid_redis_unit(self):
+        for path in (ROOT / "ops").rglob("*"):
+            if path.is_file():
+                self.assertNotIn(
+                    b"redis-server.service",
+                    path.read_bytes(),
+                    str(path.relative_to(ROOT)),
+                )
+        expected = {
+            "ops/systemd/dockyard.service.example": (
+                "After=network-online.target ultroid-redis.service "
+                "dockyard-paths.service",
+                "Requires=ultroid-redis.service dockyard-paths.service",
+            ),
+            "ops/systemd/dockyard-health.service": (
+                "After=dockyard.service ultroid-redis.service "
+                "dockyard-paths.service",
+            ),
+            "ops/systemd/dockyard-backup.service": (
+                "After=ultroid-redis.service dockyard-paths.service",
+            ),
+        }
+        for name, lines in expected.items():
+            unit = (ROOT / name).read_text("utf-8")
+            self.assertIn("ultroid-redis.service", unit, name)
+            for line in lines:
+                self.assertIn(line, unit, name)
+
     def test_shared_status_files_do_not_record_origins_or_paths(self):
         deploy = (ROOT / "ops/dockyard-deploy").read_text("utf-8")
         migration = (ROOT / "ops/dockyard-migrate-ultroid").read_text("utf-8")

@@ -39,9 +39,9 @@ privileged commands as `[sandbox] would run: ...`.
 ## Rename migration to 3.0.0
 
 Dockyard 3.0.0 renames the product and its operational surface. The code
-package (`pyUltroid`), the `ultroid` Unix account/group, `ultroid-redis.service`,
-database and Redis keys, callback data, commands, and session files are
-unchanged.
+package (`pyUltroid`), the `ultroid` Unix account/group, `ultroid-redis.service`
+(retained unchanged across the Dockyard rename), database and Redis keys,
+callback data, commands, and session files are unchanged.
 
 Before deploying 3.0.0 over an installation created by the previous release:
 

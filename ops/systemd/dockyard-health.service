@@ -1,6 +1,6 @@
 [Unit]
 Description=Dockyard health and alert probe
-After=dockyard.service redis-server.service dockyard-paths.service
+After=dockyard.service ultroid-redis.service dockyard-paths.service
 Requires=dockyard-paths.service
 
 [Service]
