@@ -38,10 +38,7 @@ Personalized from [TeamUltroid/Ultroid](https://github.com/TeamUltroid/Ultroid).
 
 
 _settings = [
-    [
-        Button.inline("API Keys", data="cbs_apiset"),
-        Button.inline("PM Bot", data="cbs_chatbot"),
-    ],
+    [Button.inline("API Keys", data="cbs_apiset")],
     [
         Button.inline("Alive", data="cbs_alvcstm"),
         Button.inline("PMPermit", data="cbs_ppmset"),

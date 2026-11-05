@@ -92,8 +92,6 @@ CATEGORY_LABELS = {
     "Misc": "Miscellaneous",
 }
 
-MNGE = udB.get_key("MNGR_EMOJI") or ""
-
 
 def get_buttons():
     BTTS = []
@@ -101,12 +99,7 @@ def get_buttons():
     while keys:
         BT = []
         for i in list(keys)[:2]:
-            text = (
-                f"{MNGE} {CATEGORY_LABELS[i]} {MNGE}".strip()
-                if MNGE
-                else CATEGORY_LABELS[i]
-            )
-            BT.append(Button.inline(text, f"hlp_{i}"))
+            BT.append(Button.inline(CATEGORY_LABELS[i], f"hlp_{i}"))
             del keys[i]
         BTTS.append(BT)
     url = f"https://t.me/{asst.me.username}?startgroup=true"

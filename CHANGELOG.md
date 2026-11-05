@@ -17,8 +17,13 @@
   glyphs, bullets, and emoji were removed from user-facing text.
 - Updated help text and plugin strings to neutral, professional English while
   preserving command syntax, placeholders, and behavior.
-- Removed the developer shell and evaluation commands together with their
-  settings surface.
+- Removed the developer shell and evaluation commands. The
+  `ALLOW_DANGEROUS_DEV_EXEC` compatibility setting is retained, but no shipped
+  plugin executes arbitrary code.
+- Removed the orphaned settings and assistant UI for plugins that no longer
+  ship, including Google Drive configuration, the PM Bot menu, the Emoji in
+  Help toggle, and the retired Twitter inline search, and added the missing
+  compressor help page.
 
 ## BoudyOS 2.3.0 — consolidated upstream development
 

@@ -15,11 +15,6 @@ from os import execl, remove
 from random import choice
 
 from bs4 import BeautifulSoup as bs
-
-try:
-    from pyUltroid.fns.gDrive import GDriveManager
-except ImportError:
-    GDriveManager = None
 from telethon import Button, events
 from catbox import CatboxUploader
 from telethon.tl.types import MessageMediaWebPage
@@ -27,8 +22,7 @@ from telethon.utils import get_peer_id
 
 from pyUltroid.fns.helper import fast_download, progress
 from pyUltroid.fns.tools import Carbon, async_searcher, get_paste, telegraph_client
-from pyUltroid.paths import OFFICIAL_ASSISTANT, source_resource
-from pyUltroid.startup.loader import Loader
+from pyUltroid.paths import source_resource
 from pyUltroid.security.updater import (
     check_for_update,
     format_changelog_report,
@@ -42,7 +36,6 @@ from . import *
 
 # --------------------------------------------------------------------#
 telegraph = telegraph_client()
-GDrive = GDriveManager() if GDriveManager else None
 uploader = CatboxUploader()
 # --------------------------------------------------------------------#
 
@@ -72,10 +65,6 @@ _buttons = {
             [
                 Button.inline("Extra plugins", data="plg"),
                 Button.inline("Add-ons", data="eaddon"),
-            ],
-            [
-                Button.inline("Emoji in Help", data="emoj"),
-                Button.inline("Google Drive", data="gdrive"),
             ],
             [
                 Button.inline("Inline image", data="inli_pic"),
@@ -143,22 +132,6 @@ _buttons = {
             [Button.inline("Turn PMPermit On", data="pmon")],
             [Button.inline("Turn PMPermit Off", data="pmoff")],
             [Button.inline("Customize PMPermit", data="cbs_pmcstm")],
-            [Button.inline("Back", data="setter")],
-        ],
-    },
-    "chatbot": {
-        "text": "Let people contact you through your BoudyOS assistant.",
-        "buttons": [
-            [
-                Button.inline("Enable chat bot", data="onchbot"),
-                Button.inline("Disable chat bot", data="ofchbot"),
-            ],
-            [
-                Button.inline("Bot Welcome", data="bwel"),
-                Button.inline("Bot Welcome Media", data="botmew"),
-            ],
-            [Button.inline("Bot Info Text", data="botinfe")],
-            [Button.inline("Force Subscribe", data="pmfs")],
             [Button.inline("Back", data="setter")],
         ],
     },
@@ -398,71 +371,6 @@ async def convo_handler(event: events.CallbackQuery):
         )
 
 
-@callback("authorise", owner=True)
-async def _(e):
-    if not e.is_private:
-        return
-    url = GDrive._create_token_file()
-    await e.edit("Go to the below link and send the code!")
-    async with asst.conversation(e.sender_id) as conv:
-        await conv.send_message(url)
-        code = await conv.get_response()
-        if GDrive._create_token_file(code=code.text):
-            await conv.send_message(
-                "`Google Drive is ready for BoudyOS.`",
-                buttons=Button.inline("Main Menu", data="setter"),
-            )
-        else:
-            await conv.send_message("Wrong code! Click authorise again.")
-
-
-@callback("folderid", owner=True, func=lambda x: x.is_private)
-async def _(e):
-    if not e.is_private:
-        return
-    msg = (
-        "Send your FOLDER ID\n\n"
-        + "For FOLDER ID:\n"
-        + "1. Open Google Drive App.\n"
-        + "2. Create Folder.\n"
-        + "3. Make that folder public.\n"
-        + "4. Send link of that folder."
-    )
-    await e.delete()
-    async with asst.conversation(e.sender_id, timeout=150) as conv:
-        await conv.send_message(msg)
-        repl = await conv.get_response()
-        id = repl.text
-        if id.startswith("https"):
-            id = id.split("?id=")[-1]
-        udB.set_key("GDRIVE_FOLDER_ID", id)
-        await repl.reply(
-            "`Success.`",
-            buttons=get_back_button("gdrive"),
-        )
-
-
-@callback("gdrive", owner=True)
-async def _(e):
-    if not e.is_private:
-        return
-    await e.edit(
-        (
-            "Select Authorize, then send the code here.\n\n"
-            "For configuration help, visit "
-            "[BoudyOS on GitHub](https://github.com/boudywho/BoudyOS)."
-        ),
-        buttons=[
-            [
-                Button.inline("Folder ID", data="folderid"),
-                Button.inline("Authorise", data="authorise"),
-            ],
-            [Button.inline("Back", data="cbs_otvars")],
-        ],
-        link_preview=False,
-    )
-
-
 async def _set_dual_mode(e, enabled):
     raw = udB.get_key("DUAL_MODE")
     if enabled:
@@ -519,35 +427,6 @@ async def hndlrr(event):
             await setit(event, var, themssg)
             await conv.send_message(
                 f"{name} changed to {themssg}",
-                buttons=get_back_button("cbs_otvars"),
-            )
-
-
-@callback("emoj", owner=True)
-async def emoji(event):
-    await event.delete()
-    pru = event.sender_id
-    var = "EMOJI_IN_HELP"
-    name = f"Emoji in `{HNDLR}help` menu"
-    async with event.client.conversation(pru) as conv:
-        await conv.send_message("Send the emoji to use in the help menu.\n\nUse /cancel to cancel.")
-        response = conv.wait_event(events.NewMessage(chats=pru))
-        response = await response
-        themssg = response.message.message
-        if themssg == "/cancel":
-            await conv.send_message(
-                "Cancelled.",
-                buttons=get_back_button("cbs_otvars"),
-            )
-        elif themssg.startswith(("/", HNDLR)):
-            await conv.send_message(
-                "Incorrect Emoji",
-                buttons=get_back_button("cbs_otvars"),
-            )
-        else:
-            await setit(event, var, themssg)
-            await conv.send_message(
-                f"{name} changed to {themssg}\n",
                 buttons=get_back_button("cbs_otvars"),
             )
 
@@ -1061,34 +940,6 @@ async def pmofff(event):
     )
 
 
-@callback("botmew", owner=True)
-async def hhh(e):
-    async with e.client.conversation(e.chat_id) as conv:
-        await conv.send_message("Send the media to use in the bot welcome message.")
-        msg = await conv.get_response()
-        if not msg.media or msg.text.startswith("/"):
-            return await conv.send_message(
-                "Terminated!", buttons=get_back_button("cbs_chatbot")
-            )
-        udB.set_key("STARTMEDIA", msg.file.id)
-        await conv.send_message("Done!", buttons=get_back_button("cbs_chatbot"))
-
-
-@callback("botinfe", owner=True)
-async def hhh(e):
-    async with e.client.conversation(e.chat_id) as conv:
-        await conv.send_message(
-            "Send the message to display when the user presses the Info button in the bot welcome message.\n\nSend `False` to remove that button."
-        )
-        msg = await conv.get_response()
-        if msg.media or msg.text.startswith("/"):
-            return await conv.send_message(
-                "Terminated!", buttons=get_back_button("cbs_chatbot")
-            )
-        udB.set_key("BOT_INFO_START", msg.text)
-        await conv.send_message("Done!", buttons=get_back_button("cbs_chatbot"))
-
-
 @callback("pmfs", owner=True)
 async def heheh(event):
     Ll = []
@@ -1110,7 +961,7 @@ async def heheh(event):
                 udB.del_key("PMBOT_FSUB")
                 timyork = "Force subscribe disabled.\nRestart the bot."
             return await conv.send_message(
-                "Cancelled!", buttons=get_back_button("cbs_chatbot")
+                "Cancelled!", buttons=get_back_button("setter")
             )
         for chat in msg.message.split("\n"):
             if chat.startswith("-") or chat.isdigit():
@@ -1124,62 +975,8 @@ async def heheh(event):
             return await conv.send_message(err)
         udB.set_key("PMBOT_FSUB", str(Ll))
         await conv.send_message(
-            "Done.\nRestart the bot.", buttons=get_back_button("cbs_chatbot")
+            "Done.\nRestart the bot.", buttons=get_back_button("setter")
         )
-
-
-@callback("bwel", owner=True)
-async def name(event):
-    await event.delete()
-    pru = event.sender_id
-    var = "STARTMSG"
-    name = "Bot Welcome Message:"
-    async with event.client.conversation(pru) as conv:
-        await conv.send_message(
-            "**Bot welcome message**\nEnter the message to show when someone starts your assistant bot.\nYou can use the `{me}` and `{mention}` parameters.\nUse /cancel to terminate the operation.",
-        )
-        response = conv.wait_event(events.NewMessage(chats=pru))
-        response = await response
-        themssg = response.message.message
-        if themssg == "/cancel":
-            return await conv.send_message(
-                "Cancelled.",
-                buttons=get_back_button("cbs_chatbot"),
-            )
-        await setit(event, var, themssg)
-        await conv.send_message(
-            f"{name} changed to {themssg}",
-            buttons=get_back_button("cbs_chatbot"),
-        )
-
-
-@callback("onchbot", owner=True)
-async def chon(event):
-    var = "PMBOT"
-    await setit(event, var, "True")
-    Loader(path=OFFICIAL_ASSISTANT / "pmbot.py", key="PM Bot").load()
-    if AST_PLUGINS.get("pmbot"):
-        for i, e in AST_PLUGINS["pmbot"]:
-            event.client.remove_event_handler(i)
-        for i, e in AST_PLUGINS["pmbot"]:
-            event.client.add_event_handler(i, events.NewMessage(**e))
-    await event.edit(
-        "Chat forwarding through this bot is now enabled.",
-        buttons=[Button.inline("Back", data="cbs_chatbot")],
-    )
-
-
-@callback("ofchbot", owner=True)
-async def chon(event):
-    var = "PMBOT"
-    await setit(event, var, "False")
-    if AST_PLUGINS.get("pmbot"):
-        for i, e in AST_PLUGINS["pmbot"]:
-            event.client.remove_event_handler(i)
-    await event.edit(
-        "Chat forwarding through this bot is now disabled.",
-        buttons=[Button.inline("Back", data="cbs_chatbot")],
-    )
 
 
 @callback("inli_pic", owner=True)
