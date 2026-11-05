@@ -27,6 +27,7 @@ class HostMigrationSandboxTests(unittest.TestCase):
             "var/lib/boudyos/workspaces/ws/work",
             "var/backups/boudyos",
             "etc/systemd/system/boudyos.service.d",
+            "etc/systemd/system/boudyos-health.service.d",
             "etc/sudoers.d",
             "usr/local/sbin",
             "usr/local/lib/boudyos",
@@ -127,14 +128,30 @@ class HostMigrationSandboxTests(unittest.TestCase):
         (fake / "etc/systemd/system/boudyos.service.d/legacy.conf").write_text(
             "[Service]\nEnvironment=LEGACY=1\n", "utf-8"
         )
+        (
+            fake / "etc/systemd/system/boudyos-health.service.d/legacy.conf"
+        ).write_text(
+            "[Service]\nEnvironment=LEGACY_HEALTH=1\n", "utf-8"
+        )
         (fake / "etc/sudoers.d/boudyos-deploy").write_text(
             "ultroid ALL=(root) NOPASSWD: /usr/local/sbin/boudyos-deploy request\n",
             "utf-8",
         )
-        (fake / "usr/local/sbin/boudyos-health").write_text(
-            "#!/usr/bin/env bash\nexit 0\n", "utf-8"
+        (fake / "etc/sudoers.d/ultroid-boudyos-deploy").write_text(
+            "ultroid ALL=(root) NOPASSWD: /usr/local/sbin/ultroid-start\n",
+            "utf-8",
         )
-        (fake / "usr/local/sbin/boudyos-health").chmod(0o755)
+        for helper in (
+            "boudyos-deploy",
+            "boudyos-health",
+            "boudyos-backup",
+            "boudyos-restore-verify",
+            "boudyos-rename-service",
+            "boudyos-migrate-ultroid",
+        ):
+            path = fake / "usr/local/sbin" / helper
+            path.write_text("#!/usr/bin/env bash\nexit 0\n", "utf-8")
+            path.chmod(0o755)
         (fake / "usr/local/lib/boudyos/dockyard_ops.py").write_text(
             "# legacy helper\n", "utf-8"
         )
@@ -295,7 +312,26 @@ class HostMigrationSandboxTests(unittest.TestCase):
         ):
             self.assertTrue((fake / "etc/systemd/system" / name).is_file(), name)
         self.assertFalse((fake / "etc/systemd/system/boudyos.service").exists())
+        self.assertFalse((fake / "etc/systemd/system/boudyos.service.d").exists())
+        self.assertFalse(
+            (fake / "etc/systemd/system/boudyos-health.service.d").exists()
+        )
         self.assertFalse((fake / "etc/sudoers.d/boudyos-deploy").exists())
+        self.assertFalse(
+            (fake / "etc/sudoers.d/ultroid-boudyos-deploy").exists()
+        )
+        self.assertFalse((fake / "usr/local/lib/boudyos").exists())
+        self.assertFalse((fake / "usr/lib/tmpfiles.d/boudyos.conf").exists())
+        for helper in (
+            "boudyos-deploy",
+            "boudyos-health",
+            "boudyos-backup",
+            "boudyos-restore-verify",
+            "boudyos-rename-service",
+            "boudyos-migrate-ultroid",
+        ):
+            path = fake / "usr/local/sbin" / helper
+            self.assertFalse(path.exists(), helper)
         self.assertTrue((fake / "etc/sudoers.d/dockyard-deploy").is_file())
         self.assertEqual(
             stat.S_IMODE((fake / "etc/sudoers.d/dockyard-deploy").stat().st_mode),
@@ -477,7 +513,25 @@ class HostMigrationSandboxTests(unittest.TestCase):
             original_unit,
         )
         self.assertTrue((fake / "usr/local/sbin/boudyos-health").is_file())
+        for helper in (
+            "boudyos-deploy",
+            "boudyos-health",
+            "boudyos-backup",
+            "boudyos-restore-verify",
+            "boudyos-rename-service",
+            "boudyos-migrate-ultroid",
+        ):
+            path = fake / "usr/local/sbin" / helper
+            self.assertTrue(path.is_file(), helper)
+            self.assertTrue(os.access(path, os.X_OK), helper)
+        self.assertTrue((fake / "usr/local/lib/boudyos/dockyard_ops.py").is_file())
         self.assertTrue((fake / "usr/lib/tmpfiles.d/boudyos.conf").is_file())
+        self.assertTrue(
+            (fake / "etc/systemd/system/boudyos-health.service.d/legacy.conf").is_file()
+        )
+        self.assertTrue(
+            (fake / "etc/sudoers.d/ultroid-boudyos-deploy").is_file()
+        )
         self.assertFalse((fake / "usr/lib/tmpfiles.d/dockyard.conf").exists())
         self.assertFalse((fake / "etc/systemd/system/dockyard.service").exists())
         self.assertFalse((fake / "usr/local/sbin/dockyard-deploy").exists())

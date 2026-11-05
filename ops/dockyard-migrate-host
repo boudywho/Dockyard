@@ -37,6 +37,18 @@ readonly LEGACY_UNITS=(
     boudyos-deploy.path
     boudyos-paths.service
 )
+readonly LEGACY_HELPERS=(
+    boudyos-deploy
+    boudyos-health
+    boudyos-backup
+    boudyos-restore-verify
+    boudyos-rename-service
+    boudyos-migrate-ultroid
+)
+readonly LEGACY_DROPINS=(
+    boudyos.service.d
+    boudyos-health.service.d
+)
 readonly NEW_TIMERS=(
     dockyard-health.timer
     dockyard-backup.timer
@@ -170,6 +182,10 @@ set_paths() {
     LEGACY_VARLIB="$(rooted var/lib/boudyos)"
     LEGACY_BACKUPS="$(rooted var/backups/boudyos)"
     LEGACY_SUDOERS="$(rooted etc/sudoers.d/boudyos-deploy)"
+    LEGACY_ULTROID_SUDOERS="$(rooted etc/sudoers.d/ultroid-boudyos-deploy)"
+    LEGACY_USRSBIN="$(rooted usr/local/sbin)"
+    LEGACY_USRLIB="$(rooted usr/local/lib/boudyos)"
+    LEGACY_TMPFILES="$(rooted usr/lib/tmpfiles.d/boudyos.conf)"
 
     NEW_ETC="$(rooted etc/dockyard)"
     NEW_OPT="$(rooted opt/dockyard)"
@@ -625,8 +641,8 @@ install_repository_assets() {
 }
 
 remove_legacy_assets() {
-    local name path directory
-    log "remove superseded BoudyOS units and sudoers file"
+    local name path directory helper dropin
+    log "remove superseded BoudyOS units, helpers, tmpfiles and sudoers files"
     for directory in \
         "$ROOT/etc/systemd/system" \
         "$ROOT/usr/lib/systemd/system" \
@@ -643,15 +659,35 @@ remove_legacy_assets() {
                 fi
             done
         done
-        if [[ -e "$directory/boudyos.service.d" ]]; then
-            rm -rf -- "$directory/boudyos.service.d"
-            log "removed $directory/boudyos.service.d"
+        for dropin in "${LEGACY_DROPINS[@]}"; do
+            path="$directory/$dropin"
+            if [[ -e "$path" || -L "$path" ]]; then
+                rm -rf -- "$path"
+                log "removed $path"
+            fi
+        done
+    done
+    for helper in "${LEGACY_HELPERS[@]}"; do
+        path="$LEGACY_USRSBIN/$helper"
+        if [[ -e "$path" || -L "$path" ]]; then
+            rm -f -- "$path"
+            log "removed $path"
         fi
     done
-    if [[ -e "$LEGACY_SUDOERS" || -L "$LEGACY_SUDOERS" ]]; then
-        rm -f -- "$LEGACY_SUDOERS"
-        log "removed $LEGACY_SUDOERS"
+    if [[ -d "$LEGACY_USRLIB" ]]; then
+        rm -rf -- "$LEGACY_USRLIB"
+        log "removed $LEGACY_USRLIB"
     fi
+    if [[ -e "$LEGACY_TMPFILES" || -L "$LEGACY_TMPFILES" ]]; then
+        rm -f -- "$LEGACY_TMPFILES"
+        log "removed $LEGACY_TMPFILES"
+    fi
+    for path in "$LEGACY_SUDOERS" "$LEGACY_ULTROID_SUDOERS"; do
+        if [[ -e "$path" || -L "$path" ]]; then
+            rm -f -- "$path"
+            log "removed $path"
+        fi
+    done
 }
 
 wait_for_stop() {
@@ -788,7 +824,8 @@ plan_output() {
     printf '  6. rewrite BOUDYOS_* keys and legacy paths/service names in %s\n' "$NEW_ETC"
     printf '  7. set the release pin in %s/deploy.conf\n' "$NEW_ETC"
     printf '  8. install repository assets (commands shown below)\n'
-    printf '  9. remove legacy units and sudoers, reload systemd, create tmpfiles and enable\n'
+    printf '  9. remove legacy units, drop-ins, helpers, tmpfiles and sudoers files,\n'
+    printf '     reload systemd, create tmpfiles and enable\n'
     printf '     each new unit only if its legacy counterpart was enabled; dockyard.service\n'
     printf '     is not enabled or started\n'
     printf ' 10. print the pinned deploy command and leave the service stopped\n'
