@@ -1,5 +1,25 @@
 # Changelog
 
+## BoudyOS 2.4.0 - clean release
+
+- Removed unmaintained, redundant, and experimental plugins: `aiwrapper`,
+  `chatbot`, `weather`, `twitter`, `stories`, `gdrive`, `logo`, `unsplash`,
+  `glitch`, `misc`, `fakeaction`, `cleanaction`, `delayspam`, `autopic`,
+  `nightmode`, `words`, `beautify`, `nsfwfilter`, `profanityfilter`,
+  `devtools`, and `specialtools`.
+- Removed the assistant `games` plugin. Assistant plugins continue to load
+  without it.
+- Simplified plugin profiles to `core`, `media`, `admin`, and `automation`.
+  The empty `developer` and `experimental` profiles are gone, and the official
+  plugin inventory remains exactly assigned to the remaining profiles.
+- Normalized the English user interface: help pages now render as
+  `Plugin: <name>`, `Commands`, followed by plain command entries; decorative
+  glyphs, bullets, and emoji were removed from user-facing text.
+- Updated help text and plugin strings to neutral, professional English while
+  preserving command syntax, placeholders, and behavior.
+- Removed the developer shell and evaluation commands together with their
+  settings surface.
+
 ## BoudyOS 2.3.0 — consolidated upstream development
 
 - Reconciled TeamUltroid feature and preview histories onto current BoudyOS main.

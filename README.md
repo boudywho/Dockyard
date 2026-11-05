@@ -21,7 +21,7 @@ compatibility.
 
 ## Features
 
-- BoudyOS 2.2 safe parsing, bounded processes, and release-aware status
+- BoudyOS 2.4 safe parsing, bounded processes, and release-aware status
 - Dashboard-based help for plugins, add-ons, voice chat, settings, and updates
 - Telegram assistant and private log-group integration
 - Verified trusted add-on workflow; untrusted install/load paths are opt-in
