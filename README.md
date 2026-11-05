@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="./resources/extras/boudyos_logo.png" width="280" alt="BoudyOS logo">
+  <img src="./resources/extras/dockyard_logo.png" width="280" alt="Dockyard logo">
 </p>
 
-<h1 align="center">BoudyOS</h1>
+<h1 align="center">Dockyard</h1>
 
 <p align="center">
   A security-focused personal Telegram workspace built with Telethon.
@@ -10,10 +10,10 @@
 
 ## About
 
-BoudyOS is a personalized public fork of
+Dockyard is a personalized public fork of
 [TeamUltroid/Ultroid](https://github.com/TeamUltroid/Ultroid). It keeps Ultroid's
 plugin ecosystem, deployment model, session format, database contracts, and
-upstream-compatible internals while presenting a focused BoudyOS experience.
+upstream-compatible internals while presenting a focused Dockyard experience.
 
 The `pyUltroid` package, `UltroidClient`, commands, callback data, environment
 keys, and database identifiers intentionally retain their upstream names for
@@ -21,7 +21,7 @@ compatibility.
 
 ## Features
 
-- BoudyOS 2.4 safe parsing, bounded processes, and release-aware status
+- Dockyard 3.0 safe parsing, bounded processes, and release-aware status
 - Dashboard-based help for plugins, add-ons, voice chat, settings, and updates
 - Telegram assistant and private log-group integration
 - Verified trusted add-on workflow; untrusted install/load paths are opt-in
@@ -47,8 +47,8 @@ generated session files.
 ### Local
 
 ```bash
-git clone https://github.com/boudywho/BoudyOS.git
-cd BoudyOS
+git clone https://github.com/boudywho/Dockyard.git
+cd Dockyard
 python3 -m venv venv
 . venv/bin/activate
 constraint=py310.txt  # use py313.txt on CPython 3.13+
@@ -89,12 +89,12 @@ systemd performs the verified deployment. The bot never pulls, resets, or
 installs dependencies. TeamUltroid is provenance and reviewed sync only.
 
 Docker builds do not fabricate a checkout of remote `main`. Release/CI builders
-pass `BOUDYOS_SOURCE_COMMIT`, `BOUDYOS_SOURCE_TAG`, and
-`BOUDYOS_SOURCE_DIRTY=0`; default local builds record an unverified/dirty
+pass `DOCKYARD_SOURCE_COMMIT`, `DOCKYARD_SOURCE_TAG`, and
+`DOCKYARD_SOURCE_DIRTY=0`; default local builds record an unverified/dirty
 identity and disable Git-based update assumptions.
 
-- BoudyOS source and support:
-  [github.com/boudywho/BoudyOS](https://github.com/boudywho/BoudyOS)
+- Dockyard source and support:
+  [github.com/boudywho/Dockyard](https://github.com/boudywho/Dockyard)
 - Upstream project:
   [TeamUltroid/Ultroid](https://github.com/TeamUltroid/Ultroid)
 - Upstream add-ons:
@@ -106,13 +106,13 @@ execution and untrusted raw add-ons are disabled by default.
 
 ## License and credits
 
-BoudyOS remains licensed under the
+Dockyard remains licensed under the
 [GNU Affero General Public License v3 or later](./LICENSE). Existing copyright
 and license headers are preserved.
 
 The core architecture and substantial implementation come from
 [TeamUltroid](https://github.com/TeamUltroid/Ultroid) and its contributors.
-BoudyOS also inherits work built on
+Dockyard also inherits work built on
 [Telethon](https://github.com/LonamiWebs/Telethon) and
 [PyTgCalls](https://github.com/pytgcalls/pytgcalls). See the repository history
 for the complete contributor record.

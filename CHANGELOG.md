@@ -1,9 +1,28 @@
 # Changelog
 
-## BoudyOS 2.4.1
+## Dockyard 3.0.0
+
+This is a rename release. The product, repository, install paths, service
+names, environment variables, and helper scripts moved from the previous
+product name to Dockyard/dockyard. Install locations now use `/opt/dockyard`,
+`/var/lib/dockyard`, `/run/dockyard`, `/var/backups/dockyard`,
+`/etc/dockyard`, and `/usr/local/lib/dockyard`; systemd units and operational
+helpers use the `dockyard-*` names and `DOCKYARD_*` environment variables.
+
+The upstream compatibility surface is unchanged: the `pyUltroid` package and
+its imports, the `ultroid` Unix account/group, `ultroid-redis.service`, shared
+database and Redis keys, callback data, command names, and the session format
+keep their existing names.
+
+A host migration is required before deploying 3.0.0. Existing installations
+must move or re-provision paths, units, configuration files, the runtime
+account, and legacy environment values before the new release starts. See
+[MIGRATION.md](./MIGRATION.md).
+
+## Dockyard 2.4.1
 
 - Ported the applicable upstream `TeamUltroid/Ultroid` #512 and #513 fixes into
-  the code BoudyOS still ships. Upstream-only changes touching plugins BoudyOS
+  the code Dockyard still ships. Upstream-only changes touching plugins Dockyard
   removed were deliberately not ported.
 - Telethon is capped below 1.45, so a fresh install no longer crashes while
   importing `telethonpatch`.
@@ -23,7 +42,7 @@
 - Release verification keeps `.git/index` inside the immutable mode policy and
   stops refreshing it during checks.
 
-## BoudyOS 2.4.0 - clean release
+## Dockyard 2.4.0 - clean release
 
 - Removed unmaintained, redundant, and experimental plugins: `aiwrapper`,
   `chatbot`, `weather`, `twitter`, `stories`, `gdrive`, `logo`, `unsplash`,
@@ -48,9 +67,9 @@
   Help toggle, and the retired Twitter inline search, and added the missing
   compressor help page.
 
-## BoudyOS 2.3.0 — consolidated upstream development
+## Dockyard 2.3.0 — consolidated upstream development
 
-- Reconciled TeamUltroid feature and preview histories onto current BoudyOS main.
+- Reconciled TeamUltroid feature and preview histories onto current Dockyard main.
   TeamUltroid main itself was already integrated at edd18d3.
 - Added offline setup/doctor, redacted configuration checks, typed settings,
   owner-only official plugin controls, structured plugin load diagnostics,
@@ -62,21 +81,21 @@
 - Historical alternate architectures are explicitly superseded and recoverable
   from archive tags; see docs/BRANCH_CONSOLIDATION.md for each merge decision.
 
-## BoudyOS 2.3.0 — uninterrupted backups
+## Dockyard 2.3.0 — uninterrupted backups
 
 - Backups no longer stop or restart the Telegram workspace. SQLite sessions
   use online snapshots with integrity checks; Redis keeps its native snapshot.
 - Keep only the newest three encrypted backup/signature pairs.
 - Ignore zero/empty log-channel placeholders instead of overwriting saved groups.
 - Verified a production encrypted backup and restore inventory with the same
-  running BoudyOS PID. Existing backup history was cleared at the owner's request.
+  running Dockyard PID. Existing backup history was cleared at the owner's request.
 - Legacy branch tips are preserved as archive tags; consolidation keeps current
   secure implementations rather than restoring incompatible historical designs.
 
 ## Unreleased — canonical service name
 
 - Added a root-only, dry-runnable, idempotent migration from
-  `ultroid.service` to the canonical `boudyos.service`, with exact unit/drop-in
+  `ultroid.service` to the canonical `dockyard.service`, with exact unit/drop-in
   preservation, atomic selector rewrites, fresh PID-correlated readiness and
   health verification, enabled-state preservation, and verified rollback to
   the restarted legacy service.
@@ -84,45 +103,45 @@
   and environment values, Telegram identifiers, and `ultroid-redis.service`
   unchanged as compatibility surfaces.
 
-## BoudyOS 2.2.6 — self-userbot text wizard
+## Dockyard 2.2.6 — self-userbot text wizard
 
 - Added a user-account-only numbered `.yt` wizard with no assistant-bot
   dependency.
 
-## BoudyOS 2.2.5 — Python launcher module-mode fix
+## Dockyard 2.2.5 — Python launcher module-mode fix
 
 - Signaled module-mode startup before loading `pyUltroid`, preserving the
   launcher's writable-work exclusion while restoring managed activation.
 
-## BoudyOS 2.2.4 — deployment preflight classifier fix
+## Dockyard 2.2.4 — deployment preflight classifier fix
 
 - Limited preflight shell syntax checks to executable files with shell shebangs,
   excluding the Python launcher from `bash -n` validation.
 
-## BoudyOS 2.2.3 — UI and media workflow polish
+## Dockyard 2.2.3 — UI and media workflow polish
 
-- Polished BoudyOS UI and branding, removed inline YouTube search, and added a
+- Polished Dockyard UI and branding, removed inline YouTube search, and added a
   Telethon-native self-userbot `yt` media workflow with quality and timestamp
   selection, cleanup, and cancellation.
 
-## BoudyOS 2.2.2 — Python 3.10 safe-path compatibility
+## Dockyard 2.2.2 — Python 3.10 safe-path compatibility
 
 - Replaced the Python 3.11-only `-P` service flag with an immutable launcher
   compatible with Python 3.10. The launcher removes the writable work directory
   from `sys.path`, pins imports to the root-owned release, and disables bytecode
   writes without weakening the managed runtime boundary.
 
-## BoudyOS 2.2.1 — legacy migration readiness
+## Dockyard 2.2.1 — legacy migration readiness
 
 - Corrected the migration `prepare` and legacy rollback gates for installations
-  running BoudyOS 2.1/legacy Ultroid, which predate the 2.2 readiness heartbeat.
+  running Dockyard 2.1/legacy Ultroid, which predate the 2.2 readiness heartbeat.
 - Legacy resume now requires a replaced nonzero systemd MainPID to remain
   active and unchanged for a bounded grace interval; managed 2.2 activation
   and rollback still require the fresh PID-correlated heartbeat.
 - Repeated `prepare` validates and reuses an exact protected preparation record
   instead of stopping the legacy service or creating an ambiguous snapshot.
 
-## BoudyOS 2.2.0 — security and reliability
+## Dockyard 2.2.0 — security and reliability
 
 - Native activation now uses one atomic commit-workspace selector for immutable
   source plus writable work, verifies stopped/replaced processes around every
@@ -141,7 +160,7 @@
 - Disabled raw URL add-on execution by default. Trusted registry installs now
   enforce HTTPS source policy, full immutable revisions, SHA-256, size/time
   limits, valid Python syntax, atomic replacement, and rollback.
-- Replaced in-bot pull/reset/pip behavior with approved BoudyOS-origin
+- Replaced in-bot pull/reset/pip behavior with approved Dockyard-origin
   pinned tag+commit checks and a short root-owned deployment request.
 
 ### Reliability and operations
@@ -166,9 +185,9 @@
 
 Telegram command names and callback data, session formats, environment and
 database keys, `pyUltroid`, `UltroidClient`, the AGPL/upstream provenance, and
-BoudyOS assets remain compatible. The upstream py-Ultroid version remains
-`2026.04.03`; the BoudyOS product version is `2.2.0`.
+Dockyard assets remain compatible. The upstream py-Ultroid version remains
+`2026.04.03`; the Dockyard product version is `2.2.0`.
 
-## BoudyOS 2.1.2
+## Dockyard 2.1.2
 
 Production baseline: commit `5a7f41f`.

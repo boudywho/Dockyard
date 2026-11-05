@@ -1,4 +1,31 @@
-# BoudyOS 2.2 migration and rollback
+# Dockyard migration and rollback
+
+## Rename migration to 3.0.0
+
+Dockyard 3.0.0 renames the product and its operational surface. The code
+package (`pyUltroid`), the `ultroid` Unix account/group, `ultroid-redis.service`,
+database and Redis keys, callback data, commands, and session files are
+unchanged.
+
+Before deploying 3.0.0 over an installation created by the previous release:
+
+1. Take and verify an authenticated encrypted backup.
+2. Install the new operational assets: units from `ops/systemd/`, sudoers from
+   `ops/sudoers/`, `ops/tmpfiles.d/dockyard.conf`, and the `ops/config/*.example`
+   files as `/etc/dockyard/*`.
+3. Move or re-provision managed state under the new paths: `/opt/dockyard`,
+   `/var/lib/dockyard`, `/run/dockyard`, and `/var/backups/dockyard`. The
+   canonical service account for a fresh managed install is `dockyard`; legacy
+   migrations may keep the `ultroid` account.
+4. Convert every legacy environment/configuration key to its `DOCKYARD_*`
+   equivalent, including the deploy, backup, health, and systemd values.
+5. Point the deploy configuration at the `dockyard-*` helpers and the
+   `dockyard.service` unit, then run the deploy `check`/`stage` flow before
+   activation.
+
+Rolling back means restoring the previous release and its original units,
+paths, and legacy configuration. Database contents are not rewritten by the
+rename.
 
 ## Existing installations
 
@@ -33,33 +60,33 @@ Use `ops/config/deploy-ultroid.conf.example`,
 `ops/config/backup-ultroid.conf.example`,
 `ops/config/backup-paths-ultroid.example`,
 `ops/config/health-ultroid.conf.example`,
-`ops/sudoers/ultroid-boudyos-deploy`, and
-`ops/systemd/ultroid-boudyos.conf.example`. Replace the commit placeholder and
+`ops/sudoers/ultroid-dockyard-deploy`, and
+`ops/systemd/ultroid-dockyard.conf.example`. Replace the commit placeholder and
 validate sudoers before installation. Install
-`ops/tmpfiles.d/boudyos.conf` and `ops/systemd/boudyos-paths.service` as
+`ops/tmpfiles.d/dockyard.conf` and `ops/systemd/dockyard-paths.service` as
 documented in `docs/operations.md`, run `systemd-tmpfiles --create` before any
 unit is started, and enable the provisioning service. The legacy drop-in also
-uses `RuntimeDirectory=boudyos` and `StateDirectory=boudyos/app-status`, so
+uses `RuntimeDirectory=dockyard` and `StateDirectory=dockyard/app-status`, so
 systemd deterministically applies `ultroid:ultroid` ownership to those two
 writable directories before `ExecStart`.
 
 Run:
 
 ```bash
-sudo /usr/local/sbin/boudyos-migrate-ultroid plan
-sudo /usr/local/sbin/boudyos-migrate-ultroid prepare
-sudo /usr/local/sbin/boudyos-deploy check
-sudo /usr/local/sbin/boudyos-deploy stage
+sudo /usr/local/sbin/dockyard-migrate-ultroid plan
+sudo /usr/local/sbin/dockyard-migrate-ultroid prepare
+sudo /usr/local/sbin/dockyard-deploy check
+sudo /usr/local/sbin/dockyard-deploy stage
 # Replace the live backup allowlist/config and health config with the managed
 # examples (preserving separately provisioned recipient/key values).
-sudo /usr/local/sbin/boudyos-migrate-ultroid activate
+sudo /usr/local/sbin/dockyard-migrate-ultroid activate
 ```
 
 Before `prepare`, install the legacy backup and health examples at their
 documented live paths. `prepare` briefly stops `ultroid.service`, creates a
 root-only rollback
-snapshot under `/var/lib/boudyos/migration-snapshots`, copies the environment
-to `/etc/boudyos/runtime.env` with group `ultroid`, creates an
+snapshot under `/var/lib/dockyard/migration-snapshots`, copies the environment
+to `/etc/dockyard/runtime.env` with group `ultroid`, creates an
 root-owned runtime seed containing an `ultroid`-owned `work/`, and restarts the
 legacy unit. The source snapshot, environment, session/local database files,
 add-ons, auth, downloads, and external Redis configuration remain available.
@@ -80,33 +107,33 @@ loads the drop-in template only from that exact staged source. It installs the
 reviewed drop-in only after those exact tag+commit directories, ownership,
 modes, and work layout verify. It repeats validation after the link switch,
 before start. It removes stale readiness, switches the existing
-`ultroid.service` to immutable BoudyOS code and venv with `work/` as its
+`ultroid.service` to immutable Dockyard code and venv with `work/` as its
 writable cwd, and
 requires fresh PID-correlated readiness. Failure removes the drop-in and
 restarts the original unit.
 
 After activation and production verification, rename only the application
-unit to its canonical `boudyos.service` name:
+unit to its canonical `dockyard.service` name:
 
 ```bash
-sudo /usr/local/sbin/boudyos-rename-service plan
-sudo /usr/local/sbin/boudyos-rename-service rename
+sudo /usr/local/sbin/dockyard-rename-service plan
+sudo /usr/local/sbin/dockyard-rename-service rename
 ```
 
 The rename preserves the complete effective legacy unit and drop-in bytes and
 changes only `ultroid.service` selectors in the root-managed deploy, backup,
 and health configuration. The production Unix user/group remain `ultroid`,
-and `/opt/ultroid`, existing BoudyOS runtime/state paths and environment
+and `/opt/ultroid`, existing Dockyard runtime/state paths and environment
 values, Telegram identifiers, and `ultroid-redis.service` remain compatibility
 surfaces. A repeated rename reports that migration is already complete and
 does not mutate the installation.
 
 ## Rollback
 
-For a deployed BoudyOS release:
+For a deployed Dockyard release:
 
 ```bash
-sudo /usr/local/sbin/boudyos-deploy rollback
+sudo /usr/local/sbin/dockyard-deploy rollback
 ```
 
 The helper does not report success until the retained prior release is active
@@ -115,7 +142,7 @@ and fresh-ready. It does not rewrite database keys.
 For the legacy layout migration, before the separate service-name rename:
 
 ```bash
-sudo /usr/local/sbin/boudyos-migrate-ultroid rollback
+sudo /usr/local/sbin/dockyard-migrate-ultroid rollback
 ```
 
 This verifies a stop before changing anything, removes the managed selectors,
@@ -135,4 +162,4 @@ above intentionally remains the procedure while the application unit is still
 named `ultroid.service`; complete any decision to use it before performing the
 final canonical-name migration.
 
-The upstream py-Ultroid version remains `2026.04.03`; BoudyOS is `2.2.2`.
+The upstream py-Ultroid version remains `2026.04.03`; Dockyard is `2.2.2`.
