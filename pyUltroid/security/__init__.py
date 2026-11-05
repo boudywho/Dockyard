@@ -1,4 +1,4 @@
-"""Security primitives used by BoudyOS runtime and operations."""
+"""Security primitives used by Dockyard runtime and operations."""
 
 from .expressions import ExpressionError, evaluate_arithmetic
 from .parsing import parse_bool, parse_night_time, safe_data_value

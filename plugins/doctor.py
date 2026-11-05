@@ -1,4 +1,4 @@
-"""Read-only, secret-safe BoudyOS health summary."""
+"""Read-only, secret-safe Dockyard health summary."""
 
 import asyncio
 import platform
@@ -13,8 +13,8 @@ from . import udB, ultroid_cmd
 
 def _build_report(ping_status="not checked") -> str:
     lines = [
-        "**BoudyOS doctor**",
-        f"BoudyOS (Ultroid `{ultroid_version}` - pyUltroid `{pyult_ver}`)",
+        "**Dockyard doctor**",
+        f"Dockyard (Ultroid `{ultroid_version}` - pyUltroid `{pyult_ver}`)",
         f"Python `{platform.python_version()}`",
     ]
     try:
@@ -37,7 +37,7 @@ def _build_report(ping_status="not checked") -> str:
 
 @ultroid_cmd(pattern="doctor$", owner_only=True)
 async def doctor_cmd(event):
-    msg = await event.eor("`Running BoudyOS doctor…`")
+    msg = await event.eor("`Running Dockyard doctor…`")
     try:
         result = await asyncio.wait_for(asyncio.to_thread(udB.ping), timeout=3)
         status = "ok" if result else "failed"
@@ -46,5 +46,5 @@ async def doctor_cmd(event):
     try:
         text = _build_report(status)
     except Exception:
-        text = "BoudyOS doctor: report unavailable."
+        text = "Dockyard doctor: report unavailable."
     await msg.edit(text)

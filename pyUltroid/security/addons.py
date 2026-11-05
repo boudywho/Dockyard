@@ -111,7 +111,7 @@ def download_https(
 ) -> bytes:
     request = urllib.request.Request(
         url,
-        headers={"User-Agent": "BoudyOS/2.2 trusted-addon-installer"},
+        headers={"User-Agent": "Dockyard/2.2 trusted-addon-installer"},
         method="GET",
     )
     try:
@@ -162,7 +162,7 @@ def atomic_install(
     stage_name = ""
     try:
         with tempfile.NamedTemporaryFile(
-            mode="wb", prefix=".boudyos-addon-", dir=addon_dir, delete=False
+            mode="wb", prefix=".dockyard-addon-", dir=addon_dir, delete=False
         ) as stage:
             stage.write(content)
             stage.flush()

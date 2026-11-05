@@ -11,10 +11,10 @@ from typing import Awaitable, Callable, Optional, Sequence, Tuple
 from .subprocess import ProcessResult, run_exec
 
 
-APPROVED_ORIGIN = "https://github.com/boudywho/BoudyOS.git"
+APPROVED_ORIGIN = "https://github.com/boudywho/Dockyard.git"
 APPROVED_BRANCH = "main"
 APPROVED_HELPERS = frozenset(
-    ("/usr/local/sbin/boudyos-deploy", "/usr/libexec/boudyos-deploy")
+    ("/usr/local/sbin/dockyard-deploy", "/usr/libexec/dockyard-deploy")
 )
 _TAG = re.compile(r"^v?([0-9]+)\.([0-9]+)\.([0-9]+)$")
 _COMMIT = re.compile(r"^[0-9a-f]{40}$")
@@ -55,12 +55,12 @@ def _target_release(
     target_commit: Optional[str],
     status_path: Optional[Path] = None,
 ) -> Tuple[str, str]:
-    tag = target_tag or os.environ.get("BOUDYOS_RELEASE_TAG", "")
-    commit = target_commit or os.environ.get("BOUDYOS_RELEASE_COMMIT", "")
+    tag = target_tag or os.environ.get("DOCKYARD_RELEASE_TAG", "")
+    commit = target_commit or os.environ.get("DOCKYARD_RELEASE_COMMIT", "")
     if not tag and not commit:
         if status_path is None:
             status_path = Path(
-                os.environ.get("BOUDYOS_STATUS_DIR", "runtime/status")
+                os.environ.get("DOCKYARD_STATUS_DIR", "runtime/status")
             ) / "update.json"
         try:
             if status_path.stat().st_size > 16 * 1024:
@@ -80,7 +80,7 @@ def _target_release(
 def _release_metadata(path: Optional[Path] = None) -> dict:
     if path is None:
         path = Path(
-            os.environ.get("BOUDYOS_RELEASE_METADATA", ".boudyos-release.json")
+            os.environ.get("DOCKYARD_RELEASE_METADATA", ".dockyard-release.json")
         )
     try:
         if path.stat().st_size > 16 * 1024:
@@ -161,7 +161,7 @@ async def check_for_update(
     git_dir = repository / ".git"
     if metadata_path is None:
         metadata_path = Path(
-            os.environ.get("BOUDYOS_RELEASE_METADATA", ".boudyos-release.json")
+            os.environ.get("DOCKYARD_RELEASE_METADATA", ".dockyard-release.json")
         )
     metadata_present = metadata_path.exists()
     metadata = _release_metadata(metadata_path)
@@ -190,14 +190,14 @@ async def check_for_update(
             (
                 "approved pinned release is queued through the root verifier"
                 if state == "available"
-                else "BoudyOS is at the configured release"
+                else "Dockyard is at the configured release"
             ),
         )
 
     origin = await _git(runner, repository, ["remote", "get-url", "origin"])
     if not origin.ok or origin.stdout != APPROVED_ORIGIN:
         return UpdateState(
-            "blocked", detail="origin is not the approved BoudyOS repository"
+            "blocked", detail="origin is not the approved Dockyard repository"
         )
     branch_result = await _git(
         runner, repository, ["rev-parse", "--abbrev-ref", "HEAD"]
@@ -236,7 +236,7 @@ async def check_for_update(
                 approved_commit,
                 branch,
                 dirty,
-                "BoudyOS release check failed",
+                "Dockyard release check failed",
             )
     peeled = await _git(runner, repository, ["rev-parse", f"refs/tags/{tag}^{{commit}}"])
     if not peeled.ok or peeled.stdout != approved_commit:
@@ -267,7 +267,7 @@ async def check_for_update(
     detail = (
         "approved pinned release is available through the privileged request helper"
         if state == "available"
-        else "BoudyOS is at the configured release"
+        else "Dockyard is at the configured release"
     )
     if dirty:
         detail += "; local changes prevent deployment"
@@ -303,15 +303,15 @@ async def request_deployment(
 
 def format_update_report(state: UpdateState) -> str:
     if state.state == "blocked":
-        return f"BoudyOS update check blocked: {state.detail}."
+        return f"Dockyard update check blocked: {state.detail}."
     if state.state == "error":
-        return f"BoudyOS update check failed: {state.detail}."
+        return f"Dockyard update check failed: {state.detail}."
     current = state.current_revision[:12] or "unknown"
     available = state.available_revision[:12] or "unknown"
     label = "available" if state.update_available else "current"
     dirty = " Local changes detected; no deployment will run." if state.dirty else ""
     return (
-        f"BoudyOS update state: {label}. Current `{current}`, configured "
+        f"Dockyard update state: {label}. Current `{current}`, configured "
         f"release `{available}`.{dirty}"
     )
 

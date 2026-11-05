@@ -1,15 +1,15 @@
 [Unit]
-Description=Provision BoudyOS protected filesystem paths
+Description=Provision Dockyard protected filesystem paths
 After=local-fs.target
-Before=boudyos.service boudyos-deploy.path boudyos-deploy.service
-Before=boudyos-backup.service boudyos-health.service
-Before=boudyos-update-check.service
+Before=dockyard.service dockyard-deploy.path dockyard-deploy.service
+Before=dockyard-backup.service dockyard-health.service
+Before=dockyard-update-check.service
 
 [Service]
 Type=oneshot
 User=root
 Group=root
-ExecStart=/usr/bin/systemd-tmpfiles --create /usr/lib/tmpfiles.d/boudyos.conf
+ExecStart=/usr/bin/systemd-tmpfiles --create /usr/lib/tmpfiles.d/dockyard.conf
 RemainAfterExit=yes
 UMask=0027
 NoNewPrivileges=yes

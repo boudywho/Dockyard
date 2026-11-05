@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Executable and trust-policy paths must never depend on the writable cwd or
 # service-controlled environment. In managed installs this resolves through
-# /opt/boudyos/current to the root-owned release selected by the deployer.
+# /opt/dockyard/current to the root-owned release selected by the deployer.
 SOURCE_ROOT = Path(__file__).resolve().parents[1]
 OFFICIAL_PLUGINS = SOURCE_ROOT / "plugins"
 OFFICIAL_ASSISTANT = SOURCE_ROOT / "assistant"

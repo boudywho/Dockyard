@@ -1,0 +1,43 @@
+[Unit]
+Description=Dockyard Telegram workspace
+After=network-online.target redis-server.service dockyard-paths.service
+Wants=network-online.target
+Requires=dockyard-paths.service
+
+[Service]
+Type=simple
+User=dockyard
+Group=dockyard
+WorkingDirectory=/var/lib/dockyard/current/work
+EnvironmentFile=/etc/dockyard/runtime.env
+Environment=PYTHONPATH=/var/lib/dockyard/current/source
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=DOCKYARD_READY_FILE=/run/dockyard/ready
+Environment=DOCKYARD_READY_INTERVAL_SECONDS=15
+Environment=DOCKYARD_STATUS_DIR=/var/lib/dockyard/status
+Environment=DOCKYARD_APP_STATUS_DIR=/var/lib/dockyard/app-status
+Environment=DOCKYARD_RELEASE_METADATA=/var/lib/dockyard/status/release.json
+ExecStart=/var/lib/dockyard/current/source/.venv/bin/python -s /var/lib/dockyard/current/source/ops/dockyard-python-launcher
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+RuntimeDirectory=dockyard
+RuntimeDirectoryMode=0750
+StateDirectory=dockyard/app-status
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadOnlyPaths=/opt/dockyard/releases /var/lib/dockyard/current /var/lib/dockyard/workspaces /var/lib/dockyard/status
+ReadWritePaths=/run/dockyard -/var/lib/dockyard/current/work /var/lib/dockyard/app-status
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

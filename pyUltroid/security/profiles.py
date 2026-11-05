@@ -57,7 +57,7 @@ def resolve_profiles(
 ) -> ProfileSelection:
     """Resolve profiles without coupling upgrade behavior to startup notifications.
 
-    ``existing_install`` remains accepted for upstream callers. New BoudyOS
+    ``existing_install`` remains accepted for upstream callers. New Dockyard
     provisioning writes ``new-safe-v1`` explicitly; an unset marker fails
     toward legacy-all so upgrades never lose commands.
     """

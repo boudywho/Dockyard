@@ -49,8 +49,8 @@ from ..paths import source_resource
 db_url = 0
 REDIS_KEEPALIVE_KEY = "KEEP_ACTIVE"
 REDIS_KEEPALIVE_INTERVAL_SECONDS = 7 * 24 * 60 * 60
-BOUDYOS_BRAND_VERSION_KEY = "BOUDYOS_BRAND_VERSION"
-BOUDYOS_BRAND_VERSION = 1
+DOCKYARD_BRAND_VERSION_KEY = "DOCKYARD_BRAND_VERSION"
+DOCKYARD_BRAND_VERSION = 1
 BOTFATHER_SUCCESS_INDICATORS = ("done", "success", "successfully")
 BOTFATHER_ERROR_INDICATORS = (
     "cannot",
@@ -229,13 +229,13 @@ async def autobot():
     if udB.get_key("BOT_TOKEN"):
         return
     await ultroid_bot.start()
-    LOGS.info("Creating your BoudyOS assistant with @BotFather...")
+    LOGS.info("Creating your Dockyard assistant with @BotFather...")
     who = ultroid_bot.me
-    name = who.first_name + "'s BoudyOS Assistant"
+    name = who.first_name + "'s Dockyard Assistant"
     if who.username:
         username = who.username + "_bot"
     else:
-        username = "boudyos_" + (str(who.id))[5:] + "_bot"
+        username = "dockyard_" + (str(who.id))[5:] + "_bot"
     bf = "@BotFather"
     await ultroid_bot(UnblockRequest(bf))
     await ultroid_bot.send_message(bf, "/cancel")
@@ -254,7 +254,7 @@ async def autobot():
     await asyncio.sleep(1)
     isdone = (await ultroid_bot.get_messages(bf, limit=1))[0].text
     if not isdone.startswith("Good."):
-        await ultroid_bot.send_message(bf, "BoudyOS Assistant")
+        await ultroid_bot.send_message(bf, "Dockyard Assistant")
         await asyncio.sleep(1)
         isdone = (await ultroid_bot.get_messages(bf, limit=1))[0].text
         if not isdone.startswith("Good."):
@@ -270,7 +270,7 @@ async def autobot():
     await ultroid_bot.send_read_acknowledge("botfather")
     if isdone.startswith("Sorry,"):
         ran = randint(1, 100)
-        username = "boudyos_" + (str(who.id))[6:] + str(ran) + "_bot"
+        username = "dockyard_" + (str(who.id))[6:] + str(ran) + "_bot"
         await ultroid_bot.send_message(bf, username)
         await asyncio.sleep(1)
         isdone = (await ultroid_bot.get_messages(bf, limit=1))[0].text
@@ -278,7 +278,7 @@ async def autobot():
         token = isdone.split("`")[1]
         udB.set_key("BOT_TOKEN", token)
         await enable_inline(ultroid_bot, username)
-        LOGS.info("Created BoudyOS assistant @%s.", username)
+        LOGS.info("Created Dockyard assistant @%s.", username)
     else:
         LOGS.info(
             "Please Delete Some Of your Telegram bots at @Botfather or Set Var BOT_TOKEN with token of a bot"
@@ -313,14 +313,14 @@ async def autopilot():
             msg_ = "'LOG_CHANNEL' not found! Add it in order to use 'BOTMODE'"
             LOGS.error(msg_)
             return await _save(msg_)
-        LOGS.info("Creating the BoudyOS log group...")
+        LOGS.info("Creating the Dockyard log group...")
         try:
             r = await ultroid_bot(
                 CreateChannelRequest(
-                    title="BoudyOS Logs",
+                    title="Dockyard Logs",
                     about=(
-                        "Private logs for BoudyOS.\n"
-                        "https://github.com/boudywho/BoudyOS"
+                        "Private logs for Dockyard.\n"
+                        "https://github.com/boudywho/Dockyard"
                     ),
                     megagroup=True,
                 ),
@@ -387,19 +387,19 @@ async def autopilot():
                 LOGS.exception(er)
     if isinstance(chat.photo, ChatPhotoEmpty):
         try:
-            photo = str(source_resource("extras", "boudyos_avatar.jpg"))
+            photo = str(source_resource("extras", "dockyard_avatar.jpg"))
             uploaded = await ultroid_bot.upload_file(photo)
             await ultroid_bot(
                 EditPhotoRequest(int(channel), InputChatUploadedPhoto(uploaded))
             )
         except BaseException as er:
-            LOGS.warning("Could not set the optional BoudyOS log-group image: %s", er)
+            LOGS.warning("Could not set the optional Dockyard log-group image: %s", er)
 
 
 # customize assistant
 
 
-async def _apply_boudyos_branding(asst, udB, ultroid_bot):
+async def _apply_dockyard_branding(asst, udB, ultroid_bot):
     try:
         owner = getattr(ultroid_bot, "me", None)
         assistant = getattr(asst, "me", None)
@@ -409,18 +409,18 @@ async def _apply_boudyos_branding(asst, udB, ultroid_bot):
             or getattr(assistant, "bot", None) is not True
         ):
             return
-        if udB.get_key(BOUDYOS_BRAND_VERSION_KEY) == BOUDYOS_BRAND_VERSION:
+        if udB.get_key(DOCKYARD_BRAND_VERSION_KEY) == DOCKYARD_BRAND_VERSION:
             return
         chat_id = udB.get_key("LOG_CHANNEL")
-        LOGS.info("Customizing the BoudyOS assistant with @BotFather...")
+        LOGS.info("Customizing the Dockyard assistant with @BotFather...")
         UL = f"@{assistant.username}"
         if not owner.username:
             sir = owner.first_name
         else:
             sir = f"@{owner.username}"
-        file = str(source_resource("extras", "boudyos_avatar.jpg"))
+        file = str(source_resource("extras", "dockyard_avatar.jpg"))
         msg = await asst.send_message(
-            chat_id, "**BoudyOS assistant customization** started in @BotFather."
+            chat_id, "**Dockyard assistant customization** started in @BotFather."
         )
         await asyncio.sleep(1)
         await ultroid_bot.send_message("botfather", "/cancel")
@@ -440,7 +440,7 @@ async def _apply_boudyos_branding(asst, udB, ultroid_bot):
         await asyncio.sleep(1)
         await ultroid_bot.send_message("botfather", UL)
         await asyncio.sleep(1)
-        await ultroid_bot.send_message("botfather", "BoudyOS Assistant")
+        await ultroid_bot.send_message("botfather", "Dockyard Assistant")
         await asyncio.sleep(2)
         await _require_botfather_success(ultroid_bot, "name")
         await ultroid_bot.send_message("botfather", "/setabouttext")
@@ -448,7 +448,7 @@ async def _apply_boudyos_branding(asst, udB, ultroid_bot):
         await ultroid_bot.send_message("botfather", UL)
         await asyncio.sleep(1)
         await ultroid_bot.send_message(
-            "botfather", f"BoudyOS assistant for {sir}"
+            "botfather", f"Dockyard assistant for {sir}"
         )
         await asyncio.sleep(2)
         await _require_botfather_success(ultroid_bot, "about text")
@@ -459,14 +459,14 @@ async def _apply_boudyos_branding(asst, udB, ultroid_bot):
         await ultroid_bot.send_message(
             "botfather",
             (
-                f"Personal Telegram assistant for {sir}, powered by BoudyOS.\n"
-                "https://github.com/boudywho/BoudyOS"
+                f"Personal Telegram assistant for {sir}, powered by Dockyard.\n"
+                "https://github.com/boudywho/Dockyard"
             ),
         )
         await asyncio.sleep(2)
         await _require_botfather_success(ultroid_bot, "description")
-        await msg.edit("BoudyOS assistant customization completed.")
-        udB.set_key(BOUDYOS_BRAND_VERSION_KEY, BOUDYOS_BRAND_VERSION)
+        await msg.edit("Dockyard assistant customization completed.")
+        udB.set_key(DOCKYARD_BRAND_VERSION_KEY, DOCKYARD_BRAND_VERSION)
         LOGS.info("Assistant customization completed.")
     except Exception as e:
         LOGS.warning(
@@ -477,7 +477,7 @@ async def _apply_boudyos_branding(asst, udB, ultroid_bot):
 async def customize():
     from .. import asst, udB, ultroid_bot
 
-    await _apply_boudyos_branding(asst, udB, ultroid_bot)
+    await _apply_dockyard_branding(asst, udB, ultroid_bot)
 
 
 async def plug(plugin_channels):
@@ -519,7 +519,7 @@ async def plug(plugin_channels):
                     try:
                         load_addons(plugin)
                     except Exception as e:
-                        LOGS.info(f"BoudyOS - plugin channel - error - {plugin}")
+                        LOGS.info(f"Dockyard - plugin channel - error - {plugin}")
                         LOGS.exception(e)
                         os.remove(plugin)
         except Exception as er:
@@ -533,19 +533,19 @@ async def ready():
     chat_id = udB.get_key("LOG_CHANNEL")
     spam_sent = None
     if not udB.get_key("INIT_DEPLOY"):  # Detailed Message at Initial Deploy
-        MSG = """**Welcome to BoudyOS**
+        MSG = """**Welcome to Dockyard**
 
 Your personal Telegram workspace is ready. Open the guide to review the essentials."""
-        PHOTO = str(source_resource("extras", "boudyos_avatar.jpg"))
+        PHOTO = str(source_resource("extras", "dockyard_avatar.jpg"))
         BTTS = Button.inline("Open guide", "initft_2")
         udB.set_key("INIT_DEPLOY", "Done")
     else:
         MSG = (
-            "**BoudyOS is ready.**\n\n"
+            "**Dockyard is ready.**\n\n"
             f"**User:** {inline_mention(ultroid_bot.me)}\n"
             f"**Assistant:** @{asst.me.username}\n"
-            "**Support:** [BoudyOS on GitHub]"
-            "(https://github.com/boudywho/BoudyOS)"
+            "**Support:** [Dockyard on GitHub]"
+            "(https://github.com/boudywho/Dockyard)"
         )
         BTTS, PHOTO = None, None
         prev_spam = udB.get_key("LAST_UPDATE_LOG_SPAM")

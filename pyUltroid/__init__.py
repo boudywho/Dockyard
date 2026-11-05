@@ -17,7 +17,7 @@ if len(sys.argv) > 1 and sys.argv[1] in {"setup", "doctor", "help", "-h", "--hel
     from pathlib import Path
 
     _cli_path = Path(__file__).resolve().parent / "startup" / "setup_cli.py"
-    _spec = importlib.util.spec_from_file_location("_boudyos_setup_cli", _cli_path)
+    _spec = importlib.util.spec_from_file_location("_dockyard_setup_cli", _cli_path)
     _cli = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(_cli)
     raise SystemExit(_cli.main(sys.argv[1:]))
@@ -26,7 +26,7 @@ try:
     import telethonpatch
 except ImportError as exc:
     raise RuntimeError(
-        "BoudyOS requires the pinned Telethon-Patch dependency; reinstall with "
+        "Dockyard requires the pinned Telethon-Patch dependency; reinstall with "
         "requirements.txt and the matching constraints/py3xx.txt file."
     ) from exc
 from .version import __version__
@@ -37,7 +37,7 @@ run_as_module = __package__ in sys.argv or sys.argv[0] == "-m"
 
 class ULTConfig:
     lang = "en"
-    thumb = str(source_resource("extras", "boudyos_avatar.jpg"))
+    thumb = str(source_resource("extras", "dockyard_avatar.jpg"))
 
 
 if run_as_module:
@@ -49,7 +49,7 @@ if run_as_module:
     from pathlib import Path
 
     _spec = importlib.util.spec_from_file_location(
-        "_boudyos_config_validate",
+        "_dockyard_config_validate",
         Path(__file__).resolve().parent / "startup" / "config_validate.py",
     )
     _validator = importlib.util.module_from_spec(_spec)
@@ -103,7 +103,7 @@ if run_as_module:
             validate_session(Var.SESSION, LOGS),
             udB=udB,
             app_version=ultroid_version,
-            device_model="BoudyOS",
+            device_model="Dockyard",
         )
         if not setting_enabled(udB, "SKIP_AUTOBOT"):
             ultroid_bot.run_in_loop(autobot())
@@ -136,7 +136,7 @@ if run_as_module:
     DUAL_HNDLR = udB.get_key("DUAL_HNDLR") or "/"
     SUDO_HNDLR = udB.get_key("SUDO_HNDLR") or HNDLR
 else:
-    print("pyUltroid - BoudyOS")
+    print("pyUltroid - Dockyard")
 
     from logging import getLogger
 

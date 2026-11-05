@@ -1,4 +1,4 @@
-# BoudyOS 2.2 tested direct pins for CPython 3.13.
+# Dockyard 2.2 tested direct pins for CPython 3.13.
 # This is a constraints set, not a complete transitive hash lock.
 telethon-patch @ git+https://github.com/New-dev0/Telethon-Patch.git@369fa3266c8a9c9aefb4a6c5608e8d44c09c7087
 telethon==1.44.0

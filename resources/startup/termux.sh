@@ -12,7 +12,7 @@ then
     pkg install python3 -y
 fi
 
-printf "*Installing the tested BoudyOS media profile...*"
+printf "*Installing the tested Dockyard media profile...*"
 if python -c 'import sys; raise SystemExit(sys.version_info[:2] < (3, 13))'
 then
     constraint="constraints/py313.txt"

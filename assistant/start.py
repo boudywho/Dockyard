@@ -32,7 +32,7 @@ if Owner_info_msg is None:
 
 **Message Forwards** - {udB.get_key("PMBOT")}
 
-**[BoudyOS v{ultroid_version}](https://github.com/boudywho/BoudyOS)**
+**[Dockyard v{ultroid_version}](https://github.com/boudywho/Dockyard)**
 Personalized from [TeamUltroid/Ultroid](https://github.com/TeamUltroid/Ultroid).
 """
 
@@ -69,7 +69,7 @@ async def own(event):
         mention=event.sender.mention, me=inline_mention(ultroid_bot.me)
     )
     if custom_info:
-        msg += "\n\nPowered by **BoudyOS**."
+        msg += "\n\nPowered by **Dockyard**."
     await event.edit(
         msg,
         buttons=[Button.inline("Close", data="closeit")],
@@ -114,7 +114,7 @@ async def ultroid(event):
             if udB.get_key("PMBOT"):
                 ok = "You can contact the owner through this bot. Send a message and I will deliver it."
             await event.reply(
-                f"Hello {mention}. This is the BoudyOS assistant for {me}.\n\n{ok}",
+                f"Hello {mention}. This is the Dockyard assistant for {me}.\n\n{ok}",
                 file=udB.get_key("STARTMEDIA"),
                 buttons=[Button.inline("Info", data="ownerinfo")]
                 if Owner_info_msg
@@ -161,7 +161,7 @@ async def ultroid(event):
 @callback("stat", owner=True)
 async def botstat(event):
     ok = len(udB.get_key("BOT_USERS") or [])
-    msg = """BoudyOS assistant
+    msg = """Dockyard assistant
 Total users: {}""".format(
         ok,
     )

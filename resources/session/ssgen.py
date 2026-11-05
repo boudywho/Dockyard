@@ -56,7 +56,7 @@ def telethon_session():
         import telethon
         x = "\bFound an existing installation of Telethon...\nSuccessfully Imported.\n\n"
     except ImportError:
-        print("Installing the pinned BoudyOS Telegram client dependencies...")
+        print("Installing the pinned Dockyard Telegram client dependencies...")
         constraint = (
             "constraints/py313.txt"
             if sys.version_info[:2] >= (3, 13)
@@ -127,7 +127,7 @@ def telethon_session():
         print(er)
         print(
             "If this looks like a bug, report it at "
-            "https://github.com/boudywho/BoudyOS/issues.\n"
+            "https://github.com/boudywho/Dockyard/issues.\n"
         )
 
 
@@ -174,7 +174,7 @@ def pyro_session():
             ss = pyro.export_session_string()
             pyro.send_message(
                 "me",
-                f"`{ss}`\n\nThis is your BoudyOS Pyrogram session string. **DO NOT SHARE IT.**",
+                f"`{ss}`\n\nThis is your Dockyard Pyrogram session string. **DO NOT SHARE IT.**",
             )
             print("Session has been sent to your saved messages!")
             exit(0)

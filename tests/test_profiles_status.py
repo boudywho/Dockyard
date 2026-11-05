@@ -129,31 +129,31 @@ class StatusTests(unittest.TestCase):
                 assistant_healthy=True,
                 state_dir=Path(tmp),
             )
-            self.assertIn("BoudyOS 2.2.0", summary)
+            self.assertIn("Dockyard 2.2.0", summary)
             self.assertNotIn(str(tmp), summary)
 
     def test_status_dir_is_resolved_at_call_time(self):
         with tempfile.TemporaryDirectory() as tmp:
-            old = os.environ.get("BOUDYOS_APP_STATUS_DIR")
-            os.environ["BOUDYOS_APP_STATUS_DIR"] = tmp
+            old = os.environ.get("DOCKYARD_APP_STATUS_DIR")
+            os.environ["DOCKYARD_APP_STATUS_DIR"] = tmp
             try:
                 status.write_update_status(updater.UpdateState("current"))
                 self.assertTrue((Path(tmp) / "update.json").is_file())
             finally:
                 if old is None:
-                    os.environ.pop("BOUDYOS_APP_STATUS_DIR", None)
+                    os.environ.pop("DOCKYARD_APP_STATUS_DIR", None)
                 else:
-                    os.environ["BOUDYOS_APP_STATUS_DIR"] = old
+                    os.environ["DOCKYARD_APP_STATUS_DIR"] = old
 
     def test_root_truth_and_app_status_paths_are_separate_at_call_time(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             truth = root / "truth"
             app = root / "app"
-            old_truth = os.environ.get("BOUDYOS_STATUS_DIR")
-            old_app = os.environ.get("BOUDYOS_APP_STATUS_DIR")
-            os.environ["BOUDYOS_STATUS_DIR"] = str(truth)
-            os.environ["BOUDYOS_APP_STATUS_DIR"] = str(app)
+            old_truth = os.environ.get("DOCKYARD_STATUS_DIR")
+            old_app = os.environ.get("DOCKYARD_APP_STATUS_DIR")
+            os.environ["DOCKYARD_STATUS_DIR"] = str(truth)
+            os.environ["DOCKYARD_APP_STATUS_DIR"] = str(app)
             try:
                 status.write_update_status(updater.UpdateState("current"))
                 self.assertEqual(status.status_dir(), truth)
@@ -161,13 +161,13 @@ class StatusTests(unittest.TestCase):
                 self.assertFalse((truth / "update.json").exists())
             finally:
                 if old_truth is None:
-                    os.environ.pop("BOUDYOS_STATUS_DIR", None)
+                    os.environ.pop("DOCKYARD_STATUS_DIR", None)
                 else:
-                    os.environ["BOUDYOS_STATUS_DIR"] = old_truth
+                    os.environ["DOCKYARD_STATUS_DIR"] = old_truth
                 if old_app is None:
-                    os.environ.pop("BOUDYOS_APP_STATUS_DIR", None)
+                    os.environ.pop("DOCKYARD_APP_STATUS_DIR", None)
                 else:
-                    os.environ["BOUDYOS_APP_STATUS_DIR"] = old_app
+                    os.environ["DOCKYARD_APP_STATUS_DIR"] = old_app
 
     def test_bot_update_preserves_root_pinned_target(self):
         with tempfile.TemporaryDirectory() as tmp:

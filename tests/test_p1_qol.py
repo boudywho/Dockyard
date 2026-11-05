@@ -180,7 +180,7 @@ class DoctorTests(unittest.TestCase):
                 asyncio.run(mod.doctor_cmd(event))
                 threaded.assert_awaited_once()
             text = event.messages[-1]
-            self.assertIn("BoudyOS", text)
+            self.assertIn("Dockyard", text)
             self.assertIn("loaded `1`", text)
             self.assertIn("failed `1`", text)
             self.assertNotIn("DO_NOT_DISCLOSE", text)

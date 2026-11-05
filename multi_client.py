@@ -24,10 +24,10 @@ def main():
         auth = _client_env(suffix)
         if not auth:
             continue
-        work = os.environ.get('BOUDYOS_CLIENT_WORK' + suffix)
+        work = os.environ.get('DOCKYARD_CLIENT_WORK' + suffix)
         work = Path(work).resolve() if work else (Path.cwd() if not suffix else None)
         if work is None or not work.is_dir() or work in workspaces:
-            print('Each extra client requires its own existing BOUDYOS_CLIENT_WORK<n> directory.')
+            print('Each extra client requires its own existing DOCKYARD_CLIENT_WORK<n> directory.')
             return 1
         env = {key: value for key, value in os.environ.items()
                if not any(key == base + number for base in (*_AUTH, 'BOT_TOKEN', 'LOG_CHANNEL', 'REDIS_URI', 'REDIS_PASSWORD', 'REDIS_URL', 'REDISHOST', 'REDISPORT', 'REDISPASSWORD', 'REDISUSER', 'MONGO_URI', 'DATABASE_URL')

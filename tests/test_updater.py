@@ -77,7 +77,7 @@ class UpdatePolicyTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self._environment = mock.patch.dict(os.environ)
         self._environment.start()
-        os.environ.pop("BOUDYOS_RELEASE_METADATA", None)
+        os.environ.pop("DOCKYARD_RELEASE_METADATA", None)
         self._repository_tmp = tempfile.TemporaryDirectory()
         self.repository = Path(self._repository_tmp.name)
         (self.repository / ".git").mkdir()
@@ -241,7 +241,7 @@ class UpdatePolicyTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(label, "v2.2.0 (aaaaaaaaaaaa)")
             self.assertEqual(
                 link,
-                "https://github.com/boudywho/BoudyOS/tree/" + "a" * 40,
+                "https://github.com/boudywho/Dockyard/tree/" + "a" * 40,
             )
 
     async def test_root_status_supplies_configured_target_without_env_exposure(self):

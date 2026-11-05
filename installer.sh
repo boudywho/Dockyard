@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REPO="https://github.com/boudywho/BoudyOS.git"
+REPO="https://github.com/boudywho/Dockyard.git"
 CURRENT_DIR="$(pwd)"
 ENV_FILE_PATH=".env"
 DIR="/root/TeamUltroid"

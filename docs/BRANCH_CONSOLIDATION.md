@@ -1,16 +1,16 @@
-# BoudyOS branch consolidation — 2026-10-11
+# Dockyard branch consolidation — 2026-10-11
 
 ## Provenance and decisions
 
 TeamUltroid/Ultroid main was fetched directly at
 `edd18d31eae982dff468bd8ce785fbb319e370c3`. It was already an ancestor
-of BoudyOS main: no missing upstream-main commits. Branch histories are
+of Dockyard main: no missing upstream-main commits. Branch histories are
 reconciled into main, not indiscriminately used to replace newer code.
 
 Every previous origin branch tip is retained under the annotated tag namespace
 `archive/consolidation-20261011/<previous-branch-name>` before branch removal.
 Only main remains an active origin development branch. Upstream remote refs
-are provenance, not BoudyOS development branches.
+are provenance, not Dockyard development branches.
 
 | History | Resolution |
 | --- | --- |

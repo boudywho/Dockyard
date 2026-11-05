@@ -29,18 +29,18 @@ def start():
     check_for_py()
 
     print(f"{a}\n\n")
-    print("Welcome to BoudyOS. Let's get your workspace ready.\n")
+    print("Welcome to Dockyard. Let's get your workspace ready.\n")
     print("Cloning the repository...\n\n")
-    target = os.path.abspath("BoudyOS")
+    target = os.path.abspath("Dockyard")
     if os.path.isdir(target):
         shutil.rmtree(target)
     subprocess.run(
-        ["git", "clone", "https://github.com/boudywho/BoudyOS.git", target],
+        ["git", "clone", "https://github.com/boudywho/Dockyard.git", target],
         check=True,
         timeout=300,
     )
     print("\n\nDone")
-    os.chdir("BoudyOS")
+    os.chdir("Dockyard")
     clear_screen()
     print(a)
     print("\n\nLet's start!\n")
@@ -66,7 +66,7 @@ def start():
         "REDIS_URI",
         "REDIS_PASSWORD",
     ]
-    all_done = "# BoudyOS environment variables.\n# Do not delete this file.\n\n"
+    all_done = "# Dockyard environment variables.\n# Do not delete this file.\n\n"
     all_done += "PLUGIN_PROFILES=core,media\n"
     all_done += "PLUGIN_PROFILE_POLICY=new-safe-v1\n"
     for i in varrs:
@@ -118,7 +118,7 @@ def start():
     subprocess.run([sys.executable, "-m", "pip", "check"], check=True)
     clear_screen()
     print(a)
-    print("\nStarting BoudyOS...")
+    print("\nStarting Dockyard...")
     subprocess.run(["bash", "startup"], check=True)
 
 

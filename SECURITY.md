@@ -1,4 +1,4 @@
-# BoudyOS security policy
+# Dockyard security policy
 
 ## Reporting
 
@@ -8,12 +8,12 @@ repository's private security-reporting channel when enabled by the maintainer.
 If private reporting is unavailable, open a minimal issue asking Hermes for a
 private contact route.
 
-Supported security releases are the current BoudyOS 2.x release and the
+Supported security releases are the current Dockyard 2.x release and the
 immediately previous 2.x release during its migration window.
 
 ## Dangerous owner capabilities
 
-The owner shell and Python evaluation commands were removed in BoudyOS 2.4.0.
+The owner shell and Python evaluation commands were removed in Dockyard 2.4.0.
 `ALLOW_DANGEROUS_DEV_EXEC` remains a compatibility setting but no shipped
 plugin executes arbitrary code. Sudo users could never invoke those commands.
 Prefer `core,media` on unattended accounts.

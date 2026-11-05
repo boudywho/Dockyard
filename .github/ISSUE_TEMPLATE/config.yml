@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: BoudyOS support
-    url: https://github.com/boudywho/BoudyOS/blob/main/SUPPORT.md
+  - name: Dockyard support
+    url: https://github.com/boudywho/Dockyard/blob/main/SUPPORT.md
     about: Read support and log-sanitization guidance before filing.
   - name: Security policy
-    url: https://github.com/boudywho/BoudyOS/blob/main/SECURITY.md
+    url: https://github.com/boudywho/Dockyard/blob/main/SECURITY.md
     about: Do not disclose secrets or exploit details in a public issue.

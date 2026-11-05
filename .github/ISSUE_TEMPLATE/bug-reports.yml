@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a reproducible BoudyOS defect without secrets
+description: Report a reproducible Dockyard defect without secrets
 title: "[Bug] "
 labels: [bug]
 body:
@@ -27,7 +27,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: What BoudyOS version are you running?
+      description: What Dockyard version are you running?
       options:
         - "2.2.0"
         - "2.1.2"
@@ -39,7 +39,7 @@ body:
     id: hosted
     attributes:
       label: Hosted On
-      description: Which BoudyOS deployment method are you using?
+      description: Which Dockyard deployment method are you using?
       options:
         - Native systemd
         - Docker
@@ -62,7 +62,7 @@ body:
     id: terms
     attributes:
       label: Acknowledgement
-      description: Confirm that the report follows the BoudyOS support and security guidance.
+      description: Confirm that the report follows the Dockyard support and security guidance.
       options:
         - label: I removed secrets and private identifiers and reviewed SUPPORT.md.
           required: true

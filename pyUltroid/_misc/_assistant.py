@@ -21,19 +21,19 @@ from . import append_or_update, owner_and_sudos
 OWNER = ultroid_bot.full_name
 
 MSG = f"""
-**BoudyOS**
+**Dockyard**
 
 **Owner**: [{OWNER}](tg://user?id={ultroid_bot.uid})
-**Support**: [BoudyOS on GitHub](https://github.com/boudywho/BoudyOS)
+**Support**: [Dockyard on GitHub](https://github.com/boudywho/Dockyard)
 """
 
 IN_BTTS = [
     [
         Button.url(
             "Repository",
-            url="https://github.com/boudywho/BoudyOS",
+            url="https://github.com/boudywho/Dockyard",
         ),
-        Button.url("Support", url="https://github.com/boudywho/BoudyOS/issues"),
+        Button.url("Support", url="https://github.com/boudywho/Dockyard/issues"),
     ]
 ]
 
@@ -99,8 +99,8 @@ def in_pattern(pattern=None, owner=False, **kwargs):
             if owner and event.sender_id not in owner_and_sudos():
                 res = [
                     await event.builder.article(
-                        title="BoudyOS",
-                        url="https://github.com/boudywho/BoudyOS",
+                        title="Dockyard",
+                        url="https://github.com/boudywho/Dockyard",
                         description="Personal Telegram workspace",
                         text=MSG,
                         thumb=InputWebDocument(
@@ -136,7 +136,7 @@ def in_pattern(pattern=None, owner=False, **kwargs):
                                 text=error_text(),
                                 buttons=Button.url(
                                     "Report",
-                                    "https://github.com/boudywho/BoudyOS/issues",
+                                    "https://github.com/boudywho/Dockyard/issues",
                                 ),
                             )
                         ]

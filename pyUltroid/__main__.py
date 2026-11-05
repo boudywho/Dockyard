@@ -38,7 +38,7 @@ def main():
         and ultroid_bot.run_in_loop(updater())
     ):
         LOGS.warning(
-            "A BoudyOS update is available. UPDATE_ON_RESTART no longer mutates "
+            "A Dockyard update is available. UPDATE_ON_RESTART no longer mutates "
             "the checkout; use the documented deployment helper."
         )
 
@@ -77,7 +77,7 @@ def main():
 
     suc_msg = """
             ----------------------------------------------------------------------
-                BoudyOS is ready: https://github.com/boudywho/BoudyOS
+                Dockyard is ready: https://github.com/boudywho/Dockyard
             ----------------------------------------------------------------------
     """
 
@@ -99,7 +99,7 @@ def main():
     # Operational readiness is unconditional and independent of log delivery.
     from .security.status import mark_ready, readiness_heartbeat
 
-    ready_path = os.environ.get("BOUDYOS_READY_FILE", "")
+    ready_path = os.environ.get("DOCKYARD_READY_FILE", "")
     if ready_path:
         try:
             mark_ready(ready_path)
@@ -116,7 +116,7 @@ def main():
         pass
 
     LOGS.info(
-        f"BoudyOS started in {time_formatter((time.time() - start_time)*1000)}"
+        f"Dockyard started in {time_formatter((time.time() - start_time)*1000)}"
     )
     LOGS.info(suc_msg)
 

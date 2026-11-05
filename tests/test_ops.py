@@ -15,14 +15,14 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("boudyos_ops", ROOT / "ops/boudyos_ops.py")
+SPEC = importlib.util.spec_from_file_location("dockyard_ops", ROOT / "ops/dockyard_ops.py")
 ops = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(ops)
-sys.modules["boudyos_ops"] = ops
+sys.modules["dockyard_ops"] = ops
 HEALTH_LOADER = importlib.machinery.SourceFileLoader(
-    "boudyos_health", str(ROOT / "ops/boudyos-health")
+    "dockyard_health", str(ROOT / "ops/dockyard-health")
 )
-HEALTH_SPEC = importlib.util.spec_from_loader("boudyos_health", HEALTH_LOADER)
+HEALTH_SPEC = importlib.util.spec_from_loader("dockyard_health", HEALTH_LOADER)
 health = importlib.util.module_from_spec(HEALTH_SPEC)
 HEALTH_LOADER.exec_module(health)
 
@@ -39,21 +39,21 @@ def make_managed_release(release_root, tag, marker):
     (stage / "plugins" / "__init__.py").write_text("", "utf-8")
     (stage / "plugins" / "official.py").write_text("VALUE = 'official'\n", "utf-8")
     (stage / "ops" / "systemd").mkdir(parents=True)
-    (stage / "ops" / "systemd" / "ultroid-boudyos.conf.example").write_text(
-        (ROOT / "ops/systemd/ultroid-boudyos.conf.example").read_text("utf-8"),
+    (stage / "ops" / "systemd" / "ultroid-dockyard.conf.example").write_text(
+        (ROOT / "ops/systemd/ultroid-dockyard.conf.example").read_text("utf-8"),
         "utf-8",
     )
     (stage / "marker").write_text(marker, "utf-8")
     subprocess.run(["git", "init", "-q", str(stage)], check=True)
     subprocess.run(
         ["git", "-C", str(stage), "remote", "add", "origin",
-         "https://github.com/boudywho/BoudyOS.git"],
+         "https://github.com/boudywho/Dockyard.git"],
         check=True,
     )
     subprocess.run(["git", "-C", str(stage), "add", "."], check=True)
     subprocess.run(
         [
-            "git", "-C", str(stage), "-c", "user.name=BoudyOS Tests",
+            "git", "-C", str(stage), "-c", "user.name=Dockyard Tests",
             "-c", "user.email=tests@invalid", "commit", "-qm", marker,
         ],
         check=True,
@@ -253,10 +253,10 @@ class BackupPolicyTests(unittest.TestCase):
 
     def test_example_backs_up_only_the_active_runtime_link(self):
         allowlist = (ROOT / "ops/config/backup-paths.example").read_text("utf-8")
-        backup = (ROOT / "ops/boudyos-backup").read_text("utf-8")
-        self.assertIn("/var/lib/boudyos/current", allowlist)
-        self.assertNotIn("/var/lib/boudyos/runtime", allowlist)
-        self.assertNotIn("/var/lib/boudyos/workspaces\n", allowlist)
+        backup = (ROOT / "ops/dockyard-backup").read_text("utf-8")
+        self.assertIn("/var/lib/dockyard/current", allowlist)
+        self.assertNotIn("/var/lib/dockyard/runtime", allowlist)
+        self.assertNotIn("/var/lib/dockyard/workspaces\n", allowlist)
         self.assertIn("resolve-active-runtime", backup)
         self.assertIn('--managed-workspace-root "$RUNTIME_ROOT"', backup)
         self.assertIn('active_source_seen=0', backup)
@@ -325,7 +325,7 @@ class BackupPolicyTests(unittest.TestCase):
             payload = source / "payload"
             payload.write_text("restorable", "utf-8")
             payload.chmod(0o640)
-            manifest = ops.build_manifest(source, {"product": "BoudyOS"})
+            manifest = ops.build_manifest(source, {"product": "Dockyard"})
             (source / "manifest.json").write_text(
                 json.dumps(manifest), "utf-8"
             )
@@ -349,7 +349,7 @@ class BackupPolicyTests(unittest.TestCase):
         paths = []
         for days in range(0, 100):
             stamp = now - timedelta(days=days)
-            paths.append(Path("boudyos-" + stamp.strftime("%Y%m%dT%H%M%SZ") + ".tar.age"))
+            paths.append(Path("dockyard-" + stamp.strftime("%Y%m%dT%H%M%SZ") + ".tar.age"))
         kept = ops.rotation_keep(paths, now=now)
         self.assertEqual(kept, paths[:3])
 
@@ -404,7 +404,7 @@ class HealthPolicyTests(unittest.TestCase):
             self.assertFalse((runtime / "plugins").exists())
 
     def test_runtime_preparation_rejects_symlink_mutable_state(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             source = root / "source"
@@ -431,12 +431,12 @@ class HealthPolicyTests(unittest.TestCase):
                     "SOURCE": str(source),
                     "PRIOR": str(prior),
                     "DESTINATION": str(destination),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_STATUS_DIR": str(root / "status"),
-                    "BOUDYOS_DEPLOY_LOCK": str(root / "deploy.lock"),
-                    "BOUDYOS_APP_STATUS_DIR": str(root / "app-status"),
-                    "BOUDYOS_RUNTIME_USER": user,
-                    "BOUDYOS_RUNTIME_GROUP": group,
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_STATUS_DIR": str(root / "status"),
+                    "DOCKYARD_DEPLOY_LOCK": str(root / "deploy.lock"),
+                    "DOCKYARD_APP_STATUS_DIR": str(root / "app-status"),
+                    "DOCKYARD_RUNTIME_USER": user,
+                    "DOCKYARD_RUNTIME_GROUP": group,
                 },
                 text=True,
                 capture_output=True,
@@ -576,11 +576,11 @@ class HealthPolicyTests(unittest.TestCase):
         )
 
     def test_deploy_dry_run_check_and_preflight_need_no_root_or_network(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         for command in ("check", "preflight", "request", "status"):
             result = subprocess.run(
                 [str(script), command],
-                env={"PATH": "/usr/bin:/bin", "BOUDYOS_DRY_RUN": "1"},
+                env={"PATH": "/usr/bin:/bin", "DOCKYARD_DRY_RUN": "1"},
                 text=True,
                 capture_output=True,
                 timeout=5,
@@ -591,8 +591,8 @@ class HealthPolicyTests(unittest.TestCase):
                 self.assertIn('"dry_run":true', result.stdout)
 
     def test_preflight_shell_classifier_excludes_python_launcher(self):
-        deploy = ROOT / "ops/boudyos-deploy"
-        launcher = ROOT / "ops/boudyos-python-launcher"
+        deploy = ROOT / "ops/dockyard-deploy"
+        launcher = ROOT / "ops/dockyard-python-launcher"
         source = deploy.read_text("utf-8")
         self.assertIn(
             "grep -qE '^#!.*(ba)?sh([[:space:]]|$)'",
@@ -607,7 +607,7 @@ class HealthPolicyTests(unittest.TestCase):
             ],
             env={
                 **os.environ,
-                "BOUDYOS_DEPLOY_LIB": "1",
+                "DOCKYARD_DEPLOY_LIB": "1",
                 "DEPLOY": str(deploy),
                 "LAUNCHER": str(launcher),
             },
@@ -619,7 +619,7 @@ class HealthPolicyTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_request_is_fast_atomic_and_requires_real_commit(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             request = root / "deploy.request"
@@ -627,15 +627,15 @@ class HealthPolicyTests(unittest.TestCase):
             env = {
                 "PATH": "/usr/bin:/bin",
                 "SCRIPT": str(script),
-                "BOUDYOS_DEPLOY_LIB": "1",
-                "BOUDYOS_DEPLOY_REQUEST": str(request),
-                "BOUDYOS_STATUS_DIR": str(status),
-                "BOUDYOS_RELEASE_TAG": "v2.2.0",
-                "BOUDYOS_RELEASE_COMMIT": "a" * 40,
-                "BOUDYOS_RUNTIME_USER": subprocess.check_output(
+                "DOCKYARD_DEPLOY_LIB": "1",
+                "DOCKYARD_DEPLOY_REQUEST": str(request),
+                "DOCKYARD_STATUS_DIR": str(status),
+                "DOCKYARD_RELEASE_TAG": "v2.2.0",
+                "DOCKYARD_RELEASE_COMMIT": "a" * 40,
+                "DOCKYARD_RUNTIME_USER": subprocess.check_output(
                     ["id", "-un"], text=True
                 ).strip(),
-                "BOUDYOS_RUNTIME_GROUP": subprocess.check_output(
+                "DOCKYARD_RUNTIME_GROUP": subprocess.check_output(
                     ["id", "-gn"], text=True
                 ).strip(),
             }
@@ -653,7 +653,7 @@ class HealthPolicyTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertRegex(request.read_text("ascii"), r"^v2\.2\.0 a{40} \d+\n$")
-            env["BOUDYOS_RELEASE_COMMIT"] = "0" * 40
+            env["DOCKYARD_RELEASE_COMMIT"] = "0" * 40
             result = subprocess.run(
                 [
                     "bash",
@@ -669,12 +669,12 @@ class HealthPolicyTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
 
     def test_real_actions_reject_insecure_deploy_config(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             config = Path(tmp) / "deploy.conf"
             config.write_text(
-                "BOUDYOS_RELEASE_TAG=v2.2.0\n"
-                "BOUDYOS_RELEASE_COMMIT=" + "a" * 40 + "\n",
+                "DOCKYARD_RELEASE_TAG=v2.2.0\n"
+                "DOCKYARD_RELEASE_COMMIT=" + "a" * 40 + "\n",
                 "utf-8",
             )
             if os.geteuid() == 0:
@@ -685,7 +685,7 @@ class HealthPolicyTests(unittest.TestCase):
                 [str(script), "request", "--non-interactive"],
                 env={
                     "PATH": "/usr/bin:/bin",
-                    "BOUDYOS_DEPLOY_CONFIG": str(config),
+                    "DOCKYARD_DEPLOY_CONFIG": str(config),
                 },
                 text=True,
                 capture_output=True,
@@ -696,16 +696,16 @@ class HealthPolicyTests(unittest.TestCase):
             self.assertIn("Deployment config", result.stderr)
 
     def test_existing_release_is_quarantined_not_reused(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             env = os.environ.copy()
             env.update(
                 {
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RELEASE_ROOT": str(root / "releases"),
-                    "BOUDYOS_RUNTIME_ROOT": str(root / "workspaces"),
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RELEASE_ROOT": str(root / "releases"),
+                    "DOCKYARD_RUNTIME_ROOT": str(root / "workspaces"),
                 }
             )
             command = r'''
@@ -730,7 +730,7 @@ test "$(find "$RELEASE_ROOT" -maxdepth 1 -type d -name '.quarantine-*' | wc -l)"
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_verified_release_is_group_readable_but_immutable(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             release = root / "release"
@@ -745,9 +745,9 @@ test "$(find "$RELEASE_ROOT" -maxdepth 1 -type d -name '.quarantine-*' | wc -l)"
             env.update(
                 {
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RELEASE_OWNER": user,
-                    "BOUDYOS_RUNTIME_GROUP": group,
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RELEASE_OWNER": user,
+                    "DOCKYARD_RUNTIME_GROUP": group,
                     "RELEASE": str(release),
                 }
             )
@@ -758,7 +758,7 @@ secure_release "$RELEASE"
 test "$(stat -c %a "$RELEASE")" = 750
 test "$(stat -c %a "$RELEASE/module.py")" = 640
 test "$(stat -c %a "$RELEASE/bin/tool")" = 750
-test "$(stat -c %G "$RELEASE")" = "$BOUDYOS_RUNTIME_GROUP"
+test "$(stat -c %G "$RELEASE")" = "$DOCKYARD_RUNTIME_GROUP"
 '''
             result = subprocess.run(
                 ["bash", "-c", command],
@@ -771,7 +771,7 @@ test "$(stat -c %G "$RELEASE")" = "$BOUDYOS_RUNTIME_GROUP"
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_active_release_uses_immutable_source_and_isolated_writable_work(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             releases = root / "releases"
@@ -787,16 +787,16 @@ test "$(stat -c %G "$RELEASE")" = "$BOUDYOS_RUNTIME_GROUP"
             env.update(
                 {
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RUNTIME_LINK": str(runtime_current),
-                    "BOUDYOS_RELEASE_ROOT": str(releases),
-                    "BOUDYOS_RUNTIME_ROOT": str(workspaces),
-                    "BOUDYOS_STATUS_DIR": str(root / "status"),
-                    "BOUDYOS_APP_STATUS_DIR": str(root / "app-status"),
-                    "BOUDYOS_RUNTIME_USER": subprocess.check_output(
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RUNTIME_LINK": str(runtime_current),
+                    "DOCKYARD_RELEASE_ROOT": str(releases),
+                    "DOCKYARD_RUNTIME_ROOT": str(workspaces),
+                    "DOCKYARD_STATUS_DIR": str(root / "status"),
+                    "DOCKYARD_APP_STATUS_DIR": str(root / "app-status"),
+                    "DOCKYARD_RUNTIME_USER": subprocess.check_output(
                         ["id", "-un"], text=True
                     ).strip(),
-                    "BOUDYOS_RUNTIME_GROUP": subprocess.check_output(
+                    "DOCKYARD_RUNTIME_GROUP": subprocess.check_output(
                         ["id", "-gn"], text=True
                     ).strip(),
                     "RELEASE_COMMIT_VALUE": commit,
@@ -854,7 +854,7 @@ fi
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_activation_rejects_workspace_tampering_before_service_start(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             releases = root / "releases"
@@ -875,18 +875,18 @@ fi
             env.update(
                 {
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RELEASE_ROOT": str(releases),
-                    "BOUDYOS_RUNTIME_ROOT": str(workspaces),
-                    "BOUDYOS_RUNTIME_LINK": str(runtime),
-                    "BOUDYOS_PREVIOUS_FILE": str(root / "previous"),
-                    "BOUDYOS_STATUS_DIR": str(root / "status"),
-                    "BOUDYOS_RELEASE_METADATA": str(root / "release.json"),
-                    "BOUDYOS_READY_FILE": str(root / "ready"),
-                    "BOUDYOS_RUNTIME_USER": subprocess.check_output(
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RELEASE_ROOT": str(releases),
+                    "DOCKYARD_RUNTIME_ROOT": str(workspaces),
+                    "DOCKYARD_RUNTIME_LINK": str(runtime),
+                    "DOCKYARD_PREVIOUS_FILE": str(root / "previous"),
+                    "DOCKYARD_STATUS_DIR": str(root / "status"),
+                    "DOCKYARD_RELEASE_METADATA": str(root / "release.json"),
+                    "DOCKYARD_READY_FILE": str(root / "ready"),
+                    "DOCKYARD_RUNTIME_USER": subprocess.check_output(
                         ["id", "-un"], text=True
                     ).strip(),
-                    "BOUDYOS_RUNTIME_GROUP": subprocess.check_output(
+                    "DOCKYARD_RUNTIME_GROUP": subprocess.check_output(
                         ["id", "-gn"], text=True
                     ).strip(),
                     "OLD_SOURCE": str(old_source),
@@ -949,7 +949,7 @@ grep -q '"state":"rolled_back"' "$STATUS_FILE"
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_verified_automatic_rollback_republishes_previous_identity(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             releases = root / "releases"
@@ -972,16 +972,16 @@ grep -q '"state":"rolled_back"' "$STATUS_FILE"
             env.update(
                 {
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RELEASE_ROOT": str(releases),
-                    "BOUDYOS_RUNTIME_ROOT": str(workspaces),
-                    "BOUDYOS_RUNTIME_LINK": str(runtime_current),
-                    "BOUDYOS_PREVIOUS_FILE": str(root / "previous"),
-                    "BOUDYOS_STATUS_DIR": str(root / "status"),
-                    "BOUDYOS_RELEASE_METADATA": str(root / "release.json"),
-                    "BOUDYOS_READY_FILE": str(root / "ready"),
-                    "BOUDYOS_RUNTIME_USER": user,
-                    "BOUDYOS_RUNTIME_GROUP": group,
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RELEASE_ROOT": str(releases),
+                    "DOCKYARD_RUNTIME_ROOT": str(workspaces),
+                    "DOCKYARD_RUNTIME_LINK": str(runtime_current),
+                    "DOCKYARD_PREVIOUS_FILE": str(root / "previous"),
+                    "DOCKYARD_STATUS_DIR": str(root / "status"),
+                    "DOCKYARD_RELEASE_METADATA": str(root / "release.json"),
+                    "DOCKYARD_READY_FILE": str(root / "ready"),
+                    "DOCKYARD_RUNTIME_USER": user,
+                    "DOCKYARD_RUNTIME_GROUP": group,
                     "OLD_SOURCE": str(old_source),
                     "OLD_RUNTIME": str(old_runtime),
                     "NEW_SOURCE": str(new_source),
@@ -1045,7 +1045,7 @@ PY
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_manual_rollback_publishes_exact_identity_and_newer_available(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             releases = root / "releases"
@@ -1073,18 +1073,18 @@ PY
             env.update(
                 {
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RELEASE_ROOT": str(releases),
-                    "BOUDYOS_RUNTIME_ROOT": str(workspaces),
-                    "BOUDYOS_RUNTIME_LINK": str(runtime_current),
-                    "BOUDYOS_PREVIOUS_FILE": str(previous),
-                    "BOUDYOS_STATUS_DIR": str(root / "status"),
-                    "BOUDYOS_DEPLOY_LOCK": str(root / "deploy.lock"),
-                    "BOUDYOS_READY_FILE": str(root / "ready"),
-                    "BOUDYOS_RUNTIME_USER": user,
-                    "BOUDYOS_RUNTIME_GROUP": group,
-                    "BOUDYOS_RELEASE_TAG": "v2.2.0",
-                    "BOUDYOS_RELEASE_COMMIT": new_commit,
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RELEASE_ROOT": str(releases),
+                    "DOCKYARD_RUNTIME_ROOT": str(workspaces),
+                    "DOCKYARD_RUNTIME_LINK": str(runtime_current),
+                    "DOCKYARD_PREVIOUS_FILE": str(previous),
+                    "DOCKYARD_STATUS_DIR": str(root / "status"),
+                    "DOCKYARD_DEPLOY_LOCK": str(root / "deploy.lock"),
+                    "DOCKYARD_READY_FILE": str(root / "ready"),
+                    "DOCKYARD_RUNTIME_USER": user,
+                    "DOCKYARD_RUNTIME_GROUP": group,
+                    "DOCKYARD_RELEASE_TAG": "v2.2.0",
+                    "DOCKYARD_RELEASE_COMMIT": new_commit,
                     "OLD_SOURCE": str(old_source),
                     "OLD_RUNTIME": str(old_runtime),
                     "OLD_COMMIT": old_commit,
@@ -1138,7 +1138,7 @@ PY
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_manual_rollback_rejects_tampered_workspace_before_stop(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             releases = root / "releases"
@@ -1186,17 +1186,17 @@ test "$(readlink -f "$RUNTIME_LINK/source")" = "$NEW_SOURCE"
                 env={
                     **os.environ,
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RELEASE_ROOT": str(releases),
-                    "BOUDYOS_RUNTIME_ROOT": str(workspaces),
-                    "BOUDYOS_RUNTIME_LINK": str(runtime_current),
-                    "BOUDYOS_PREVIOUS_FILE": str(previous),
-                    "BOUDYOS_STATUS_DIR": str(root / "status"),
-                    "BOUDYOS_DEPLOY_LOCK": str(root / "deploy.lock"),
-                    "BOUDYOS_RUNTIME_USER": user,
-                    "BOUDYOS_RUNTIME_GROUP": group,
-                    "BOUDYOS_RELEASE_TAG": "v2.2.0",
-                    "BOUDYOS_RELEASE_COMMIT": new_commit,
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RELEASE_ROOT": str(releases),
+                    "DOCKYARD_RUNTIME_ROOT": str(workspaces),
+                    "DOCKYARD_RUNTIME_LINK": str(runtime_current),
+                    "DOCKYARD_PREVIOUS_FILE": str(previous),
+                    "DOCKYARD_STATUS_DIR": str(root / "status"),
+                    "DOCKYARD_DEPLOY_LOCK": str(root / "deploy.lock"),
+                    "DOCKYARD_RUNTIME_USER": user,
+                    "DOCKYARD_RUNTIME_GROUP": group,
+                    "DOCKYARD_RELEASE_TAG": "v2.2.0",
+                    "DOCKYARD_RELEASE_COMMIT": new_commit,
                     "NEW_SOURCE": str(new_source),
                     "NEW_RUNTIME": str(new_runtime),
                 },
@@ -1266,7 +1266,7 @@ test "$(readlink -f "$RUNTIME_LINK/source")" = "$NEW_SOURCE"
             self.assertNotEqual(first_commit, second_commit)
 
     def test_stop_failure_does_not_switch_or_publish_identity(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             releases = root / "releases"
@@ -1311,17 +1311,17 @@ grep -q '"state":"activation_failed"' "$STATUS_FILE"
                 env={
                     **os.environ,
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RELEASE_ROOT": str(releases),
-                    "BOUDYOS_RUNTIME_ROOT": str(workspaces),
-                    "BOUDYOS_RUNTIME_LINK": str(current),
-                    "BOUDYOS_STATUS_DIR": str(root / "status"),
-                    "BOUDYOS_RELEASE_METADATA": str(root / "release.json"),
-                    "BOUDYOS_READY_FILE": str(root / "ready"),
-                    "BOUDYOS_RUNTIME_USER": subprocess.check_output(
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RELEASE_ROOT": str(releases),
+                    "DOCKYARD_RUNTIME_ROOT": str(workspaces),
+                    "DOCKYARD_RUNTIME_LINK": str(current),
+                    "DOCKYARD_STATUS_DIR": str(root / "status"),
+                    "DOCKYARD_RELEASE_METADATA": str(root / "release.json"),
+                    "DOCKYARD_READY_FILE": str(root / "ready"),
+                    "DOCKYARD_RUNTIME_USER": subprocess.check_output(
                         ["id", "-un"], text=True
                     ).strip(),
-                    "BOUDYOS_RUNTIME_GROUP": subprocess.check_output(
+                    "DOCKYARD_RUNTIME_GROUP": subprocess.check_output(
                         ["id", "-gn"], text=True
                     ).strip(),
                     "NEW_SOURCE": str(new_source),
@@ -1337,7 +1337,7 @@ grep -q '"state":"activation_failed"' "$STATUS_FILE"
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_readiness_rejects_unchanged_pid_and_stale_marker(self):
-        script = ROOT / "ops/boudyos-deploy"
+        script = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             marker = root / "ready"
@@ -1361,9 +1361,9 @@ if ready_is_fresh 2001 0; then exit 1; fi
                 env={
                     **os.environ,
                     "SCRIPT": str(script),
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_READY_FILE": str(marker),
-                    "BOUDYOS_READY_MAX_AGE_SECONDS": "9999999999",
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_READY_FILE": str(marker),
+                    "DOCKYARD_READY_MAX_AGE_SECONDS": "9999999999",
                 },
                 text=True,
                 capture_output=True,
@@ -1373,8 +1373,8 @@ if ready_is_fresh 2001 0; then exit 1; fi
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_deploy_and_migration_share_one_contention_lock(self):
-        deploy = ROOT / "ops/boudyos-deploy"
-        migration = ROOT / "ops/boudyos-migrate-ultroid"
+        deploy = ROOT / "ops/dockyard-deploy"
+        migration = ROOT / "ops/dockyard-migrate-ultroid"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             lock = root / "transition.lock"
@@ -1393,8 +1393,8 @@ if ready_is_fresh 2001 0; then exit 1; fi
             try:
                 self.assertEqual(holder.stdout.readline().strip(), "locked")
                 for script, command, library_key in (
-                    (deploy, "rollback_release", "BOUDYOS_DEPLOY_LIB"),
-                    (migration, "rollback", "BOUDYOS_MIGRATION_LIB"),
+                    (deploy, "rollback_release", "DOCKYARD_DEPLOY_LIB"),
+                    (migration, "rollback", "DOCKYARD_MIGRATION_LIB"),
                 ):
                     result = subprocess.run(
                         ["bash", "-c", f'source "$SCRIPT"; {command}'],
@@ -1402,9 +1402,9 @@ if ready_is_fresh 2001 0; then exit 1; fi
                             **os.environ,
                             "SCRIPT": str(script),
                             library_key: "1",
-                            "BOUDYOS_DEPLOY_LOCK": str(lock),
-                            "BOUDYOS_RELEASE_TAG": "v2.2.0",
-                            "BOUDYOS_RELEASE_COMMIT": "a" * 40,
+                            "DOCKYARD_DEPLOY_LOCK": str(lock),
+                            "DOCKYARD_RELEASE_TAG": "v2.2.0",
+                            "DOCKYARD_RELEASE_COMMIT": "a" * 40,
                         },
                         text=True,
                         capture_output=True,
@@ -1417,7 +1417,7 @@ if ready_is_fresh 2001 0; then exit 1; fi
                 holder.communicate("\n", timeout=5)
 
     def test_legacy_rollback_restores_backup_to_running_legacy_state(self):
-        script = ROOT / "ops/boudyos-migrate-ultroid"
+        script = ROOT / "ops/dockyard-migrate-ultroid"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             legacy = root / "legacy"
@@ -1460,7 +1460,7 @@ ln -s "$LEGACY_SOURCE" "$OBSOLETE_SOURCE_LINK"
 ln -s "$MANAGED_RUNTIME" "$RUNTIME_LINK"
 printf 'managed drop-in\n' >"$DROPIN"
 printf 'BACKUP_MODE=managed\n' >"$BACKUP_CONFIG"
-printf '/var/lib/boudyos/current\n' >"$BACKUP_PATHS"
+printf '/var/lib/dockyard/current\n' >"$BACKUP_PATHS"
 printf 'LAYOUT_MODE=managed\n' >"$HEALTH_CONFIG"
 active=1
 mock_pid=100
@@ -1483,24 +1483,24 @@ PY
                 env={
                     **os.environ,
                     "SCRIPT": str(script),
-                    "BOUDYOS_MIGRATION_LIB": "1",
-                    "BOUDYOS_LEGACY_USER": user,
-                    "BOUDYOS_LEGACY_GROUP": group,
-                    "BOUDYOS_LEGACY_SOURCE": str(legacy),
-                    "BOUDYOS_LEGACY_ENV": str(legacy_env),
-                    "BOUDYOS_NEW_ENV": str(root / "runtime.env"),
-                    "BOUDYOS_RUNTIME_ROOT": str(root / "workspaces"),
-                    "BOUDYOS_SNAPSHOT_ROOT": str(root / "snapshots"),
-                    "BOUDYOS_MIGRATION_RECORD": str(root / "migration.json"),
-                    "BOUDYOS_OBSOLETE_CURRENT_LINK": str(current),
-                    "BOUDYOS_RUNTIME_LINK": str(runtime_current),
-                    "BOUDYOS_BACKUP_CONFIG": str(backup),
-                    "BOUDYOS_BACKUP_PATHS": str(backup_paths),
-                    "BOUDYOS_HEALTH_CONFIG": str(health_config),
-                    "BOUDYOS_DROPIN_DIR": str(dropin_dir),
-                    "BOUDYOS_STATUS_DIR": str(status),
-                    "BOUDYOS_DEPLOY_LOCK": str(root / "deploy.lock"),
-                    "BOUDYOS_READY_FILE": str(root / "ready"),
+                    "DOCKYARD_MIGRATION_LIB": "1",
+                    "DOCKYARD_LEGACY_USER": user,
+                    "DOCKYARD_LEGACY_GROUP": group,
+                    "DOCKYARD_LEGACY_SOURCE": str(legacy),
+                    "DOCKYARD_LEGACY_ENV": str(legacy_env),
+                    "DOCKYARD_NEW_ENV": str(root / "runtime.env"),
+                    "DOCKYARD_RUNTIME_ROOT": str(root / "workspaces"),
+                    "DOCKYARD_SNAPSHOT_ROOT": str(root / "snapshots"),
+                    "DOCKYARD_MIGRATION_RECORD": str(root / "migration.json"),
+                    "DOCKYARD_OBSOLETE_CURRENT_LINK": str(current),
+                    "DOCKYARD_RUNTIME_LINK": str(runtime_current),
+                    "DOCKYARD_BACKUP_CONFIG": str(backup),
+                    "DOCKYARD_BACKUP_PATHS": str(backup_paths),
+                    "DOCKYARD_HEALTH_CONFIG": str(health_config),
+                    "DOCKYARD_DROPIN_DIR": str(dropin_dir),
+                    "DOCKYARD_STATUS_DIR": str(status),
+                    "DOCKYARD_DEPLOY_LOCK": str(root / "deploy.lock"),
+                    "DOCKYARD_READY_FILE": str(root / "ready"),
                     "MANAGED_RUNTIME": str(root / "managed-runtime"),
                 },
                 text=True,
@@ -1511,7 +1511,7 @@ PY
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_every_readwrite_path_is_provisioned_before_execstart(self):
-        tmpfiles = ROOT / "ops/tmpfiles.d/boudyos.conf"
+        tmpfiles = ROOT / "ops/tmpfiles.d/dockyard.conf"
         provisioned = {
             line.split()[1]
             for line in tmpfiles.read_text("utf-8").splitlines()
@@ -1528,14 +1528,14 @@ PY
                 if line.startswith("RuntimeDirectory="):
                     for value in line.split("=", 1)[1].split():
                         unit_provisioned.add("/run/" + value)
-            if "ExecStart=" in text and unit.name != "boudyos-paths.service":
+            if "ExecStart=" in text and unit.name != "dockyard-paths.service":
                 self.assertIn(
-                    "Requires=boudyos-paths.service", text, unit.name
+                    "Requires=dockyard-paths.service", text, unit.name
                 )
                 self.assertIn(
                     "After=", text, unit.name
                 )
-                self.assertIn("boudyos-paths.service", text, unit.name)
+                self.assertIn("dockyard-paths.service", text, unit.name)
             for line in text.splitlines():
                 if not line.startswith("ReadWritePaths="):
                     continue
@@ -1543,29 +1543,29 @@ PY
                     safely_optional = configured.startswith("-")
                     path = configured.removeprefix("-")
                     if safely_optional:
-                        self.assertEqual(path, "/var/lib/boudyos/current/work")
+                        self.assertEqual(path, "/var/lib/dockyard/current/work")
                         self.assertIn(
-                            "WorkingDirectory=/var/lib/boudyos/current/work", text
+                            "WorkingDirectory=/var/lib/dockyard/current/work", text
                         )
                     else:
                         self.assertIn(path, unit_provisioned, (unit.name, path))
         paths_unit = (
-            ROOT / "ops/systemd/boudyos-paths.service"
+            ROOT / "ops/systemd/dockyard-paths.service"
         ).read_text("utf-8")
         self.assertLess(
             paths_unit.index("ExecStart=/usr/bin/systemd-tmpfiles"),
             paths_unit.index("RemainAfterExit=yes"),
         )
         for account_unit in (
-            "boudyos.service.example", "ultroid-boudyos.conf.example"
+            "dockyard.service.example", "ultroid-dockyard.conf.example"
         ):
             text = (ROOT / "ops/systemd" / account_unit).read_text("utf-8")
-            self.assertIn("RuntimeDirectory=boudyos", text)
-            self.assertIn("StateDirectory=boudyos/app-status", text)
+            self.assertIn("RuntimeDirectory=dockyard", text)
+            self.assertIn("StateDirectory=dockyard/app-status", text)
 
     def test_legacy_layout_migration_plan_is_exact(self):
         result = subprocess.run(
-            [str(ROOT / "ops/boudyos-migrate-ultroid"), "plan"],
+            [str(ROOT / "ops/dockyard-migrate-ultroid"), "plan"],
             text=True,
             capture_output=True,
             timeout=3,
@@ -1581,16 +1581,16 @@ PY
             self.assertIn(value, result.stdout)
 
     def test_legacy_migration_contract_stages_snapshots_and_rolls_back(self):
-        source = (ROOT / "ops/boudyos-migrate-ultroid").read_text("utf-8")
+        source = (ROOT / "ops/dockyard-migrate-ultroid").read_text("utf-8")
         documentation = (ROOT / "MIGRATION.md").read_text("utf-8")
         self.assertIn('cp -a --no-dereference -- "$LEGACY_SOURCE"', source)
         self.assertIn("os.chmod(temporary, 0o600)", source)
-        self.assertIn("boudyos-deploy stage", documentation)
-        self.assertIn("boudyos-migrate-ultroid rollback", documentation)
+        self.assertIn("dockyard-deploy stage", documentation)
+        self.assertIn("dockyard-migrate-ultroid rollback", documentation)
         self.assertIn("original ultroid.service was restored", source)
 
     def test_python310_launcher_excludes_writable_work_and_signals_module_mode(self):
-        launcher = ROOT / "ops/boudyos-python-launcher"
+        launcher = ROOT / "ops/dockyard-python-launcher"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             source = root / "source"
@@ -1598,7 +1598,7 @@ PY
             (source / "ops").mkdir(parents=True)
             (source / "pyUltroid").mkdir()
             (work / "pyUltroid").mkdir(parents=True)
-            shutil.copy2(launcher, source / "ops/boudyos-python-launcher")
+            shutil.copy2(launcher, source / "ops/dockyard-python-launcher")
             result_path = root / "result.txt"
             (source / "pyUltroid/__init__.py").write_text(
                 "import sys\n"
@@ -1622,7 +1622,7 @@ PY
                 "raise SystemExit('writable package executed')\n", "utf-8"
             )
             result = subprocess.run(
-                [sys.executable, "-s", str(source / "ops/boudyos-python-launcher")],
+                [sys.executable, "-s", str(source / "ops/dockyard-python-launcher")],
                 cwd=work,
                 env={
                     **os.environ,
@@ -1639,7 +1639,7 @@ PY
             self.assertEqual(result_path.read_text("ascii"), "source-module")
 
     def test_legacy_restart_stability_does_not_require_managed_heartbeat(self):
-        script = ROOT / "ops/boudyos-migrate-ultroid"
+        script = ROOT / "ops/dockyard-migrate-ultroid"
         with tempfile.TemporaryDirectory() as tmp:
             ready = Path(tmp) / "ready"
             result = subprocess.run(
@@ -1655,16 +1655,16 @@ systemctl() {
 }
 sleep() { :; }
 wait_legacy_stable 111
-test ! -e "$BOUDYOS_READY_FILE"
+test ! -e "$DOCKYARD_READY_FILE"
 ''',
                 ],
                 env={
                     **os.environ,
                     "SCRIPT": str(script),
-                    "BOUDYOS_MIGRATION_LIB": "1",
-                    "BOUDYOS_READY_FILE": str(ready),
-                    "BOUDYOS_LEGACY_STABILITY_SECONDS": "2",
-                    "BOUDYOS_LEGACY_STABILITY_ATTEMPTS": "3",
+                    "DOCKYARD_MIGRATION_LIB": "1",
+                    "DOCKYARD_READY_FILE": str(ready),
+                    "DOCKYARD_LEGACY_STABILITY_SECONDS": "2",
+                    "DOCKYARD_LEGACY_STABILITY_ATTEMPTS": "3",
                 },
                 text=True,
                 capture_output=True,
@@ -1674,7 +1674,7 @@ test ! -e "$BOUDYOS_READY_FILE"
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_legacy_restart_stability_rejects_pid_flapping(self):
-        script = ROOT / "ops/boudyos-migrate-ultroid"
+        script = ROOT / "ops/dockyard-migrate-ultroid"
         with tempfile.TemporaryDirectory() as tmp:
             counter = Path(tmp) / "counter"
             counter.write_text("0", "ascii")
@@ -1701,9 +1701,9 @@ if wait_legacy_stable 111; then exit 9; fi
                     **os.environ,
                     "SCRIPT": str(script),
                     "COUNTER": str(counter),
-                    "BOUDYOS_MIGRATION_LIB": "1",
-                    "BOUDYOS_LEGACY_STABILITY_SECONDS": "2",
-                    "BOUDYOS_LEGACY_STABILITY_ATTEMPTS": "4",
+                    "DOCKYARD_MIGRATION_LIB": "1",
+                    "DOCKYARD_LEGACY_STABILITY_SECONDS": "2",
+                    "DOCKYARD_LEGACY_STABILITY_ATTEMPTS": "4",
                 },
                 text=True,
                 capture_output=True,
@@ -1713,7 +1713,7 @@ if wait_legacy_stable 111; then exit 9; fi
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_managed_readiness_still_requires_heartbeat(self):
-        script = ROOT / "ops/boudyos-migrate-ultroid"
+        script = ROOT / "ops/dockyard-migrate-ultroid"
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run(
                 [
@@ -1733,8 +1733,8 @@ if wait_ready 1 111; then exit 9; fi
                 env={
                     **os.environ,
                     "SCRIPT": str(script),
-                    "BOUDYOS_MIGRATION_LIB": "1",
-                    "BOUDYOS_READY_FILE": str(Path(tmp) / "missing-ready"),
+                    "DOCKYARD_MIGRATION_LIB": "1",
+                    "DOCKYARD_READY_FILE": str(Path(tmp) / "missing-ready"),
                 },
                 text=True,
                 capture_output=True,
@@ -1744,7 +1744,7 @@ if wait_ready 1 111; then exit 9; fi
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_legacy_migration_prepare_preserves_exact_state_and_snapshot(self):
-        script = ROOT / "ops/boudyos-migrate-ultroid"
+        script = ROOT / "ops/dockyard-migrate-ultroid"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             legacy = root / "opt-ultroid"
@@ -1762,22 +1762,22 @@ if wait_ready 1 111; then exit 9; fi
             env.update(
                 {
                     "SCRIPT": str(script),
-                    "BOUDYOS_MIGRATION_LIB": "1",
-                    "BOUDYOS_LEGACY_USER": user,
-                    "BOUDYOS_LEGACY_GROUP": group,
-                    "BOUDYOS_LEGACY_SOURCE": str(legacy),
-                    "BOUDYOS_LEGACY_ENV": str(legacy_env),
-                    "BOUDYOS_NEW_ENV": str(root / "etc-boudyos/runtime.env"),
-                    "BOUDYOS_RUNTIME_ROOT": str(root / "workspaces"),
-                    "BOUDYOS_SNAPSHOT_ROOT": str(root / "snapshots"),
-                    "BOUDYOS_MIGRATION_RECORD": str(root / "migration.record"),
-                    "BOUDYOS_RUNTIME_LINK": str(root / "runtime-current"),
-                    "BOUDYOS_DROPIN_DIR": str(root / "ultroid.service.d"),
-                    "BOUDYOS_BACKUP_CONFIG": str(backup),
-                    "BOUDYOS_BACKUP_PATHS": str(backup_paths),
-                    "BOUDYOS_HEALTH_CONFIG": str(health_config),
-                    "BOUDYOS_DEPLOY_LOCK": str(root / "deploy.lock"),
-                    "BOUDYOS_READY_FILE": str(root / "ready"),
+                    "DOCKYARD_MIGRATION_LIB": "1",
+                    "DOCKYARD_LEGACY_USER": user,
+                    "DOCKYARD_LEGACY_GROUP": group,
+                    "DOCKYARD_LEGACY_SOURCE": str(legacy),
+                    "DOCKYARD_LEGACY_ENV": str(legacy_env),
+                    "DOCKYARD_NEW_ENV": str(root / "etc-dockyard/runtime.env"),
+                    "DOCKYARD_RUNTIME_ROOT": str(root / "workspaces"),
+                    "DOCKYARD_SNAPSHOT_ROOT": str(root / "snapshots"),
+                    "DOCKYARD_MIGRATION_RECORD": str(root / "migration.record"),
+                    "DOCKYARD_RUNTIME_LINK": str(root / "runtime-current"),
+                    "DOCKYARD_DROPIN_DIR": str(root / "ultroid.service.d"),
+                    "DOCKYARD_BACKUP_CONFIG": str(backup),
+                    "DOCKYARD_BACKUP_PATHS": str(backup_paths),
+                    "DOCKYARD_HEALTH_CONFIG": str(health_config),
+                    "DOCKYARD_DEPLOY_LOCK": str(root / "deploy.lock"),
+                    "DOCKYARD_READY_FILE": str(root / "ready"),
                 }
             )
             command = r'''
@@ -1822,8 +1822,8 @@ test "$before_count" = "$after_count"
             self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_legacy_prepare_stage_activate_uses_exact_staged_template(self):
-        migration = ROOT / "ops/boudyos-migrate-ultroid"
-        deploy = ROOT / "ops/boudyos-deploy"
+        migration = ROOT / "ops/dockyard-migrate-ultroid"
+        deploy = ROOT / "ops/dockyard-deploy"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             legacy = root / "legacy"
@@ -1847,28 +1847,28 @@ test "$before_count" = "$after_count"
             common = os.environ.copy()
             common.update(
                 {
-                    "BOUDYOS_MIGRATION_LIB": "1",
-                    "BOUDYOS_LEGACY_USER": user,
-                    "BOUDYOS_LEGACY_GROUP": group,
-                    "BOUDYOS_LEGACY_SOURCE": str(legacy),
-                    "BOUDYOS_LEGACY_ENV": str(legacy_env),
-                    "BOUDYOS_NEW_ENV": str(root / "etc-boudyos/runtime.env"),
-                    "BOUDYOS_RELEASE_ROOT": str(releases),
-                    "BOUDYOS_RUNTIME_ROOT": str(workspaces),
-                    "BOUDYOS_SNAPSHOT_ROOT": str(root / "snapshots"),
-                    "BOUDYOS_MIGRATION_RECORD": str(root / "migration.record"),
-                    "BOUDYOS_OBSOLETE_CURRENT_LINK": str(current),
-                    "BOUDYOS_RUNTIME_LINK": str(runtime_current),
-                    "BOUDYOS_BACKUP_CONFIG": str(backup),
-                    "BOUDYOS_BACKUP_PATHS": str(backup_paths),
-                    "BOUDYOS_HEALTH_CONFIG": str(health_config),
-                    "BOUDYOS_DEPLOY_LOCK": str(root / "deploy.lock"),
-                    "BOUDYOS_READY_FILE": str(root / "ready"),
-                    "BOUDYOS_DEPLOY_CONFIG": str(deploy_config),
-                    "BOUDYOS_DROPIN_DIR": str(dropin_dir),
-                    "BOUDYOS_STATUS_DIR": str(status),
-                    "BOUDYOS_APP_STATUS_DIR": str(root / "app-status"),
-                    "BOUDYOS_STAGED_METADATA": str(staged_state),
+                    "DOCKYARD_MIGRATION_LIB": "1",
+                    "DOCKYARD_LEGACY_USER": user,
+                    "DOCKYARD_LEGACY_GROUP": group,
+                    "DOCKYARD_LEGACY_SOURCE": str(legacy),
+                    "DOCKYARD_LEGACY_ENV": str(legacy_env),
+                    "DOCKYARD_NEW_ENV": str(root / "etc-dockyard/runtime.env"),
+                    "DOCKYARD_RELEASE_ROOT": str(releases),
+                    "DOCKYARD_RUNTIME_ROOT": str(workspaces),
+                    "DOCKYARD_SNAPSHOT_ROOT": str(root / "snapshots"),
+                    "DOCKYARD_MIGRATION_RECORD": str(root / "migration.record"),
+                    "DOCKYARD_OBSOLETE_CURRENT_LINK": str(current),
+                    "DOCKYARD_RUNTIME_LINK": str(runtime_current),
+                    "DOCKYARD_BACKUP_CONFIG": str(backup),
+                    "DOCKYARD_BACKUP_PATHS": str(backup_paths),
+                    "DOCKYARD_HEALTH_CONFIG": str(health_config),
+                    "DOCKYARD_DEPLOY_LOCK": str(root / "deploy.lock"),
+                    "DOCKYARD_READY_FILE": str(root / "ready"),
+                    "DOCKYARD_DEPLOY_CONFIG": str(deploy_config),
+                    "DOCKYARD_DROPIN_DIR": str(dropin_dir),
+                    "DOCKYARD_STATUS_DIR": str(status),
+                    "DOCKYARD_APP_STATUS_DIR": str(root / "app-status"),
+                    "DOCKYARD_STAGED_METADATA": str(staged_state),
                 }
             )
             prepared = subprocess.run(
@@ -1903,9 +1903,9 @@ test "$before_count" = "$after_count"
                     "SOURCE": str(release),
                     "RUNTIME": str(runtime),
                     "COMMIT": commit,
-                    "BOUDYOS_DEPLOY_LIB": "1",
-                    "BOUDYOS_RUNTIME_USER": user,
-                    "BOUDYOS_RUNTIME_GROUP": group,
+                    "DOCKYARD_DEPLOY_LIB": "1",
+                    "DOCKYARD_RUNTIME_USER": user,
+                    "DOCKYARD_RUNTIME_GROUP": group,
                 },
                 text=True,
                 capture_output=True,
@@ -1914,10 +1914,10 @@ test "$before_count" = "$after_count"
             )
             self.assertEqual(staged.returncode, 0, staged.stderr)
             deploy_config.write_text(
-                "BOUDYOS_RELEASE_TAG=v2.2.0\n"
-                f"BOUDYOS_RELEASE_COMMIT={commit}\n"
-                f"BOUDYOS_RELEASE_ROOT={releases}\n"
-                f"BOUDYOS_RUNTIME_ROOT={workspaces}\n",
+                "DOCKYARD_RELEASE_TAG=v2.2.0\n"
+                f"DOCKYARD_RELEASE_COMMIT={commit}\n"
+                f"DOCKYARD_RELEASE_ROOT={releases}\n"
+                f"DOCKYARD_RUNTIME_ROOT={workspaces}\n",
                 "utf-8",
             )
             deploy_config.chmod(0o600)
@@ -1926,8 +1926,8 @@ test "$before_count" = "$after_count"
             backup.write_text(
                 "BACKUP_MODE=managed\n"
                 f"ALLOWLIST_FILE={managed_paths}\n"
-                f"BOUDYOS_RUNTIME_ROOT={workspaces}\n"
-                f"BOUDYOS_RUNTIME_LINK={runtime_current}\n"
+                f"DOCKYARD_RUNTIME_ROOT={workspaces}\n"
+                f"DOCKYARD_RUNTIME_LINK={runtime_current}\n"
                 "QUIESCE_SERVICE=ultroid.service\n",
                 "utf-8",
             )
@@ -1966,8 +1966,8 @@ test "$before_count" = "$after_count"
             self.assertEqual(runtime_current.resolve(), runtime)
             self.assertEqual((runtime_current / "source").resolve(), release)
             self.assertEqual(
-                (dropin_dir / "boudyos.conf").read_text("utf-8"),
-                (release / "ops/systemd/ultroid-boudyos.conf.example").read_text(
+                (dropin_dir / "dockyard.conf").read_text("utf-8"),
+                (release / "ops/systemd/ultroid-dockyard.conf.example").read_text(
                     "utf-8"
                 ),
             )
@@ -1978,7 +1978,7 @@ test "$before_count" = "$after_count"
             self.assertEqual(stat.S_IMODE(staged_state.stat().st_mode), 0o640)
 
     def test_legacy_activation_rejects_linked_staged_state(self):
-        migration = ROOT / "ops/boudyos-migrate-ultroid"
+        migration = ROOT / "ops/dockyard-migrate-ultroid"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             real_state = root / "real.json"
@@ -1998,8 +1998,8 @@ test "$before_count" = "$after_count"
                 env={
                     **os.environ,
                     "SCRIPT": str(migration),
-                    "BOUDYOS_MIGRATION_LIB": "1",
-                    "BOUDYOS_STAGED_METADATA": str(linked_state),
+                    "DOCKYARD_MIGRATION_LIB": "1",
+                    "DOCKYARD_STAGED_METADATA": str(linked_state),
                     "RELEASES": str(releases),
                     "WORKSPACES": str(workspaces),
                     "COMMIT": "a" * 40,

@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_package_module(name):
-    package_name = "test_boudyos_security"
+    package_name = "test_dockyard_security"
     if package_name not in sys.modules:
         package_spec = importlib.util.spec_from_file_location(
             package_name,

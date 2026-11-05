@@ -2,25 +2,25 @@
 set -Eeuo pipefail
 umask 077
 
-readonly LEGACY_SERVICE="${BOUDYOS_LEGACY_SERVICE:-${BOUDYOS_RENAME_LEGACY_SERVICE:-ultroid.service}}"
-readonly TARGET_SERVICE="${BOUDYOS_TARGET_SERVICE:-${BOUDYOS_RENAME_TARGET_SERVICE:-boudyos.service}}"
-readonly UNIT_DIR="${BOUDYOS_UNIT_DIR:-${BOUDYOS_RENAME_UNIT_DIR:-/etc/systemd/system}}"
-readonly LEGACY_UNIT="${BOUDYOS_LEGACY_UNIT_PATH:-$UNIT_DIR/$LEGACY_SERVICE}"
-readonly TARGET_UNIT="${BOUDYOS_TARGET_UNIT_PATH:-$UNIT_DIR/$TARGET_SERVICE}"
-readonly LEGACY_DROPINS="${BOUDYOS_LEGACY_DROPIN_DIR:-$UNIT_DIR/$LEGACY_SERVICE.d}"
-readonly TARGET_DROPINS="${BOUDYOS_TARGET_DROPIN_DIR:-$UNIT_DIR/$TARGET_SERVICE.d}"
-readonly DEPLOY_CONFIG="${BOUDYOS_DEPLOY_CONFIG:-/etc/boudyos/deploy.conf}"
-readonly BACKUP_CONFIG="${BOUDYOS_BACKUP_CONFIG:-/etc/boudyos/backup.conf}"
-readonly HEALTH_CONFIG="${BOUDYOS_HEALTH_CONFIG:-/etc/boudyos/health.conf}"
-readonly HEALTH_COMMAND="${BOUDYOS_HEALTH_COMMAND:-${BOUDYOS_HEALTH_HELPER:-/usr/local/sbin/boudyos-health}}"
-readonly HEALTH_PYTHONPATH="${BOUDYOS_HEALTH_PYTHONPATH:-/usr/local/lib/boudyos}"
-readonly READY_FILE="${BOUDYOS_READY_FILE:-/run/boudyos/ready}"
-readonly READY_MAX_AGE="${BOUDYOS_READY_MAX_AGE_SECONDS:-45}"
-readonly READY_ATTEMPTS="${BOUDYOS_RENAME_READY_ATTEMPTS:-60}"
-readonly READY_INTERVAL="${BOUDYOS_RENAME_READY_INTERVAL:-1}"
-readonly RECORD="${BOUDYOS_RENAME_RECORD:-/var/lib/boudyos/service-rename}"
-readonly LOCK_FILE="${BOUDYOS_RENAME_LOCK:-/run/lock/boudyos/deploy.lock}"
-readonly TEST_MODE="${BOUDYOS_RENAME_TEST_MODE:-0}"
+readonly LEGACY_SERVICE="${DOCKYARD_LEGACY_SERVICE:-${DOCKYARD_RENAME_LEGACY_SERVICE:-ultroid.service}}"
+readonly TARGET_SERVICE="${DOCKYARD_TARGET_SERVICE:-${DOCKYARD_RENAME_TARGET_SERVICE:-dockyard.service}}"
+readonly UNIT_DIR="${DOCKYARD_UNIT_DIR:-${DOCKYARD_RENAME_UNIT_DIR:-/etc/systemd/system}}"
+readonly LEGACY_UNIT="${DOCKYARD_LEGACY_UNIT_PATH:-$UNIT_DIR/$LEGACY_SERVICE}"
+readonly TARGET_UNIT="${DOCKYARD_TARGET_UNIT_PATH:-$UNIT_DIR/$TARGET_SERVICE}"
+readonly LEGACY_DROPINS="${DOCKYARD_LEGACY_DROPIN_DIR:-$UNIT_DIR/$LEGACY_SERVICE.d}"
+readonly TARGET_DROPINS="${DOCKYARD_TARGET_DROPIN_DIR:-$UNIT_DIR/$TARGET_SERVICE.d}"
+readonly DEPLOY_CONFIG="${DOCKYARD_DEPLOY_CONFIG:-/etc/dockyard/deploy.conf}"
+readonly BACKUP_CONFIG="${DOCKYARD_BACKUP_CONFIG:-/etc/dockyard/backup.conf}"
+readonly HEALTH_CONFIG="${DOCKYARD_HEALTH_CONFIG:-/etc/dockyard/health.conf}"
+readonly HEALTH_COMMAND="${DOCKYARD_HEALTH_COMMAND:-${DOCKYARD_HEALTH_HELPER:-/usr/local/sbin/dockyard-health}}"
+readonly HEALTH_PYTHONPATH="${DOCKYARD_HEALTH_PYTHONPATH:-/usr/local/lib/dockyard}"
+readonly READY_FILE="${DOCKYARD_READY_FILE:-/run/dockyard/ready}"
+readonly READY_MAX_AGE="${DOCKYARD_READY_MAX_AGE_SECONDS:-45}"
+readonly READY_ATTEMPTS="${DOCKYARD_RENAME_READY_ATTEMPTS:-60}"
+readonly READY_INTERVAL="${DOCKYARD_RENAME_READY_INTERVAL:-1}"
+readonly RECORD="${DOCKYARD_RENAME_RECORD:-/var/lib/dockyard/service-rename}"
+readonly LOCK_FILE="${DOCKYARD_RENAME_LOCK:-/run/lock/dockyard/deploy.lock}"
+readonly TEST_MODE="${DOCKYARD_RENAME_TEST_MODE:-0}"
 readonly ACTION="${1:-plan}"
 
 transaction=""
@@ -35,8 +35,8 @@ require_root() {
 }
 
 validate_names_and_paths() {
-    [[ "$LEGACY_SERVICE" == ultroid.service && "$TARGET_SERVICE" == boudyos.service ]] ||
-        fail "Only the ultroid.service to boudyos.service rename is supported."
+    [[ "$LEGACY_SERVICE" == ultroid.service && "$TARGET_SERVICE" == dockyard.service ]] ||
+        fail "Only the ultroid.service to dockyard.service rename is supported."
     [[ "$LEGACY_UNIT" == /* && "$TARGET_UNIT" == /* && "$LEGACY_UNIT" != "$TARGET_UNIT" ]] ||
         fail "Unit paths must be distinct absolute paths."
     [[ "$(basename "$LEGACY_UNIT")" == "$LEGACY_SERVICE" &&
@@ -106,7 +106,7 @@ validate_selectors() {
     validate_root_file "$DEPLOY_CONFIG"
     validate_root_file "$BACKUP_CONFIG"
     validate_root_file "$HEALTH_CONFIG"
-    [[ "$(selector_value "$DEPLOY_CONFIG" BOUDYOS_SERVICE)" == "$wanted" &&
+    [[ "$(selector_value "$DEPLOY_CONFIG" DOCKYARD_SERVICE)" == "$wanted" &&
        "$(selector_value "$BACKUP_CONFIG" QUIESCE_SERVICE)" == "$wanted" &&
        "$(selector_value "$HEALTH_CONFIG" SERVICE)" == "$wanted" ]]
 }
@@ -195,7 +195,7 @@ health_is_healthy() {
     validate_root_file "$HEALTH_COMMAND" || return 1
     [[ -f "$HEALTH_COMMAND" && ! -L "$HEALTH_COMMAND" && -x "$HEALTH_COMMAND" ]] ||
         return 1
-    BOUDYOS_HEALTH_CONFIG="$config" \
+    DOCKYARD_HEALTH_CONFIG="$config" \
         PYTHONPATH="$HEALTH_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}" \
         "$HEALTH_COMMAND" >/dev/null 2>&1
 }
@@ -295,7 +295,7 @@ preflight() {
     require_root
     validate_names_and_paths
     if already_complete; then
-        printf 'already migrated: boudyos.service is canonical\n'
+        printf 'already migrated: dockyard.service is canonical\n'
         exit 0
     fi
     [[ ! -e "$TARGET_UNIT" && ! -L "$TARGET_UNIT" &&
@@ -338,7 +338,7 @@ begin_snapshot() {
     cp -a -- "$DEPLOY_CONFIG" "$transaction/candidate-deploy"
     cp -a -- "$BACKUP_CONFIG" "$transaction/candidate-backup"
     cp -a -- "$HEALTH_CONFIG" "$transaction/candidate-health"
-    replace_selector "$transaction/candidate-deploy" BOUDYOS_SERVICE "$LEGACY_SERVICE" "$TARGET_SERVICE"
+    replace_selector "$transaction/candidate-deploy" DOCKYARD_SERVICE "$LEGACY_SERVICE" "$TARGET_SERVICE"
     replace_selector "$transaction/candidate-backup" QUIESCE_SERVICE "$LEGACY_SERVICE" "$TARGET_SERVICE"
     replace_selector "$transaction/candidate-health" SERVICE "$LEGACY_SERVICE" "$TARGET_SERVICE"
     printf '%s\n' "$legacy_enabled" >"$transaction/before/enabled-state"
@@ -424,21 +424,21 @@ rename_service() {
     mv -- "$transaction" "$RECORD"
     transaction=""
     trap - ERR INT TERM
-    printf 'renamed ultroid.service to boudyos.service and verified health\n'
+    printf 'renamed ultroid.service to dockyard.service and verified health\n'
 }
 
 main() {
     case "$ACTION" in
         plan|rename) ;;
-        *) fail "Usage: boudyos-rename-service [plan|rename]"; return 2 ;;
+        *) fail "Usage: dockyard-rename-service [plan|rename]"; return 2 ;;
     esac
 
-    if [[ "$ACTION" == plan || "${BOUDYOS_DRY_RUN:-0}" == 1 ]]; then
+    if [[ "$ACTION" == plan || "${DOCKYARD_DRY_RUN:-0}" == 1 ]]; then
         preflight
         printf '%s\n' \
             "plan: validate active ultroid.service readiness and health" \
             "plan: preserve unit, drop-ins, selectors, ownership, modes, and enabled state" \
-            "plan: verify boudyos.service before removing legacy unit files"
+            "plan: verify dockyard.service before removing legacy unit files"
         return 0
     fi
 
@@ -449,6 +449,6 @@ main() {
     rename_service
 }
 
-if [[ "${BOUDYOS_RENAME_LIB:-0}" != 1 ]]; then
+if [[ "${DOCKYARD_RENAME_LIB:-0}" != 1 ]]; then
     main
 fi

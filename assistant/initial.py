@@ -10,14 +10,14 @@ import re
 from . import *
 
 STRINGS = {
-    1: """**Welcome to BoudyOS**
+    1: """**Welcome to Dockyard**
 
 Your personal Telegram workspace is ready. This short guide covers the essentials.""",
-    2: """**About BoudyOS**
+    2: """**About Dockyard**
 
-BoudyOS is a modular Telegram userbot built with Telethon. It is a personalized fork of [TeamUltroid/Ultroid](https://github.com/TeamUltroid/Ultroid).
+Dockyard is a modular Telegram userbot built with Telethon. It is a personalized fork of [TeamUltroid/Ultroid](https://github.com/TeamUltroid/Ultroid).
 
-Source and support: [github.com/boudywho/BoudyOS](https://github.com/boudywho/BoudyOS)""",
+Source and support: [github.com/boudywho/Dockyard](https://github.com/boudywho/Dockyard)""",
     3: """**Getting started**
 
 Use the dashboard to browse plugins, add-ons, voice-chat tools, settings, and updates.
@@ -29,7 +29,7 @@ Keep your session string, bot token, and database credentials private.""",
 `{HNDLR}cmds` - list available command groups""",
     5: """**You are all set.**
 
-For source, updates, or support, visit [BoudyOS on GitHub](https://github.com/boudywho/BoudyOS).""",
+For source, updates, or support, visit [Dockyard on GitHub](https://github.com/boudywho/Dockyard).""",
 }
 
 

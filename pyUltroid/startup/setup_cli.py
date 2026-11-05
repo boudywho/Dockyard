@@ -1,4 +1,4 @@
-"""BoudyOS offline maintenance (no Telegram boot, network probes or pip execution).
+"""Dockyard offline maintenance (no Telegram boot, network probes or pip execution).
 
 Usage:
   python -m pyUltroid setup
@@ -71,7 +71,7 @@ def install_command(profile, version=None):
 
 
 def _load_validator():
-    spec = importlib.util.spec_from_file_location("_boudyos_validate", ROOT / "pyUltroid/startup/config_validate.py")
+    spec = importlib.util.spec_from_file_location("_dockyard_validate", ROOT / "pyUltroid/startup/config_validate.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -99,7 +99,7 @@ def _doctor_values():
 
 
 def cmd_doctor():
-    print("BoudyOS doctor (offline; no database connections)")
+    print("Dockyard doctor (offline; no database connections)")
     print(f"Python: {sys.version_info.major}.{sys.version_info.minor}")
     print("Dependencies (availability only; modules are not imported):")
     for module in ("telethonpatch", "telethon", "decouple", "dotenv", "redis", "pymongo", "psycopg2"):
@@ -124,7 +124,7 @@ def _print_install(profile):
 
 
 def cmd_setup():
-    print("BoudyOS setup - hosted platforms should set dashboard config vars instead.")
+    print("Dockyard setup - hosted platforms should set dashboard config vars instead.")
     if not _is_interactive():
         print("Non-interactive: create a private .env (chmod 600), using .env.sample as a guide; no files changed.")
         _print_install("minimal")

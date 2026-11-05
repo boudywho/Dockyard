@@ -32,16 +32,16 @@ from . import _ult_cache
 
 SUP_BUTTONS = [
     [
-        Button.url("Source", url="https://github.com/boudywho/BoudyOS"),
-        Button.url("Support", url="https://github.com/boudywho/BoudyOS/issues"),
+        Button.url("Source", url="https://github.com/boudywho/Dockyard"),
+        Button.url("Support", url="https://github.com/boudywho/Dockyard/issues"),
     ],
 ]
 
 ofox = "https://graph.org/file/231f0049fcd722824f13b.jpg"
 gugirl = "https://graph.org/file/0df54ae4541abca96aa11.jpg"
 ultpic = (
-    "https://raw.githubusercontent.com/boudywho/BoudyOS/main/"
-    "resources/extras/boudyos_avatar.jpg"
+    "https://raw.githubusercontent.com/boudywho/Dockyard/main/"
+    "resources/extras/dockyard_avatar.jpg"
 )
 
 apis = [
@@ -172,14 +172,14 @@ async def _(e):
 async def repo(e):
     res = [
         await e.builder.article(
-            title="BoudyOS",
+            title="Dockyard",
             description="Personal Telegram workspace",
             thumb=wb(ultpic, 0, "image/jpeg", []),
-            text="**BoudyOS**",
+            text="**Dockyard**",
             buttons=SUP_BUTTONS,
         ),
     ]
-    await e.answer(res, switch_pm="BoudyOS source", switch_pm_param="start")
+    await e.answer(res, switch_pm="Dockyard source", switch_pm_param="start")
 
 
 @in_pattern("go", owner=True)
@@ -517,8 +517,8 @@ async def inline_tl(ult):
             [
                 await ult.builder.article(
                     title="How to Use?",
-                    description="TL Searcher by BoudyOS",
-                    url="https://github.com/boudywho/BoudyOS",
+                    description="TL Searcher by Dockyard",
+                    url="https://github.com/boudywho/Dockyard",
                     text=text,
                 )
             ],
@@ -541,7 +541,7 @@ async def inline_tl(ult):
                 await ult.builder.article(
                     title=key.__name__,
                     description=tyyp,
-                    url="https://github.com/boudywho/BoudyOS",
+                    url="https://github.com/boudywho/Dockyard",
                     text=text[:4000],
                 )
             )
@@ -553,9 +553,9 @@ InlinePlugin.update(
     {
         "Play Store Apps": "app telegram",
         "Modded Apps": "mods minecraft",
-        "Search On Google": "go BoudyOS",
+        "Search On Google": "go Dockyard",
         "WhiSper": "wspr @username Hello",
-        "Piston Eval": "run javascript console.log('Hello BoudyOS')",
+        "Piston Eval": "run javascript console.log('Hello Dockyard')",
         "OrangeFox": "ofox beryllium",
         "Twitter User": "twitter telegram",
         "Fdroid Search": "fdroid telegram",

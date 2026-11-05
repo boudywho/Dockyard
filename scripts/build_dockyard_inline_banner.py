@@ -1,4 +1,4 @@
-"""Build the branded inline preview banner from the canonical BoudyOS avatar."""
+"""Build the branded inline preview banner from the canonical Dockyard avatar."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-AVATAR = ROOT / "resources" / "extras" / "boudyos_avatar.jpg"
+AVATAR = ROOT / "resources" / "extras" / "dockyard_avatar.jpg"
 OUTPUT = ROOT / "resources" / "extras" / "inline.jpg"
 SIZE = (1280, 720)
 
@@ -83,7 +83,7 @@ def build() -> None:
     title = font("Noto Sans:style=Bold", 66)
     body = font("Noto Sans:style=Regular", 25)
     meta = font("Noto Sans:style=Regular", 18)
-    draw.text((88, 118), "BOUDYOS / TELEGRAM WORKSPACE", font=label, fill=(89, 222, 247, 255))
+    draw.text((88, 118), "DOCKYARD / TELEGRAM WORKSPACE", font=label, fill=(89, 222, 247, 255))
     draw.text((88, 186), "Your personal", font=title, fill=(245, 249, 255, 255))
     draw.text((88, 266), "Telegram workspace", font=title, fill=(245, 249, 255, 255))
     draw.rounded_rectangle((92, 382, 230, 388), radius=3, fill=(35, 205, 246, 255))

@@ -1,4 +1,4 @@
-# BoudyOS operations runbook
+# Dockyard operations runbook
 
 ## Profiles and dependency constraints
 
@@ -30,59 +30,59 @@ installed environment and this VCS result must be reviewed separately.
 
 ## Transactional releases
 
-The canonical application unit name is `boudyos.service`. Existing production
+The canonical application unit name is `dockyard.service`. Existing production
 installations that still run the application through `ultroid.service` must use
-the transactional service-name migration after the managed BoudyOS activation
+the transactional service-name migration after the managed Dockyard activation
 is healthy:
 
 ```bash
-install -o root -g root -m 0755 ops/boudyos-rename-service \
-  /usr/local/sbin/boudyos-rename-service
-sudo /usr/local/sbin/boudyos-rename-service plan
-sudo /usr/local/sbin/boudyos-rename-service rename
+install -o root -g root -m 0755 ops/dockyard-rename-service \
+  /usr/local/sbin/dockyard-rename-service
+sudo /usr/local/sbin/dockyard-rename-service plan
+sudo /usr/local/sbin/dockyard-rename-service rename
 ```
 
 The command copies the exact legacy unit and complete drop-in directory to the
 canonical name, rewrites only the unit-name selectors in `deploy.conf`,
 `backup.conf`, and `health.conf`, and verifies fresh PID-correlated readiness
 and health before removing the legacy unit files. It retains the root-only
-snapshot and canonical-state record at `/var/lib/boudyos/service-rename`,
+snapshot and canonical-state record at `/var/lib/dockyard/service-rename`,
 restores the snapshot and restarts `ultroid.service` on failure, and is a no-op
 after a verified successful migration. The Unix account and group remain
-`ultroid`, as do `/opt/ultroid`, the existing BoudyOS runtime/state and
+`ultroid`, as do `/opt/ultroid`, the existing Dockyard runtime/state and
 environment values, Telegram identifiers, and the required
 `ultroid-redis.service` unit. A service rename does not authorize renaming any
 of those surfaces. Nonstandard test or staging locations may override
-`BOUDYOS_UNIT_DIR`,
-`BOUDYOS_DEPLOY_CONFIG`, `BOUDYOS_BACKUP_CONFIG`,
-`BOUDYOS_HEALTH_CONFIG`, `BOUDYOS_READY_FILE`,
-`BOUDYOS_HEALTH_COMMAND`, `BOUDYOS_HEALTH_PYTHONPATH`,
-`BOUDYOS_RENAME_RECORD`, and `BOUDYOS_RENAME_LOCK`; production should use the
+`DOCKYARD_UNIT_DIR`,
+`DOCKYARD_DEPLOY_CONFIG`, `DOCKYARD_BACKUP_CONFIG`,
+`DOCKYARD_HEALTH_CONFIG`, `DOCKYARD_READY_FILE`,
+`DOCKYARD_HEALTH_COMMAND`, `DOCKYARD_HEALTH_PYTHONPATH`,
+`DOCKYARD_RENAME_RECORD`, and `DOCKYARD_RENAME_LOCK`; production should use the
 defaults.
 
 Install the helper root-owned and non-group/world-writable. Before enabling or
-starting any BoudyOS unit, install and run the path provisioner:
+starting any Dockyard unit, install and run the path provisioner:
 
 ```bash
-install -d -o root -g root -m 0755 /usr/local/lib/boudyos
-install -o root -g root -m 0644 ops/boudyos_ops.py \
-  /usr/local/lib/boudyos/boudyos_ops.py
-install -o root -g root -m 0644 ops/tmpfiles.d/boudyos.conf \
-  /usr/lib/tmpfiles.d/boudyos.conf
-install -o root -g root -m 0644 ops/systemd/boudyos-paths.service \
-  /etc/systemd/system/boudyos-paths.service
-systemd-tmpfiles --create /usr/lib/tmpfiles.d/boudyos.conf
+install -d -o root -g root -m 0755 /usr/local/lib/dockyard
+install -o root -g root -m 0644 ops/dockyard_ops.py \
+  /usr/local/lib/dockyard/dockyard_ops.py
+install -o root -g root -m 0644 ops/tmpfiles.d/dockyard.conf \
+  /usr/lib/tmpfiles.d/dockyard.conf
+install -o root -g root -m 0644 ops/systemd/dockyard-paths.service \
+  /etc/systemd/system/dockyard-paths.service
+systemd-tmpfiles --create /usr/lib/tmpfiles.d/dockyard.conf
 systemctl daemon-reload
-systemctl enable boudyos-paths.service
+systemctl enable dockyard-paths.service
 ```
 
-The prerequisite deterministically creates `/opt/boudyos`,
-`/var/lib/boudyos`, `/var/lib/boudyos/status`, `/run/boudyos`,
-`/run/lock/boudyos`, and `/var/backups/boudyos` before protected service
+The prerequisite deterministically creates `/opt/dockyard`,
+`/var/lib/dockyard`, `/var/lib/dockyard/status`, `/run/dockyard`,
+`/run/lock/dockyard`, and `/var/backups/dockyard` before protected service
 namespaces are built.
 Application units then use `RuntimeDirectory=` and `StateDirectory=` to apply
-the selected service account to `/run/boudyos` and
-`/var/lib/boudyos/app-status`. Deploy applies the configured runtime group to
+the selected service account to `/run/dockyard` and
+`/var/lib/dockyard/app-status`. Deploy applies the configured runtime group to
 the root-owned workspace selectors, while status truth remains root-owned and
 service non-writable.
 
@@ -91,39 +91,39 @@ file with `visudo -cf`.
 Telegram is allowed only:
 
 ```text
-/usr/local/sbin/boudyos-deploy request --non-interactive
+/usr/local/sbin/dockyard-deploy request --non-interactive
 ```
 
 The short action validates root configuration, atomically replaces
-`/var/lib/boudyos/deploy.request`, and exits. The path unit starts the long
+`/var/lib/dockyard/deploy.request`, and exits. The path unit starts the long
 root `deploy` action. The root update check publishes the configured target
 tag and commit in the sanitized shared status directory; the bot compares its
 active immutable metadata with that target and never reads the root config.
 
-Copy `ops/config/deploy.conf.example` to `/etc/boudyos/deploy.conf` as
+Copy `ops/config/deploy.conf.example` to `/etc/dockyard/deploy.conf` as
 root:root 0640. Replace the documented zero placeholder. Real
 `check`, `preflight`, `request`, and `deploy` fail closed unless both values are
 present and the commit is nonzero 40-hex:
 
 ```text
-BOUDYOS_RELEASE_TAG=v2.2.2
-BOUDYOS_RELEASE_COMMIT=<exact 40-hex peeled tag commit>
+DOCKYARD_RELEASE_TAG=v2.2.2
+DOCKYARD_RELEASE_COMMIT=<exact 40-hex peeled tag commit>
 ```
 
 `check` and `deploy` fetch only
-`+refs/tags/$BOUDYOS_RELEASE_TAG:refs/tags/$BOUDYOS_RELEASE_TAG`, compare the
+`+refs/tags/$DOCKYARD_RELEASE_TAG:refs/tags/$DOCKYARD_RELEASE_TAG`, compare the
 peeled tag to the pin, verify the approved origin, refuse downgrade/unrelated
 history, and use detached `HEAD`. Deployment builds a fresh venv, runs unit,
 compile, import, JSON/YAML, shell, diff, and `pip check` preflight. An existing
 target directory is quarantined and replaced; it is never silently reused.
 
-Immutable source and `.venv` remain root-owned under `/opt/boudyos/releases`.
-Each `/var/lib/boudyos/workspaces/<40-hex-commit>` is root-owned 0750 and
+Immutable source and `.venv` remain root-owned under `/opt/dockyard/releases`.
+Each `/var/lib/dockyard/workspaces/<40-hex-commit>` is root-owned 0750 and
 contains exactly a root-owned `source` symlink to
-`/opt/boudyos/releases/<same-commit>` plus a service-owned 0700 `work/`.
+`/opt/dockyard/releases/<same-commit>` plus a service-owned 0700 `work/`.
 Systemd uses `current/work` as `WorkingDirectory`, starts
 `current/source/.venv/bin/python` with safe-path mode, and sets `PYTHONPATH` to
-`current/source`. The single atomic `/var/lib/boudyos/current` replacement
+`current/source`. The single atomic `/var/lib/dockyard/current` replacement
 therefore selects immutable code and writable state together. The process
 therefore imports `pyUltroid`, official `plugins`, `assistant`, and `strings`
 directly from the immutable release even if a namesake appears in writable
@@ -133,7 +133,7 @@ state.
 temporary files, VCBot state, and `resources/{auth,auths,downloads}`. Bundled
 images/fonts and the trusted add-on registry are addressed from source
 constants derived from module location. The unit makes the workspace selector
-and workspace root read-only and allowlists only `current/work`, `/run/boudyos`,
+and workspace root read-only and allowlists only `current/work`, `/run/dockyard`,
 and app status as writable. Prior mutable state is validated as regular,
 link-free content and copied into the new `work/`; official source is never
 copied there. This preserves relative media and command output.
@@ -157,9 +157,9 @@ configured `HMAC_KEY_FILE`, separate from backups and the age identity, for
 example:
 
 ```bash
-install -d -m 0700 /etc/boudyos
-python3 /usr/local/lib/boudyos/boudyos_ops.py ensure-hmac-key \
-  /etc/boudyos/backup-auth.key
+install -d -m 0700 /etc/dockyard
+python3 /usr/local/lib/dockyard/dockyard_ops.py ensure-hmac-key \
+  /etc/dockyard/backup-auth.key
 ```
 
 Configure the public `AGE_RECIPIENT`, root-readable allowlist, native Redis
@@ -172,9 +172,9 @@ snapshot across Redis and all files; transient downloads/logs can change during
 copying. `LOG_CHANNEL=0` is only an installer placeholder and must not overwrite
 a saved log-group ID on startup.
 
-The supplied allowlist names `/var/lib/boudyos/current`. The root backup helper
+The supplied allowlist names `/var/lib/dockyard/current`. The root backup helper
 accepts that one activation symlink only when it resolves directly to
-`/var/lib/boudyos/workspaces/<40-hex-commit>`. It requires the workspace to
+`/var/lib/dockyard/workspaces/<40-hex-commit>`. It requires the workspace to
 contain the exact root-owned `source` link and `work/`, copies only real mutable
 state from `work/`, rejects every other link or special entry, and does not
 traverse historic workspaces or immutable source. Backup status includes only
@@ -191,7 +191,7 @@ before age decrypts or tar parsing begins. The HMAC key is read from its file,
 never placed in arguments or logs. There is no plaintext fallback.
 
 Rotation keeps only the newest three archive/signature pairs.
-`boudyos-restore-verify` uses a private temporary directory and never writes
+`dockyard-restore-verify` uses a private temporary directory and never writes
 production.
 
 ### Disabling scheduled backups
@@ -199,15 +199,15 @@ production.
 Retire the schedule before removing its target directory:
 
 ```bash
-systemctl disable --now boudyos-backup.timer
-systemctl reset-failed boudyos-backup.service
+systemctl disable --now dockyard-backup.timer
+systemctl reset-failed dockyard-backup.service
 ```
 
-Removing `/var/backups/boudyos` while the timer is still enabled makes the
+Removing `/var/backups/dockyard` while the timer is still enabled makes the
 oneshot unit fail with `status=226/NAMESPACE`, which then appears as a failed
 job even though backups were intentionally disabled. Re-enabling the timer
 requires recreating the directory with
-`systemd-tmpfiles --create /usr/lib/tmpfiles.d/boudyos.conf` and confirming the
+`systemd-tmpfiles --create /usr/lib/tmpfiles.d/dockyard.conf` and confirming the
 configured age recipient and HMAC key are still present.
 
 ## Health, readiness, and status
@@ -216,8 +216,8 @@ The application writes readiness after initialization even with `LOG_OFF` and
 refreshes it every 15 seconds. Deploy and health default to a 45-second maximum
 age and require the marker PID to equal systemd `MainPID`.
 
-Set `BOUDYOS_STATUS_DIR=/var/lib/boudyos/status` as the root-owned truth
-directory and `BOUDYOS_APP_STATUS_DIR=/var/lib/boudyos/app-status` as the
+Set `DOCKYARD_STATUS_DIR=/var/lib/dockyard/status` as the root-owned truth
+directory and `DOCKYARD_APP_STATUS_DIR=/var/lib/dockyard/app-status` as the
 service-owned output directory. Root truth is root-owned, group-readable where
 the dashboard needs it, and never group-writable: directories are 0750,
 sanitized dashboard files are 0640, and private alert state is 0600. The bot
@@ -233,10 +233,10 @@ fixed sanitized state `alert delivery failed`.
 Review:
 
 ```bash
-systemctl status boudyos.service boudyos-deploy.path \
-  boudyos-health.timer boudyos-backup.timer
-/usr/local/sbin/boudyos-deploy status
-journalctl -u boudyos.service --since today
+systemctl status dockyard.service dockyard-deploy.path \
+  dockyard-health.timer dockyard-backup.timer
+/usr/local/sbin/dockyard-deploy status
+journalctl -u dockyard.service --since today
 ```
 
 Never share raw configuration, exceptions, paths, URLs, chat IDs, or logs.

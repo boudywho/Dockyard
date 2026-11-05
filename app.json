@@ -1,17 +1,17 @@
 {
-    "name": "BoudyOS",
+    "name": "Dockyard",
     "description": "A polished personal Telegram workspace built with Telethon.",
-    "logo": "https://raw.githubusercontent.com/boudywho/BoudyOS/main/resources/extras/boudyos_logo.png",
+    "logo": "https://raw.githubusercontent.com/boudywho/Dockyard/main/resources/extras/dockyard_logo.png",
     "keywords": [
         "Telethon",
         "telegram",
         "userbot",
         "python",
-        "boudyos"
+        "dockyard"
     ],
-    "repository": "https://github.com/boudywho/BoudyOS",
-    "website": "https://github.com/boudywho/BoudyOS",
-    "success_url": "https://github.com/boudywho/BoudyOS",
+    "repository": "https://github.com/boudywho/Dockyard",
+    "website": "https://github.com/boudywho/Dockyard",
+    "success_url": "https://github.com/boudywho/Dockyard",
     "stack": "container",
     "env": {
         "API_ID": {
@@ -48,7 +48,7 @@
         }
     },
     "formation": {
-        "boudyos": {
+        "dockyard": {
             "quantity": 1,
             "size": "eco"
         }

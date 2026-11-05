@@ -1,0 +1,27 @@
+# Install as /etc/systemd/system/ultroid.service.d/dockyard.conf only after
+# ops/dockyard-migrate-ultroid prepare and a successful Dockyard preflight.
+[Unit]
+After=dockyard-paths.service
+Requires=dockyard-paths.service
+
+[Service]
+User=ultroid
+Group=ultroid
+WorkingDirectory=/var/lib/dockyard/current/work
+EnvironmentFile=
+EnvironmentFile=/etc/dockyard/runtime.env
+Environment=PYTHONPATH=/var/lib/dockyard/current/source
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=DOCKYARD_READY_FILE=/run/dockyard/ready
+Environment=DOCKYARD_READY_INTERVAL_SECONDS=15
+Environment=DOCKYARD_STATUS_DIR=/var/lib/dockyard/status
+Environment=DOCKYARD_APP_STATUS_DIR=/var/lib/dockyard/app-status
+Environment=DOCKYARD_RELEASE_METADATA=/var/lib/dockyard/status/release.json
+ExecStart=
+ExecStart=/var/lib/dockyard/current/source/.venv/bin/python -s /var/lib/dockyard/current/source/ops/dockyard-python-launcher
+RuntimeDirectory=dockyard
+RuntimeDirectoryMode=0750
+StateDirectory=dockyard/app-status
+StateDirectoryMode=0700
+ReadWritePaths=/run/dockyard -/var/lib/dockyard/current/work /var/lib/dockyard/app-status
+ReadOnlyPaths=/opt/dockyard/releases /var/lib/dockyard/current /var/lib/dockyard/workspaces /var/lib/dockyard/status

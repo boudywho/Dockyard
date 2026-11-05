@@ -1,17 +1,17 @@
-# Install root:root 0600 as /etc/boudyos/health.conf.
-SERVICE=boudyos.service
-READY_FILE=/run/boudyos/ready
+# Install root:root 0600 as /etc/dockyard/health.conf.
+SERVICE=dockyard.service
+READY_FILE=/run/dockyard/ready
 READY_MAX_AGE_SECONDS=45
-BOUDYOS_STATUS_DIR=/var/lib/boudyos/status
-BOUDYOS_STATUS_GROUP=boudyos
-RUNTIME_USER=boudyos
-RUNTIME_GROUP=boudyos
+DOCKYARD_STATUS_DIR=/var/lib/dockyard/status
+DOCKYARD_STATUS_GROUP=dockyard
+RUNTIME_USER=dockyard
+RUNTIME_GROUP=dockyard
 LAYOUT_MODE=managed
-RELEASE_ROOT=/opt/boudyos/releases
-WORKSPACE_ROOT=/var/lib/boudyos/workspaces
-RUNTIME_LINK=/var/lib/boudyos/current
-REDIS_ENV_FILE=/etc/boudyos/redis.env
-DISK_PATH=/opt/boudyos
+RELEASE_ROOT=/opt/dockyard/releases
+WORKSPACE_ROOT=/var/lib/dockyard/workspaces
+RUNTIME_LINK=/var/lib/dockyard/current
+REDIS_ENV_FILE=/etc/dockyard/redis.env
+DISK_PATH=/opt/dockyard
 BACKUP_MAX_AGE_SECONDS=129600
 UPDATE_MAX_AGE_SECONDS=172800
 ALERT_COOLDOWN_SECONDS=3600

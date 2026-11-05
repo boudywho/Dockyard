@@ -8,13 +8,13 @@
 from . import *
 
 START = """
-**BoudyOS Assistant**
+**Dockyard Assistant**
 
 Manage groups and use everyday tools from one place.
 
 /start - Check assistant status
 /help - Open this help menu
-/repo - View the BoudyOS source
+/repo - View the Dockyard source
 
 Choose a category below.
 """

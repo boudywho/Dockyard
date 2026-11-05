@@ -1,19 +1,19 @@
 [Unit]
-Description=BoudyOS health and alert probe
-After=boudyos.service redis-server.service boudyos-paths.service
-Requires=boudyos-paths.service
+Description=Dockyard health and alert probe
+After=dockyard.service redis-server.service dockyard-paths.service
+Requires=dockyard-paths.service
 
 [Service]
 Type=oneshot
 User=root
 Group=root
-ExecStart=/usr/local/sbin/boudyos-health
+ExecStart=/usr/local/sbin/dockyard-health
 TimeoutStartSec=45s
 UMask=0077
 PrivateTmp=yes
 ProtectHome=yes
 ProtectSystem=strict
-ReadWritePaths=/var/lib/boudyos/status
+ReadWritePaths=/var/lib/dockyard/status
 NoNewPrivileges=yes
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 ProtectKernelTunables=yes

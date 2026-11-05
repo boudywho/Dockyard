@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Root-side BoudyOS health probe with sanitized atomic status."""
+"""Root-side Dockyard health probe with sanitized atomic status."""
 
 import json
 import os
@@ -15,7 +15,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-from boudyos_ops import atomic_json, sanitize_health_status
+from dockyard_ops import atomic_json, sanitize_health_status
 
 
 def read_config(path):
@@ -134,7 +134,7 @@ def runtime_code_links_valid(
     workspace_root,
     runtime_uid=None,
     runtime_gid=None,
-    approved_origin="https://github.com/boudywho/BoudyOS.git",
+    approved_origin="https://github.com/boudywho/Dockyard.git",
 ):
     """Validate one atomic workspace selector, exact source, and writable work."""
     try:
@@ -322,7 +322,7 @@ def ensure_root_status_directory(path, group_name):
     ):
         raise PermissionError("status parent ownership or mode is unsafe")
 
-    # The parent is deliberately read-only in boudyos-health.service.  The
+    # The parent is deliberately read-only in dockyard-health.service.  The
     # tmpfiles prerequisite creates status; health changes only that allowlist.
     path.mkdir(mode=0o750, exist_ok=True)
     info = path.lstat()
@@ -343,19 +343,19 @@ def ensure_root_status_directory(path, group_name):
 
 def main():
     config_path = Path(
-        os.environ.get("BOUDYOS_HEALTH_CONFIG", "/etc/boudyos/health.conf")
+        os.environ.get("DOCKYARD_HEALTH_CONFIG", "/etc/dockyard/health.conf")
     )
     config = read_config(config_path)
-    service = config.get("SERVICE", "boudyos.service")
+    service = config.get("SERVICE", "dockyard.service")
     status_dir = Path(
         config.get(
-            "BOUDYOS_STATUS_DIR",
-            os.environ.get("BOUDYOS_STATUS_DIR", "/var/lib/boudyos/status"),
+            "DOCKYARD_STATUS_DIR",
+            os.environ.get("DOCKYARD_STATUS_DIR", "/var/lib/dockyard/status"),
         )
     )
     status_file = Path(config.get("STATUS_FILE", str(status_dir / "health.json")))
     state_file = Path(config.get("ALERT_STATE_FILE", str(status_dir / "alert.json")))
-    ready_file = Path(config.get("READY_FILE", "/run/boudyos/ready"))
+    ready_file = Path(config.get("READY_FILE", "/run/dockyard/ready"))
     backup_status = Path(
         config.get("BACKUP_STATUS_FILE", str(status_dir / "backup.json"))
     )
@@ -363,16 +363,16 @@ def main():
         config.get("UPDATE_STATUS_FILE", str(status_dir / "update.json"))
     )
     layout_mode = config.get("LAYOUT_MODE", "managed")
-    release_root = Path(config.get("RELEASE_ROOT", "/opt/boudyos/releases"))
+    release_root = Path(config.get("RELEASE_ROOT", "/opt/dockyard/releases"))
     workspace_root = Path(
-        config.get("WORKSPACE_ROOT", "/var/lib/boudyos/workspaces")
+        config.get("WORKSPACE_ROOT", "/var/lib/dockyard/workspaces")
     )
-    runtime_link = Path(config.get("RUNTIME_LINK", "/var/lib/boudyos/current"))
+    runtime_link = Path(config.get("RUNTIME_LINK", "/var/lib/dockyard/current"))
     legacy_source = Path(config.get("LEGACY_SOURCE", "/opt/ultroid"))
     ensure_root_status_directory(
-        status_dir, config.get("BOUDYOS_STATUS_GROUP", "boudyos")
+        status_dir, config.get("DOCKYARD_STATUS_GROUP", "dockyard")
     )
-    disk_path = config.get("DISK_PATH", "/opt/boudyos")
+    disk_path = config.get("DISK_PATH", "/opt/dockyard")
     cooldown = int(config.get("ALERT_COOLDOWN_SECONDS", "3600"))
     alerts = []
 
@@ -403,7 +403,7 @@ def main():
         alerts.append("readiness stale")
 
     redis_env = read_config(
-        Path(config.get("REDIS_ENV_FILE", "/etc/boudyos/redis.env"))
+        Path(config.get("REDIS_ENV_FILE", "/etc/dockyard/redis.env"))
     )
     redis_process_env = os.environ.copy()
     if redis_env.get("REDIS_PASSWORD"):
@@ -452,7 +452,7 @@ def main():
         alerts.append("backup stale")
     if not update_fresh:
         alerts.append("update status stale")
-    runtime_user = config.get("RUNTIME_USER", "boudyos")
+    runtime_user = config.get("RUNTIME_USER", "dockyard")
     runtime_group = config.get("RUNTIME_GROUP", runtime_user)
     try:
         runtime_uid = pwd.getpwnam(runtime_user).pw_uid
@@ -487,10 +487,10 @@ def main():
         previous_state != "degraded" or now - last_alert >= cooldown
     ):
         delivery = send_alert(
-            config, "BoudyOS health degraded: " + ", ".join(alerts)
+            config, "Dockyard health degraded: " + ", ".join(alerts)
         )
     elif not alerts and previous_state == "degraded":
-        delivery = send_alert(config, "BoudyOS health recovered.")
+        delivery = send_alert(config, "Dockyard health recovered.")
     if delivery is True:
         last_alert = now
     elif delivery is False:

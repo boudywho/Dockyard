@@ -5,12 +5,12 @@
 
 FROM python:3.13-slim-bookworm
 
-ARG BOUDYOS_SOURCE_COMMIT=unknown
-ARG BOUDYOS_SOURCE_TAG=untagged
-ARG BOUDYOS_SOURCE_DIRTY=1
-LABEL org.opencontainers.image.source="https://github.com/boudywho/BoudyOS" \
-      org.opencontainers.image.version="${BOUDYOS_SOURCE_TAG}" \
-      org.opencontainers.image.revision="${BOUDYOS_SOURCE_COMMIT}"
+ARG DOCKYARD_SOURCE_COMMIT=unknown
+ARG DOCKYARD_SOURCE_TAG=untagged
+ARG DOCKYARD_SOURCE_DIRTY=1
+LABEL org.opencontainers.image.source="https://github.com/boudywho/Dockyard" \
+      org.opencontainers.image.version="${DOCKYARD_SOURCE_TAG}" \
+      org.opencontainers.image.revision="${DOCKYARD_SOURCE_COMMIT}"
 
 # set timezone
 ENV TZ=Asia/Kolkata
@@ -21,22 +21,22 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
         ca-certificates ffmpeg git mediainfo sqlite3 wkhtmltopdf \
     && rm -rf /var/lib/apt/lists/*
 
-# Install against BoudyOS' checked-out dependency manifests. The base image supplies
+# Install against Dockyard' checked-out dependency manifests. The base image supplies
 # the system packages, but its bundled TeamUltroid checkout is not our runtime source.
-COPY requirements.txt /tmp/boudyos/requirements.txt
-COPY requirements /tmp/boudyos/requirements
-COPY constraints /tmp/boudyos/constraints
+COPY requirements.txt /tmp/dockyard/requirements.txt
+COPY requirements /tmp/dockyard/requirements
+COPY constraints /tmp/dockyard/constraints
 RUN python3 -m pip install --no-cache-dir --upgrade 'pip>=26.2' 'setuptools>=83' \
     && python3 -m pip install --no-cache-dir \
-        -r /tmp/boudyos/requirements/media.txt \
-        -c /tmp/boudyos/constraints/py313.txt \
+        -r /tmp/dockyard/requirements/media.txt \
+        -c /tmp/dockyard/constraints/py313.txt \
     && python3 -m pip check \
-    && rm -rf /tmp/boudyos
+    && rm -rf /tmp/dockyard
 
 # Keep the historical path for scripts and deployment configuration that rely on it.
 WORKDIR "/root/TeamUltroid"
 
-# Copy the current BoudyOS checkout only after dependency setup so every deployment
+# Copy the current Dockyard checkout only after dependency setup so every deployment
 # runs this source tree (including its bundled brand assets).
 COPY . .
 
@@ -44,8 +44,8 @@ COPY . .
 # pass the exact clean context identity; local/default builds remain explicitly
 # unverified and Git-based updater semantics stay disabled.
 RUN printf '%s\n' \
-    "{\"schema_version\":1,\"origin\":\"https://github.com/boudywho/BoudyOS.git\",\"tag\":\"${BOUDYOS_SOURCE_TAG}\",\"commit\":\"${BOUDYOS_SOURCE_COMMIT}\",\"dirty\":${BOUDYOS_SOURCE_DIRTY}}" \
-    > /opt/boudyos-release.json
-ENV BOUDYOS_RELEASE_METADATA=/opt/boudyos-release.json
+    "{\"schema_version\":1,\"origin\":\"https://github.com/boudywho/Dockyard.git\",\"tag\":\"${DOCKYARD_SOURCE_TAG}\",\"commit\":\"${DOCKYARD_SOURCE_COMMIT}\",\"dirty\":${DOCKYARD_SOURCE_DIRTY}}" \
+    > /opt/dockyard-release.json
+ENV DOCKYARD_RELEASE_METADATA=/opt/dockyard-release.json
 
 CMD ["bash", "startup"]

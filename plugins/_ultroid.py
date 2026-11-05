@@ -15,23 +15,23 @@ from pyUltroid.paths import source_resource
 from . import LOG_CHANNEL, LOGS, Button, asst, eor, get_string, ultroid_cmd
 
 REPOMSG = """
-**BoudyOS**
+**Dockyard**
 
 Personal Telegram workspace built on TeamUltroid/Ultroid.
 
-[Source and documentation](https://github.com/boudywho/BoudyOS)
-[Support](https://github.com/boudywho/BoudyOS/issues)
+[Source and documentation](https://github.com/boudywho/Dockyard)
+[Support](https://github.com/boudywho/Dockyard/issues)
 """
 
 RP_BUTTONS = [
     [
-        Button.url(get_string("bot_3"), "https://github.com/boudywho/BoudyOS"),
+        Button.url(get_string("bot_3"), "https://github.com/boudywho/Dockyard"),
         Button.url("Addons", "https://github.com/TeamUltroid/UltroidAddons"),
     ],
-    [Button.url("Support", "https://github.com/boudywho/BoudyOS/issues")],
+    [Button.url("Support", "https://github.com/boudywho/Dockyard/issues")],
 ]
 
-ULTSTRING = """**Welcome to BoudyOS**
+ULTSTRING = """**Welcome to Dockyard**
 
 Your personal Telegram workspace is ready."""
 
@@ -62,7 +62,7 @@ async def useUltroid(rs):
     msg = await asst.send_message(
         LOG_CHANNEL,
         ULTSTRING,
-        file=str(source_resource("extras", "boudyos_avatar.jpg")),
+        file=str(source_resource("extras", "dockyard_avatar.jpg")),
         buttons=button,
     )
     if not (rs.chat_id == LOG_CHANNEL and rs.client._bot):

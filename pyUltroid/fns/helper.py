@@ -219,20 +219,20 @@ if run_as_module:
             output = "Plugin: `{}`\n".format(plug)
             for i in HELP[plug]:
                 output += i
-            output += "\nBoudyOS - https://github.com/boudywho/BoudyOS"
-            await eod(ok, f"**BoudyOS installed plugin:** `{plug}`\n\n{output}")
+            output += "\nDockyard - https://github.com/boudywho/Dockyard"
+            await eod(ok, f"**Dockyard installed plugin:** `{plug}`\n\n{output}")
         elif plug in CMD_HELP:
             output = f"Plugin: {plug}\n\nCommands\n\n"
             output += str(CMD_HELP[plug])
-            await eod(ok, f"**BoudyOS installed plugin:** `{plug}`\n\n{output}")
+            await eod(ok, f"**Dockyard installed plugin:** `{plug}`\n\n{output}")
         else:
             try:
                 x = f"Plugin: {plug}\n\nCommands\n\n"
                 for d in LIST[plug]:
                     x += HNDLR + d + "\n"
-                await eod(ok, f"**BoudyOS installed plugin:** `{plug}`\n\n`{x}`")
+                await eod(ok, f"**Dockyard installed plugin:** `{plug}`\n\n`{x}`")
             except BaseException:
-                await eod(ok, f"**BoudyOS installed plugin:** `{plug}`")
+                await eod(ok, f"**Dockyard installed plugin:** `{plug}`")
 
     async def heroku_logs(event):
         """
@@ -260,7 +260,7 @@ if run_as_module:
             event.chat_id,
             file="ultroid-heroku.log",
             thumb=ULTConfig.thumb,
-            caption="**BoudyOS Heroku logs**",
+            caption="**Dockyard Heroku logs**",
         )
 
         os.remove("ultroid-heroku.log")
@@ -268,7 +268,7 @@ if run_as_module:
 
     async def def_logs(ult, file):
         await ult.respond(
-            "**BoudyOS logs**",
+            "**Dockyard logs**",
             file=file,
             thumb=ULTConfig.thumb,
         )
@@ -315,8 +315,8 @@ if run_as_module:
             else repo.git.rev_parse("--abbrev-ref", "HEAD")
         )
         ch_log = tldr_log = ""
-        ch = f"<b>BoudyOS {ultroid_version} updates for <a href={UPSTREAM_REPO_URL}/tree/{ac_br}>[{ac_br}]</a>:</b>"
-        ch_tl = f"BoudyOS {ultroid_version} updates for {ac_br}:"
+        ch = f"<b>Dockyard {ultroid_version} updates for <a href={UPSTREAM_REPO_URL}/tree/{ac_br}>[{ac_br}]</a>:</b>"
+        ch_tl = f"Dockyard {ultroid_version} updates for {ac_br}:"
         d_form = "%d/%m/%y || %H:%M"
         for c in repo.iter_commits(diff):
             ch_log += f"\n\nCommits: <b>{c.count()}</b> | Date: <b>[{c.committed_datetime.strftime(d_form)}]</b>\n<b><a href={UPSTREAM_REPO_URL.rstrip('/')}/commit/{c}>[{c.summary}]</a></b> | Author: <code>{c.author}</code>"
@@ -350,7 +350,7 @@ async def bash(cmd, run_code=0):
 
 
 async def updater():
-    """Compatibility shim returning whether approved BoudyOS updates exist."""
+    """Compatibility shim returning whether approved Dockyard updates exist."""
     from ..security.status import write_update_status
     from ..security.updater import check_for_update
 

@@ -201,8 +201,8 @@ def ultroid_cmd(
                 date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
                 naam = get_display_name(chat)
                 ftext = (
-                    "**BoudyOS client error**\n"
-                    "Report this at https://github.com/boudywho/BoudyOS/issues\n\n"
+                    "**Dockyard client error**\n"
+                    "Report this at https://github.com/boudywho/Dockyard/issues\n\n"
                 )
                 ftext += "**Py-Ultroid Version:** `" + str(pyver)
                 ftext += "`\n**Ultroid Version:** `" + str(ult_ver)
@@ -239,9 +239,9 @@ def ultroid_cmd(
                                 _log_ch,
                                 file,
                                 caption=(
-                                    "**BoudyOS client error**\n"
+                                    "**Dockyard client error**\n"
                                     "Report this at "
-                                    "https://github.com/boudywho/BoudyOS/issues\n\n"
+                                    "https://github.com/boudywho/Dockyard/issues\n\n"
                                 ),
                             )
                     else:

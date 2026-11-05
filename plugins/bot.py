@@ -66,7 +66,7 @@ from . import (
 
 
 def ULTPIC():
-    return inline_pic() or str(source_resource("extras", "boudyos_avatar.jpg"))
+    return inline_pic() or str(source_resource("extras", "dockyard_avatar.jpg"))
 
 
 def branch_link():
@@ -76,23 +76,23 @@ def branch_link():
 
 buttons = [
     [
-        Button.url(get_string("bot_3"), "https://github.com/boudywho/BoudyOS"),
+        Button.url(get_string("bot_3"), "https://github.com/boudywho/Dockyard"),
         Button.url(
-            get_string("bot_4"), "https://github.com/boudywho/BoudyOS/issues"
+            get_string("bot_4"), "https://github.com/boudywho/Dockyard/issues"
         ),
     ]
 ]
 
 # Will move to strings
 alive_txt = """
-BoudyOS
+Dockyard
 
   Version - {}
   Py-Ultroid - {}
   Telethon - {}
 """
 
-in_alive = "{}\n\n<b>BoudyOS version:</b> <code>{}</code>\n<b>pyUltroid:</b> <code>{}</code>\n<b>Python:</b> <code>{}</code>\n<b>Uptime:</b> <code>{}</code>\n<b>Branch:</b> [ {} ]\n\n<b>github.com/boudywho/BoudyOS</b>"
+in_alive = "{}\n\n<b>Dockyard version:</b> <code>{}</code>\n<b>pyUltroid:</b> <code>{}</code>\n<b>Python:</b> <code>{}</code>\n<b>Uptime:</b> <code>{}</code>\n<b>Branch:</b> [ {} ]\n\n<b>github.com/boudywho/Dockyard</b>"
 
 
 @callback("alive")
@@ -247,7 +247,7 @@ async def _(event):
         if isinstance(file, dict):
             await event.eor(f"`{file}`")
             return
-        await event.reply("**BoudyOS logs**", file=file)
+        await event.reply("**Dockyard logs**", file=file)
     elif opt == "open":
         with open("ultroid.log", "r") as f:
             file = f.read()[-4000:]
@@ -297,7 +297,7 @@ async def inline_alive(ult):
                     await builder.document(
                         pic,
                         title="Inline Alive",
-                        description="BoudyOS",
+                        description="Dockyard",
                         parse_mode="html",
                         buttons=buttons,
                     )
@@ -320,8 +320,8 @@ async def _(e):
     write_update_status(state)
     request = e.pattern_match.group(1).strip().lower()
     if request in ("fast", "soft", "deploy"):
-        helper = udB.get_key("BOUDYOS_DEPLOY_HELPER") or os.environ.get(
-            "BOUDYOS_DEPLOY_HELPER"
+        helper = udB.get_key("DOCKYARD_DEPLOY_HELPER") or os.environ.get(
+            "DOCKYARD_DEPLOY_HELPER"
         )
         if not helper:
             return await xx.edit(
@@ -338,7 +338,7 @@ async def _(e):
             return await xx.edit("`Deployment helper configuration was refused.`")
         if result.ok:
             return await xx.edit(
-                "`The privileged BoudyOS deployment helper accepted the request. "
+                "`The privileged Dockyard deployment helper accepted the request. "
                 "Use the status dashboard to monitor readiness.`"
             )
         return await xx.edit("`The deployment helper rejected the request.`")

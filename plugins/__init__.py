@@ -44,7 +44,7 @@ LOG_CHANNEL = udB.get_key("LOG_CHANNEL")
 def inline_pic():
     INLINE_PIC = udB.get_key("INLINE_PIC")
     if INLINE_PIC is None:
-        INLINE_PIC = str(source_resource("extras", "boudyos_avatar.jpg"))
+        INLINE_PIC = str(source_resource("extras", "dockyard_avatar.jpg"))
     elif INLINE_PIC is False:
         INLINE_PIC = None
     return INLINE_PIC

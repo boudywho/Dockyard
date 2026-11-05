@@ -52,7 +52,7 @@ def text_to_url(event):
 
 _buttons = {
     "otvars": {
-        "text": "Additional BoudyOS settings:",
+        "text": "Additional Dockyard settings:",
         "buttons": [
             [
                 Button.inline("Tag Logger", data="taglog"),
@@ -260,8 +260,8 @@ async def send(eve):
 async def update(eve):
     state = await check_for_update()
     write_update_status(state)
-    helper = udB.get_key("BOUDYOS_DEPLOY_HELPER") or os.environ.get(
-        "BOUDYOS_DEPLOY_HELPER"
+    helper = udB.get_key("DOCKYARD_DEPLOY_HELPER") or os.environ.get(
+        "DOCKYARD_DEPLOY_HELPER"
     )
     if not helper:
         return await eve.edit(
@@ -395,7 +395,7 @@ async def dual_mode_off(e):
 
 @callback("dmof", owner=True)
 async def rhwhe(e):
-    """Compatibility toggle for buttons sent by older BoudyOS releases."""
+    """Compatibility toggle for buttons sent by older Dockyard releases."""
     await _set_dual_mode(e, not parse_bool(udB.get_key("DUAL_MODE")))
 
 
@@ -439,7 +439,7 @@ async def pluginch(event):
     name = "Plugin Channel"
     async with event.client.conversation(pru) as conv:
         await conv.send_message(
-            "Send the ID or username of the channel to install plugins from.\n\nOnly install plugins from trusted BoudyOS repositories or sources.\n\nUse /cancel to cancel.",
+            "Send the ID or username of the channel to install plugins from.\n\nOnly install plugins from trusted Dockyard repositories or sources.\n\nUse /cancel to cancel.",
         )
         response = conv.wait_event(events.NewMessage(chats=pru))
         response = await response

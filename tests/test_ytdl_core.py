@@ -11,7 +11,7 @@ CORE = ROOT / "pyUltroid" / "fns" / "ytdl_core"
 
 
 def load_core():
-    name = "boudyos_test_ytdl_core"
+    name = "dockyard_test_ytdl_core"
     spec = importlib.util.spec_from_file_location(
         name,
         CORE / "__init__.py",

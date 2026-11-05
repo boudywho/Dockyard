@@ -159,8 +159,8 @@ async def allcmds(event, telegraph):
         for zz in LIST[z]:
             txt += HNDLR + zz + "\n"
         txt += "\n\n"
-    t = telegraph.create_page(title="BoudyOS commands", content=[txt])
-    await eor(event, f"BoudyOS commands: [open list]({t['url']})", link_preview=False)
+    t = telegraph.create_page(title="Dockyard commands", content=[txt])
+    await eor(event, f"Dockyard commands: [open list]({t['url']})", link_preview=False)
 
 
 async def ReTrieveFile(input_file_name):

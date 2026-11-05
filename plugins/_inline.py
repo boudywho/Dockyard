@@ -102,8 +102,8 @@ def _dashboard_text():
 
 SUP_BUTTONS = [
     [
-        Button.url("Source", url="https://github.com/boudywho/BoudyOS"),
-        Button.url("Support", url="https://github.com/boudywho/BoudyOS/issues"),
+        Button.url("Source", url="https://github.com/boudywho/Dockyard"),
+        Button.url("Support", url="https://github.com/boudywho/Dockyard/issues"),
     ],
 ]
 
@@ -113,7 +113,7 @@ SUP_BUTTONS = [
 @in_pattern(owner=True, func=lambda x: not x.text)
 async def inline_alive(o):
     pic = inline_pic()
-    MSG = "**BoudyOS**"
+    MSG = "**Dockyard**"
     if pic:
         result = await o.builder.photo(
             file=pic,
@@ -123,7 +123,7 @@ async def inline_alive(o):
         )
     else:
         result = await o.builder.article(
-            title="BoudyOS",
+            title="Dockyard",
             description="Personal Telegram workspace",
             text=MSG,
             buttons=SUP_BUTTONS,
@@ -133,7 +133,7 @@ async def inline_alive(o):
         [result],
         private=True,
         cache_time=300,
-        switch_pm="BoudyOS",
+        switch_pm="Dockyard",
         switch_pm_param="start",
     )
 
@@ -153,7 +153,7 @@ async def inline_handler(event):
         )
     else:
         result = await event.builder.article(
-            title="BoudyOS dashboard", text=text, buttons=_main_help_menu
+            title="Dockyard dashboard", text=text, buttons=_main_help_menu
         )
     await event.answer([result], private=True, cache_time=300, gallery=True)
 
@@ -240,7 +240,7 @@ async def uptd_plugin(event):
                 help_ += "\n"
     if not help_:
         help_ = f"{file} has no Detailed Help!"
-    help_ += "\n\nBoudyOS help - github.com/boudywho/BoudyOS"
+    help_ += "\n\nDockyard help - github.com/boudywho/Dockyard"
     buttons = []
     if inline_pic():
         data = f"sndplug_{key}_{file}"
@@ -420,9 +420,9 @@ async def ibuild(e):
                     results = [
                         await builder.document(
                             _pic,
-                            title="BoudyOS operator",
+                            title="Dockyard operator",
                             text=txt,
-                            description="BoudyOS",
+                            description="Dockyard",
                             buttons=btn,
                             link_preview=False,
                         )
@@ -435,10 +435,10 @@ async def ibuild(e):
                     cont = InputWebDocument(pic, 0, mime_type, [])
                 results = [
                     await builder.article(
-                        title="BoudyOS operator",
+                        title="Dockyard operator",
                         type=_type,
                         text=txt,
-                        description="BoudyOS",
+                        description="Dockyard",
                         include_media=include_media,
                         buttons=btn,
                         thumb=cont,
@@ -451,7 +451,7 @@ async def ibuild(e):
             LOGS.exception(er)
     result = [
         await builder.article(
-            "BoudyOS operator", text=txt, link_preview=False, buttons=btn
+            "Dockyard operator", text=txt, link_preview=False, buttons=btn
         )
     ]
     await e.answer(result)

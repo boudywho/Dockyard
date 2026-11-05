@@ -115,7 +115,7 @@ async def unzipp(event):
         )
         file = image.name
     try:
-        with private_workspace(Path.cwd(), ".boudyos-unzip-") as command_dir:
+        with private_workspace(Path.cwd(), ".dockyard-unzip-") as command_dir:
             archive_path = resolve_under(Path.cwd(), file, must_exist=True)
             extracted = extract_archive(
                 archive_path,

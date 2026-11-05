@@ -29,7 +29,7 @@ class MultiClientTests(unittest.TestCase):
         mod = load_file('multi_client_test', 'multi_client.py')
         with tempfile.TemporaryDirectory() as tmp:
             env = {'API_ID1': '22', 'API_HASH1': 'private-hash', 'SESSION1': 'private-session',
-                   'BOUDYOS_CLIENT_WORK1': tmp, 'REDIS_URI1': 'localhost:6381', 'REDIS_PASSWORD1': 'private-password'}
+                   'DOCKYARD_CLIENT_WORK1': tmp, 'REDIS_URI1': 'localhost:6381', 'REDIS_PASSWORD1': 'private-password'}
             child = Mock()
             child.wait.return_value = 0
             with patch.dict(os.environ, env, clear=True), patch.object(mod.subprocess, 'Popen', return_value=child) as launch:
@@ -45,7 +45,7 @@ class MultiClientTests(unittest.TestCase):
         mod = load_file('multi_client_test', 'multi_client.py')
         with tempfile.TemporaryDirectory() as tmp:
             env = {'API_ID1': '22', 'API_HASH1': 'hash', 'SESSION1': 'session',
-                   'BOUDYOS_CLIENT_WORK1': tmp, 'MONGO_URI1': 'mongodb://private-db/account',
+                   'DOCKYARD_CLIENT_WORK1': tmp, 'MONGO_URI1': 'mongodb://private-db/account',
                    'REDISHOST': 'shared-host', 'REDIS_URL': 'shared-host:6379', 'REDISPASSWORD': 'secret'}
             child = Mock()
             child.wait.return_value = 0
@@ -61,7 +61,7 @@ class MultiClientTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             env = {'API_ID': '11', 'API_HASH': 'hash', 'SESSION': 'primary',
                    'API_ID1': '22', 'API_HASH1': 'hash', 'SESSION1': 'secondary',
-                   'BOUDYOS_CLIENT_WORK1': tmp, 'REDIS_URI': 'shared:6379', 'REDIS_URI1': 'shared:6379',
+                   'DOCKYARD_CLIENT_WORK1': tmp, 'REDIS_URI': 'shared:6379', 'REDIS_URI1': 'shared:6379',
                    'MONGO_URI': 'mongodb://unused-a/db', 'MONGO_URI1': 'mongodb://unused-b/db'}
             with patch.dict(os.environ, env, clear=True), patch.object(mod.subprocess, 'Popen') as launch:
                 self.assertEqual(mod.main(), 1)

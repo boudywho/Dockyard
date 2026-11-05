@@ -2,35 +2,35 @@
 set -euo pipefail
 umask 077
 
-readonly LEGACY_USER="${BOUDYOS_LEGACY_USER:-ultroid}"
-readonly LEGACY_GROUP="${BOUDYOS_LEGACY_GROUP:-ultroid}"
-readonly LEGACY_SERVICE="${BOUDYOS_LEGACY_SERVICE:-ultroid.service}"
-readonly LEGACY_SOURCE="${BOUDYOS_LEGACY_SOURCE:-/opt/ultroid}"
-readonly LEGACY_ENV="${BOUDYOS_LEGACY_ENV:-/etc/ultroid/ultroid.env}"
-readonly NEW_ENV="${BOUDYOS_NEW_ENV:-/etc/boudyos/runtime.env}"
-readonly RUNTIME_ROOT="${BOUDYOS_RUNTIME_ROOT:-/var/lib/boudyos/workspaces}"
-readonly SNAPSHOT_ROOT="${BOUDYOS_SNAPSHOT_ROOT:-/var/lib/boudyos/migration-snapshots}"
-readonly RECORD="${BOUDYOS_MIGRATION_RECORD:-/var/lib/boudyos/ultroid-migration.snapshot}"
-readonly DROPIN_DIR="${BOUDYOS_DROPIN_DIR:-/etc/systemd/system/ultroid.service.d}"
-readonly DROPIN="$DROPIN_DIR/boudyos.conf"
-readonly OBSOLETE_SOURCE_LINK="${BOUDYOS_OBSOLETE_CURRENT_LINK:-/opt/boudyos/current}"
-readonly RUNTIME_LINK="${BOUDYOS_RUNTIME_LINK:-/var/lib/boudyos/current}"
-readonly DEPLOY_CONFIG="${BOUDYOS_DEPLOY_CONFIG:-/etc/boudyos/deploy.conf}"
-if [[ "${BOUDYOS_MIGRATION_LIB:-0}" == "1" ]]; then
-    readonly TRANSITION_LOCK="${BOUDYOS_DEPLOY_LOCK:-/tmp/boudyos-deploy-test.lock}"
+readonly LEGACY_USER="${DOCKYARD_LEGACY_USER:-ultroid}"
+readonly LEGACY_GROUP="${DOCKYARD_LEGACY_GROUP:-ultroid}"
+readonly LEGACY_SERVICE="${DOCKYARD_LEGACY_SERVICE:-ultroid.service}"
+readonly LEGACY_SOURCE="${DOCKYARD_LEGACY_SOURCE:-/opt/ultroid}"
+readonly LEGACY_ENV="${DOCKYARD_LEGACY_ENV:-/etc/ultroid/ultroid.env}"
+readonly NEW_ENV="${DOCKYARD_NEW_ENV:-/etc/dockyard/runtime.env}"
+readonly RUNTIME_ROOT="${DOCKYARD_RUNTIME_ROOT:-/var/lib/dockyard/workspaces}"
+readonly SNAPSHOT_ROOT="${DOCKYARD_SNAPSHOT_ROOT:-/var/lib/dockyard/migration-snapshots}"
+readonly RECORD="${DOCKYARD_MIGRATION_RECORD:-/var/lib/dockyard/ultroid-migration.snapshot}"
+readonly DROPIN_DIR="${DOCKYARD_DROPIN_DIR:-/etc/systemd/system/ultroid.service.d}"
+readonly DROPIN="$DROPIN_DIR/dockyard.conf"
+readonly OBSOLETE_SOURCE_LINK="${DOCKYARD_OBSOLETE_CURRENT_LINK:-/opt/dockyard/current}"
+readonly RUNTIME_LINK="${DOCKYARD_RUNTIME_LINK:-/var/lib/dockyard/current}"
+readonly DEPLOY_CONFIG="${DOCKYARD_DEPLOY_CONFIG:-/etc/dockyard/deploy.conf}"
+if [[ "${DOCKYARD_MIGRATION_LIB:-0}" == "1" ]]; then
+    readonly TRANSITION_LOCK="${DOCKYARD_DEPLOY_LOCK:-/tmp/dockyard-deploy-test.lock}"
 else
-    readonly TRANSITION_LOCK="/run/lock/boudyos/deploy.lock"
+    readonly TRANSITION_LOCK="/run/lock/dockyard/deploy.lock"
 fi
-readonly READY_FILE="${BOUDYOS_READY_FILE:-/run/boudyos/ready}"
-readonly BACKUP_CONFIG="${BOUDYOS_BACKUP_CONFIG:-/etc/boudyos/backup.conf}"
-readonly BACKUP_PATHS="${BOUDYOS_BACKUP_PATHS:-/etc/boudyos/backup-paths-ultroid}"
-readonly HEALTH_CONFIG="${BOUDYOS_HEALTH_CONFIG:-/etc/boudyos/health.conf}"
-readonly STATUS_DIR="${BOUDYOS_STATUS_DIR:-/var/lib/boudyos/status}"
-readonly BACKUP_STATUS="${BOUDYOS_BACKUP_STATUS:-$STATUS_DIR/backup.json}"
-readonly STAGED_METADATA="${BOUDYOS_STAGED_METADATA:-$STATUS_DIR/staged-release.json}"
-readonly DRY_RUN="${BOUDYOS_DRY_RUN:-0}"
-readonly LEGACY_STABILITY_SECONDS="${BOUDYOS_LEGACY_STABILITY_SECONDS:-5}"
-readonly LEGACY_STABILITY_ATTEMPTS="${BOUDYOS_LEGACY_STABILITY_ATTEMPTS:-60}"
+readonly READY_FILE="${DOCKYARD_READY_FILE:-/run/dockyard/ready}"
+readonly BACKUP_CONFIG="${DOCKYARD_BACKUP_CONFIG:-/etc/dockyard/backup.conf}"
+readonly BACKUP_PATHS="${DOCKYARD_BACKUP_PATHS:-/etc/dockyard/backup-paths-ultroid}"
+readonly HEALTH_CONFIG="${DOCKYARD_HEALTH_CONFIG:-/etc/dockyard/health.conf}"
+readonly STATUS_DIR="${DOCKYARD_STATUS_DIR:-/var/lib/dockyard/status}"
+readonly BACKUP_STATUS="${DOCKYARD_BACKUP_STATUS:-$STATUS_DIR/backup.json}"
+readonly STAGED_METADATA="${DOCKYARD_STAGED_METADATA:-$STATUS_DIR/staged-release.json}"
+readonly DRY_RUN="${DOCKYARD_DRY_RUN:-0}"
+readonly LEGACY_STABILITY_SECONDS="${DOCKYARD_LEGACY_STABILITY_SECONDS:-5}"
+readonly LEGACY_STABILITY_ATTEMPTS="${DOCKYARD_LEGACY_STABILITY_ATTEMPTS:-60}"
 [[ "$LEGACY_STABILITY_SECONDS" =~ ^[1-9][0-9]*$ \
     && "$LEGACY_STABILITY_SECONDS" -le 30 \
     && "$LEGACY_STABILITY_ATTEMPTS" =~ ^[1-9][0-9]*$ \
@@ -45,8 +45,8 @@ plan() {
         "legacy_service=ultroid.service" \
         "legacy_source=/opt/ultroid" \
         "legacy_env=/etc/ultroid/ultroid.env" \
-        "new_runtime=/var/lib/boudyos/current" \
-        "rollback_snapshot=/var/lib/boudyos/migration-snapshots"
+        "new_runtime=/var/lib/dockyard/current" \
+        "rollback_snapshot=/var/lib/dockyard/migration-snapshots"
 }
 
 require_root() {
@@ -87,7 +87,7 @@ PY
 # The original legacy release predates the 2.2 heartbeat contract. While that
 # exact legacy unit is being resumed for preparation or rollback, require a new
 # nonzero MainPID to remain active and unchanged for a bounded grace interval.
-# Managed BoudyOS activation continues to use wait_ready above.
+# Managed Dockyard activation continues to use wait_ready above.
 wait_legacy_stable() {
     local old_pid="${1:-0}" attempt pid candidate="" stable=0
     for ((attempt=0; attempt<LEGACY_STABILITY_ATTEMPTS; attempt++)); do
@@ -140,7 +140,7 @@ acquire_transition_lock() {
 verify_staged_release() {
     local release="$1" runtime="$2" tag="$3" commit="$4"
     [[ "$(git -C "$release" remote get-url origin 2>/dev/null)" == \
-        "https://github.com/boudywho/BoudyOS.git" ]] || return 1
+        "https://github.com/boudywho/Dockyard.git" ]] || return 1
     [[ "$(git -C "$release" rev-parse HEAD 2>/dev/null)" == "$commit" ]] \
         || return 1
     [[ "$(git -C "$release" rev-parse "refs/tags/$tag^{commit}" 2>/dev/null)" == \
@@ -508,15 +508,15 @@ def values(path):
 
 backup = values(backup_name)
 health = values(health_name)
-allowlist = Path(backup.get("ALLOWLIST_FILE", "/etc/boudyos/backup-paths"))
+allowlist = Path(backup.get("ALLOWLIST_FILE", "/etc/dockyard/backup-paths"))
 paths = [
     line.strip() for line in allowlist.read_text("utf-8").splitlines()
     if line.strip() and not line.lstrip().startswith("#")
 ]
 if (
     backup.get("BACKUP_MODE") != "managed"
-    or backup.get("BOUDYOS_RUNTIME_LINK") != runtime_link
-    or backup.get("BOUDYOS_RUNTIME_ROOT") != runtime_root
+    or backup.get("DOCKYARD_RUNTIME_LINK") != runtime_link
+    or backup.get("DOCKYARD_RUNTIME_ROOT") != runtime_root
     or backup.get("QUIESCE_SERVICE") != service
     or paths.count(runtime_link) != 1
     or health.get("LAYOUT_MODE") != "managed"
@@ -789,23 +789,23 @@ activate() {
     }
     # shellcheck source=/dev/null
     source "$DEPLOY_CONFIG"
-    [[ "${BOUDYOS_RELEASE_COMMIT:-}" =~ ^[0-9a-f]{40}$ \
-        && "$BOUDYOS_RELEASE_COMMIT" != "0000000000000000000000000000000000000000" ]] || {
+    [[ "${DOCKYARD_RELEASE_COMMIT:-}" =~ ^[0-9a-f]{40}$ \
+        && "$DOCKYARD_RELEASE_COMMIT" != "0000000000000000000000000000000000000000" ]] || {
         echo "A full release commit is required." >&2
         return 1
     }
-    local release_root="${BOUDYOS_RELEASE_ROOT:-/opt/boudyos/releases}"
-    local runtime_root="${BOUDYOS_RUNTIME_ROOT:-/var/lib/boudyos/workspaces}"
+    local release_root="${DOCKYARD_RELEASE_ROOT:-/opt/dockyard/releases}"
+    local runtime_root="${DOCKYARD_RUNTIME_ROOT:-/var/lib/dockyard/workspaces}"
     local -a staged_paths
     mapfile -t staged_paths < <(
         load_staged_release "$release_root" "$runtime_root" \
-            "$BOUDYOS_RELEASE_TAG" "$BOUDYOS_RELEASE_COMMIT"
+            "$DOCKYARD_RELEASE_TAG" "$DOCKYARD_RELEASE_COMMIT"
     ) || {
-        echo "Run boudyos-deploy stage; staged release state is invalid." >&2
+        echo "Run dockyard-deploy stage; staged release state is invalid." >&2
         return 1
     }
     [[ "${#staged_paths[@]}" == "2" ]] || {
-        echo "Run boudyos-deploy stage; staged release state is incomplete." >&2
+        echo "Run dockyard-deploy stage; staged release state is incomplete." >&2
         return 1
     }
     local release="${staged_paths[0]}"
@@ -824,11 +824,11 @@ activate() {
         return 1
     }
     if ! verify_staged_release \
-        "$release" "$runtime" "$BOUDYOS_RELEASE_TAG" "$BOUDYOS_RELEASE_COMMIT"; then
-        echo "Run boudyos-deploy stage; exact staged release verification failed." >&2
+        "$release" "$runtime" "$DOCKYARD_RELEASE_TAG" "$DOCKYARD_RELEASE_COMMIT"; then
+        echo "Run dockyard-deploy stage; exact staged release verification failed." >&2
         return 1
     fi
-    local template="$release/ops/systemd/ultroid-boudyos.conf.example"
+    local template="$release/ops/systemd/ultroid-dockyard.conf.example"
     [[ -f "$template" && ! -L "$template" ]] || {
         echo "Migration systemd drop-in template is unavailable." >&2
         return 1
@@ -855,7 +855,7 @@ activate() {
         return 1
     fi
     if ! verify_staged_release \
-        "$release" "$runtime" "$BOUDYOS_RELEASE_TAG" "$BOUDYOS_RELEASE_COMMIT"; then
+        "$release" "$runtime" "$DOCKYARD_RELEASE_TAG" "$DOCKYARD_RELEASE_COMMIT"; then
         restore_legacy_activation "Migration target changed before service start"
         return 1
     fi
@@ -870,20 +870,20 @@ activate() {
         restore_legacy_activation "Migration readiness failed"
         return 1
     fi
-    local status_dir="${BOUDYOS_STATUS_DIR:-/var/lib/boudyos/status}"
-    local app_status_dir="${BOUDYOS_APP_STATUS_DIR:-/var/lib/boudyos/app-status}"
+    local status_dir="${DOCKYARD_STATUS_DIR:-/var/lib/dockyard/status}"
+    local app_status_dir="${DOCKYARD_APP_STATUS_DIR:-/var/lib/dockyard/app-status}"
     install -d -o root -g "$LEGACY_GROUP" -m 0750 "$(dirname "$status_dir")"
     install -d -o root -g "$LEGACY_GROUP" -m 0750 "$status_dir"
     install -d -o "$LEGACY_USER" -g "$LEGACY_GROUP" -m 0700 "$app_status_dir"
     local metadata_tmp
     metadata_tmp="$(mktemp "$status_dir/.release.XXXXXX")"
     printf '{"schema_version":1,"tag":"%s","commit":"%s","checked_at":"%s"}\n' \
-        "$BOUDYOS_RELEASE_TAG" "$BOUDYOS_RELEASE_COMMIT" \
+        "$DOCKYARD_RELEASE_TAG" "$DOCKYARD_RELEASE_COMMIT" \
         "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$metadata_tmp"
     chown "root:$LEGACY_GROUP" "$metadata_tmp"
     chmod 0640 "$metadata_tmp"
     mv -f -- "$metadata_tmp" "$status_dir/release.json"
-    printf 'Activated BoudyOS through ultroid.service; verify fresh readiness now.\n'
+    printf 'Activated Dockyard through ultroid.service; verify fresh readiness now.\n'
 }
 
 rollback_locked() {
@@ -952,7 +952,7 @@ rollback() {
     rollback_locked
 }
 
-if [[ "${BOUDYOS_MIGRATION_LIB:-0}" != "1" ]]; then
+if [[ "${DOCKYARD_MIGRATION_LIB:-0}" != "1" ]]; then
     case "${1:-}" in
         plan) plan ;;
         prepare) prepare_transition ;;

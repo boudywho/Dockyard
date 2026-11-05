@@ -2,10 +2,10 @@
 set -euo pipefail
 umask 027
 
-readonly APPROVED_ORIGIN="https://github.com/boudywho/BoudyOS.git"
-readonly CONFIG_FILE="${BOUDYOS_DEPLOY_CONFIG:-/etc/boudyos/deploy.conf}"
+readonly APPROVED_ORIGIN="https://github.com/boudywho/Dockyard.git"
+readonly CONFIG_FILE="${DOCKYARD_DEPLOY_CONFIG:-/etc/dockyard/deploy.conf}"
 
-if [[ "${BOUDYOS_DEPLOY_LIB:-0}" != "1" && "${BOUDYOS_DRY_RUN:-0}" != "1" ]]; then
+if [[ "${DOCKYARD_DEPLOY_LIB:-0}" != "1" && "${DOCKYARD_DRY_RUN:-0}" != "1" ]]; then
     [[ -f "$CONFIG_FILE" && ! -L "$CONFIG_FILE" && -r "$CONFIG_FILE" ]] || {
         echo "A regular root-owned deployment config is required." >&2
         exit 2
@@ -25,39 +25,39 @@ if [[ "${BOUDYOS_DEPLOY_LIB:-0}" != "1" && "${BOUDYOS_DRY_RUN:-0}" != "1" ]]; th
     source "$CONFIG_FILE"
 fi
 
-readonly RELEASE_ROOT="${BOUDYOS_RELEASE_ROOT:-/opt/boudyos/releases}"
-readonly RUNTIME_ROOT="${BOUDYOS_RUNTIME_ROOT:-/var/lib/boudyos/workspaces}"
-readonly RUNTIME_LINK="${BOUDYOS_RUNTIME_LINK:-/var/lib/boudyos/current}"
-readonly RUNTIME_USER="${BOUDYOS_RUNTIME_USER:-boudyos}"
-readonly RUNTIME_GROUP="${BOUDYOS_RUNTIME_GROUP:-boudyos}"
+readonly RELEASE_ROOT="${DOCKYARD_RELEASE_ROOT:-/opt/dockyard/releases}"
+readonly RUNTIME_ROOT="${DOCKYARD_RUNTIME_ROOT:-/var/lib/dockyard/workspaces}"
+readonly RUNTIME_LINK="${DOCKYARD_RUNTIME_LINK:-/var/lib/dockyard/current}"
+readonly RUNTIME_USER="${DOCKYARD_RUNTIME_USER:-dockyard}"
+readonly RUNTIME_GROUP="${DOCKYARD_RUNTIME_GROUP:-dockyard}"
 readonly RELEASE_OWNER="root"
-readonly PREVIOUS_FILE="${BOUDYOS_PREVIOUS_FILE:-/var/lib/boudyos/previous-release}"
-readonly STATUS_DIR="${BOUDYOS_STATUS_DIR:-/var/lib/boudyos/status}"
-readonly STATE_ROOT="${BOUDYOS_STATE_ROOT:-$(dirname "$STATUS_DIR")}"
-readonly APP_STATUS_DIR="${BOUDYOS_APP_STATUS_DIR:-/var/lib/boudyos/app-status}"
-readonly STATUS_GROUP="${BOUDYOS_STATUS_GROUP:-$RUNTIME_GROUP}"
-readonly STATUS_FILE="${BOUDYOS_DEPLOY_STATUS:-$STATUS_DIR/deploy.json}"
-readonly UPDATE_STATUS_FILE="${BOUDYOS_UPDATE_STATUS:-$STATUS_DIR/update.json}"
-readonly RELEASE_METADATA="${BOUDYOS_RELEASE_METADATA:-$STATUS_DIR/release.json}"
-readonly STAGED_METADATA="${BOUDYOS_STAGED_METADATA:-$STATUS_DIR/staged-release.json}"
-readonly REQUEST_FILE="${BOUDYOS_DEPLOY_REQUEST:-/var/lib/boudyos/deploy.request}"
-if [[ "${BOUDYOS_DEPLOY_LIB:-0}" == "1" ]]; then
-    readonly LOCK_FILE="${BOUDYOS_DEPLOY_LOCK:-/tmp/boudyos-deploy-test.lock}"
+readonly PREVIOUS_FILE="${DOCKYARD_PREVIOUS_FILE:-/var/lib/dockyard/previous-release}"
+readonly STATUS_DIR="${DOCKYARD_STATUS_DIR:-/var/lib/dockyard/status}"
+readonly STATE_ROOT="${DOCKYARD_STATE_ROOT:-$(dirname "$STATUS_DIR")}"
+readonly APP_STATUS_DIR="${DOCKYARD_APP_STATUS_DIR:-/var/lib/dockyard/app-status}"
+readonly STATUS_GROUP="${DOCKYARD_STATUS_GROUP:-$RUNTIME_GROUP}"
+readonly STATUS_FILE="${DOCKYARD_DEPLOY_STATUS:-$STATUS_DIR/deploy.json}"
+readonly UPDATE_STATUS_FILE="${DOCKYARD_UPDATE_STATUS:-$STATUS_DIR/update.json}"
+readonly RELEASE_METADATA="${DOCKYARD_RELEASE_METADATA:-$STATUS_DIR/release.json}"
+readonly STAGED_METADATA="${DOCKYARD_STAGED_METADATA:-$STATUS_DIR/staged-release.json}"
+readonly REQUEST_FILE="${DOCKYARD_DEPLOY_REQUEST:-/var/lib/dockyard/deploy.request}"
+if [[ "${DOCKYARD_DEPLOY_LIB:-0}" == "1" ]]; then
+    readonly LOCK_FILE="${DOCKYARD_DEPLOY_LOCK:-/tmp/dockyard-deploy-test.lock}"
 else
-    readonly LOCK_FILE="/run/lock/boudyos/deploy.lock"
+    readonly LOCK_FILE="/run/lock/dockyard/deploy.lock"
 fi
-readonly SERVICE="${BOUDYOS_SERVICE:-boudyos.service}"
-readonly READY_FILE="${BOUDYOS_READY_FILE:-/run/boudyos/ready}"
-readonly READY_MAX_AGE="${BOUDYOS_READY_MAX_AGE_SECONDS:-45}"
-readonly KEEP_RELEASES="${BOUDYOS_KEEP_RELEASES:-5}"
-readonly DRY_RUN="${BOUDYOS_DRY_RUN:-0}"
-readonly PERSIST_NAMES="${BOUDYOS_PERSIST_NAMES:-.env database.json ultroid.json .megarc addons downloads sessions db logs temp vcbot resources/auth resources/auths resources/downloads}"
+readonly SERVICE="${DOCKYARD_SERVICE:-dockyard.service}"
+readonly READY_FILE="${DOCKYARD_READY_FILE:-/run/dockyard/ready}"
+readonly READY_MAX_AGE="${DOCKYARD_READY_MAX_AGE_SECONDS:-45}"
+readonly KEEP_RELEASES="${DOCKYARD_KEEP_RELEASES:-5}"
+readonly DRY_RUN="${DOCKYARD_DRY_RUN:-0}"
+readonly PERSIST_NAMES="${DOCKYARD_PERSIST_NAMES:-.env database.json ultroid.json .megarc addons downloads sessions db logs temp vcbot resources/auth resources/auths resources/downloads}"
 readonly MUTABLE_TOP_LEVEL="addons downloads sessions db logs temp vcbot"
 readonly MUTABLE_RESOURCES="auth auths downloads"
 
 STATUS_OWNER="root"
 STATUS_OWNER_UID="0"
-if [[ "${BOUDYOS_DEPLOY_LIB:-0}" == "1" && "$(id -u)" != "0" ]]; then
+if [[ "${DOCKYARD_DEPLOY_LIB:-0}" == "1" && "$(id -u)" != "0" ]]; then
     # Unit-test library mode cannot manufacture root ownership.
     STATUS_OWNER="$(id -un)"
     STATUS_OWNER_UID="$(id -u)"
@@ -109,15 +109,15 @@ update_status() {
 }
 
 load_release_config() {
-    RELEASE_TAG="${BOUDYOS_RELEASE_TAG:-}"
-    RELEASE_COMMIT="${BOUDYOS_RELEASE_COMMIT:-}"
+    RELEASE_TAG="${DOCKYARD_RELEASE_TAG:-}"
+    RELEASE_COMMIT="${DOCKYARD_RELEASE_COMMIT:-}"
     [[ "$RELEASE_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
-        echo "BOUDYOS_RELEASE_TAG must pin a release tag." >&2
+        echo "DOCKYARD_RELEASE_TAG must pin a release tag." >&2
         return 2
     }
     [[ "$RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ \
         && "$RELEASE_COMMIT" != "0000000000000000000000000000000000000000" ]] || {
-        echo "BOUDYOS_RELEASE_COMMIT must be a full 40-character commit." >&2
+        echo "DOCKYARD_RELEASE_COMMIT must be a full 40-character commit." >&2
         return 2
     }
 }
@@ -183,7 +183,7 @@ runtime_layout_verified() {
     runtime_uid="$(id -u "$RUNTIME_USER")" || return 1
     runtime_gid="$(getent group "$RUNTIME_GROUP" | cut -d: -f3)" || return 1
     [[ -n "$runtime_gid" ]] || return 1
-    if [[ "${BOUDYOS_DEPLOY_LIB:-0}" != "1" ]]; then
+    if [[ "${DOCKYARD_DEPLOY_LIB:-0}" != "1" ]]; then
         [[ "$release_uid" != "$runtime_uid" ]] || return 1
     fi
     python3 - "$source" "$runtime" "$release_uid" "$runtime_uid" \
@@ -845,7 +845,7 @@ check_release() {
     fi
     load_release_config
     local stage current
-    stage="$(mktemp -d "${TMPDIR:-/tmp}/boudyos-check.XXXXXX")"
+    stage="$(mktemp -d "${TMPDIR:-/tmp}/dockyard-check.XXXXXX")"
     trap 'rm -rf --one-file-system -- "$stage"' RETURN
     fetch_exact_release "$stage"
     current="$(active_commit)"
@@ -1071,7 +1071,7 @@ rollback_release() {
     rollback_release_locked
 }
 
-if [[ "${BOUDYOS_DEPLOY_LIB:-0}" != "1" ]]; then
+if [[ "${DOCKYARD_DEPLOY_LIB:-0}" != "1" ]]; then
 case "${1:-}" in
     check) check_release ;;
     request) request_release ;;

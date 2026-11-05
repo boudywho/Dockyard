@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location('live_ops', ROOT / 'ops/boudyos_ops.py')
+SPEC = importlib.util.spec_from_file_location('live_ops', ROOT / 'ops/dockyard_ops.py')
 ops = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(ops)
 
@@ -84,7 +84,7 @@ class LiveBackupTests(unittest.TestCase):
                 self.assertEqual(saved.execute('PRAGMA integrity_check').fetchone(), ('ok',))
 
     def test_rotation_keeps_only_three_newest_archives(self):
-        paths = [Path(f'boudyos-2026100{day}T000000Z.tar.age') for day in range(1, 9)]
+        paths = [Path(f'dockyard-2026100{day}T000000Z.tar.age') for day in range(1, 9)]
         self.assertEqual(ops.rotation_keep(paths, now=datetime(2026, 10, 9, tzinfo=timezone.utc)), paths[-1:-4:-1])
 
     def test_zero_log_channel_does_not_replace_saved_group(self):

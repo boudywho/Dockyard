@@ -20,17 +20,17 @@ autopic_2: "`{}` માટે કોઈ પરિણામ મળ્યાં �
 autopic_3: "તમારી શોધથી સંબંધિત સંગ્રહ મળ્યો !\n ઓટોપિક શરૂ કરી રહ્યા છીએ  !"
 
 # inline
-inline_1: "[અલ્ટ્રોઇડ સપોર્ટ](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_1: "[અલ્ટ્રોઇડ સપોર્ટ](https://github.com/boudywho/Dockyard/issues)\n\n
 **{} ના સહાય મેનૂ .\n\n
 પ્લગઇન્સ ~ {}**"
-inline_2: "[અલ્ટ્રોઇડ સપોર્ટ](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_2: "[અલ્ટ્રોઇડ સપોર્ટ](https://github.com/boudywho/Dockyard/issues)\n\n
 **{} ના સહાય મેનૂ.\n\n
 એડન્સ ~ {}**"
-inline_3: "[અલ્ટ્રોઇડ સપોર્ટ](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_3: "[અલ્ટ્રોઇડ સપોર્ટ](https://github.com/boudywho/Dockyard/issues)\n\n
 **{} ના સહાય મેનૂ.\n\n
 એડન્સ ~ {}\n\n
 `ADDONS` મૂલ્યને `True` પર સેટ કરો**"
-inline_4: "**BoudyOS**\n**{}** માટે વ્યક્તિગત Telegram કાર્યસ્થળ\n\n**ઝાંખી**\n• પ્લગઇન્સ: {}\n• એડ-ઓન્સ: {}\n• આદેશો: {}\n\nનીચે શ્રેણી પસંદ કરો."
+inline_4: "**Dockyard**\n**{}** માટે વ્યક્તિગત Telegram કાર્યસ્થળ\n\n**ઝાંખી**\n• પ્લગઇન્સ: {}\n• એડ-ઓન્સ: {}\n• આદેશો: {}\n\nનીચે શ્રેણી પસંદ કરો."
 inline_5: "**મેનુ બંધ કરાયું છે**"
 
 
@@ -103,7 +103,7 @@ chats_2: "`આ ચેટ કાઢી શકાતી નથી`"
 chats_3: "`હું એડમિન નથી`"
 chats_4: "#Deleted\n{} કાઢી નાખ્યું."
 chats_5: "તમારું [{}]({}) ગ્રુપ તૈયાર છે!"
-chats_6: "જોડાઓ BoudyOS"
+chats_6: "જોડાઓ Dockyard"
 
 # converter
 cvt_1: "મીડિયાને/ડોક્યુમેન્ટ જવાબ આપો."
@@ -159,7 +159,7 @@ gdrive_1: "`તમે પહેલાથી જ ગૂગલ ડ્રાઇવ�
 gdrive_2: "[અહીં](https://console.developers.google.com/flows/enableapi?apiid=drive) જાઓ અને મેળવો તમારો `GDRIVE_CLIENT_ID` અને `GDRIVE_CLIENT_SECRET`\n\n
 GDRIVE_CLIENT_ID અને GDRIVE_CLIENT_SECRET આવી રીતે મોકલો.\n`GDRIVE_CLIENT_ID GDRIVE_CLIENT_SECRET` જગ્યા દ્વારા અલગ."
 gdrive_3: "`Client ID ખોટું છે`"
-gdrive_4: "`કંઈક ખોટું થયું! `/auth` ફરીથી મોકલો.\nIf same happens contact `BoudyOS"
+gdrive_4: "`કંઈક ખોટું થયું! `/auth` ફરીથી મોકલો.\nIf same happens contact `Dockyard"
 gdrive_5: "`સફળ! \ N તમે બધા અલ્ટ્રોઇડ યુઝરબotટથી ગૂગલ ડ્રાઇવનો ઉપયોગ કરવા માટે તૈયાર છો.`"
 gdrive_6: "`Go to `{}` and send ``/auth.`"
 gdrive_7: "**જી ડ્રાઇવ પર સફળતાપૂર્વક ફાઇલ અપલોડ કરી :**\n\n[{}]({})"
@@ -269,7 +269,7 @@ help_autoban: ".\n    ચાલુ કરવા માટે.\n    બંધ - �
 can_2: "Us #યુઝરઅમઅપડેટ\n\n@{user ને વપરાશકર્તા નામ @{} માં બદલ્યું"
 aki_1: "રમત સમાપ્ત થઈ ગઈ છે ...."
 youtube_8: "Video વિડિઓ ગીત ડાઉનલોડ કરવું ... `"
-help_button: " -\n\n• `{i}button <text with button format`\n   Create a button; you can also reply to a photo.\n\nFormat:- `{i}button Hey There! 😎.\n[BoudyOS | https://github.com/boudywho/BoudyOS][Support | https://github.com/boudywho/BoudyOS/issues | same]\n[Repository | https://github.com/boudywho/BoudyOS]`"
+help_button: " -\n\n• `{i}button <text with button format`\n   Create a button; you can also reply to a photo.\n\nFormat:- `{i}button Hey There! 😎.\n[Dockyard | https://github.com/boudywho/Dockyard][Support | https://github.com/boudywho/Dockyard/issues | same]\n[Repository | https://github.com/boudywho/Dockyard]`"
 bot_1: "અરે, હું જીવંત છું."
 youtube_7: "મને વિડિઓ ડાઉનલોડ કરવા માટે એક (યુટ્યુબ) શોધ ક્વેરી આપો!"
 com_5: "ડાઉનલોડ ..."
@@ -529,7 +529,7 @@ clst_3: "Change ચેન્જલોગ્સ જનરેટ કરો ..."
 calc_2: "ફરીથી કેલ્ક્યુલેટર ખોલો"
 blk_3: "Black બ્લેકલિસ્ટમાંથી દૂર કરવા માટે શબ્દ આપો..`"
 cvt_6: "તમારા કસ્ટમ થંબનેલ તરીકે [આ] ({}) ઉમેર્યું"
-inline_6: "** {} ** માટે વ voice ઇસ ચેટ સહાય મેનૂ\n** ઉપલબ્ધ આદેશો: ** `{}`\n\nBoudyOS"
+inline_6: "** {} ** માટે વ voice ઇસ ચેટ સહાય મેનૂ\n** ઉપલબ્ધ આદેશો: ** `{}`\n\nDockyard"
 pmbot_7: "`અભિનંદન!તમે અનબેન થઈ ગયા છો .`"
 pmbot_4: "`ગુડબાય!તમારા પર પ્રતિબંધ છે .`\n** તમે મોકલો તે વધુ સંદેશા આગળ મોકલવામાં આવશે નહીં. **"
 inline_9: "તમે પહેલાથી જ નવીનતમ સંસ્કરણ પર છો"

@@ -33,12 +33,12 @@ _RELEASE_COMMIT = re.compile(r"^[0-9a-f]{40}$")
 
 def status_dir() -> Path:
     """Resolve the read-only root truth directory at call time."""
-    return Path(os.environ.get("BOUDYOS_STATUS_DIR", "runtime/status"))
+    return Path(os.environ.get("DOCKYARD_STATUS_DIR", "runtime/status"))
 
 
 def app_status_dir() -> Path:
     """Resolve the service-owned status output directory at call time."""
-    return Path(os.environ.get("BOUDYOS_APP_STATUS_DIR", "runtime/app-status"))
+    return Path(os.environ.get("DOCKYARD_APP_STATUS_DIR", "runtime/app-status"))
 
 
 def read_bounded_status(path: Path, max_bytes: int = 64 * 1024) -> Dict[str, Any]:
@@ -112,16 +112,16 @@ def write_update_status(state: UpdateState, path: Path = None) -> bool:
 
 
 def mark_ready(configured_path: str) -> None:
-    """Write readiness only inside the dedicated /run/boudyos directory."""
+    """Write readiness only inside the dedicated /run/dockyard directory."""
     if not configured_path:
         return
-    root = Path("/run/boudyos")
+    root = Path("/run/dockyard")
     target = Path(configured_path)
     try:
         resolved_parent = target.parent.resolve()
         resolved_parent.relative_to(root)
     except (OSError, ValueError):
-        raise ValueError("readiness path must be under /run/boudyos")
+        raise ValueError("readiness path must be under /run/dockyard")
     target.parent.mkdir(mode=0o750, parents=True, exist_ok=True)
     handle, temporary = tempfile.mkstemp(prefix=".ready.", dir=target.parent)
     try:
@@ -155,7 +155,7 @@ async def readiness_heartbeat(
         return
     if interval is None:
         try:
-            interval = float(os.environ.get("BOUDYOS_READY_INTERVAL_SECONDS", "15"))
+            interval = float(os.environ.get("DOCKYARD_READY_INTERVAL_SECONDS", "15"))
         except ValueError:
             interval = 15.0
     interval = max(5.0, min(interval, 60.0))
@@ -188,7 +188,7 @@ def dashboard_summary(
     backup_label = str(backup.get("state", "unknown"))
     health_label = str(health.get("state", "unknown"))
     return (
-        f"\n\n**BoudyOS {version} status**\n"
+        f"\n\n**Dockyard {version} status**\n"
         f"Uptime: `{uptime}s` | Official: `{official_count}` | Add-ons: `{addon_count}`\n"
         f"Disabled optional: `{disabled_count}` | Update: `{update_label}`\n"
         f"Redis: `{'healthy' if redis_healthy else 'unavailable'}` | "

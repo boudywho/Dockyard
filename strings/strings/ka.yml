@@ -19,14 +19,14 @@ autopic_2: "`{}`ಗಾಗಿ ಯಾವುದೇ ಫಲಿತಾಂಶಗಳು �
 autopic_3: "ನಿಮ್ಮ ಹುಡುಕಾಟಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಸಂಗ್ರಹ `{}` ಸಿಕ್ಕಿದೆ!\nಆಟೋಪಿಕ್ ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ!!"
 
 #inline
-inline_1: "[ಅಲ್ಟ್ರಾಯ್ಡ್ ಸಪೋರ್ಟ್](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_1: "[ಅಲ್ಟ್ರಾಯ್ಡ್ ಸಪೋರ್ಟ್](https://github.com/boudywho/Dockyard/issues)\n\n
 **{}ನ ಸಹಾಯ ಮೆನು.\n\n
 ಪ್ಲಗಿನ್ಸ್ ~ {}**"
-inline_2: "[ಅಲ್ಟ್ರಾಯ್ಡ್ ಸಪೋರ್ಟ್](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_2: "[ಅಲ್ಟ್ರಾಯ್ಡ್ ಸಪೋರ್ಟ್](https://github.com/boudywho/Dockyard/issues)\n\n
 **{}ನ ಸಹಾಯ ಮೆನು.\n\n
 ಆಡ್ಅನ್ಸ್  ~ {}**"
-inline_3: "[ಅಲ್ಟ್ರಾಯ್ಡ್ ಸಪೋರ್ಟ್](https://github.com/boudywho/BoudyOS/issues)\n\n**{}ನ ಸಹಾಯ ಮೆನು.\n\nಆಡ್ಅನ್ಸ್  ~ {}ಹೋಗಿ `ADDONS` Var ಗೆ True ಮೌಲ್ಯ ವನ್ನು ಸೇರಿಸಿ.**"
-inline_4: "**BoudyOS**\n**{}**-ის პირადი Telegram სამუშაო სივრცე\n\n**მიმოხილვა**\n• პლაგინები: {}\n• დამატებები: {}\n• ბრძანებები: {}\n\nაირჩიეთ კატეგორია ქვემოთ."
+inline_3: "[ಅಲ್ಟ್ರಾಯ್ಡ್ ಸಪೋರ್ಟ್](https://github.com/boudywho/Dockyard/issues)\n\n**{}ನ ಸಹಾಯ ಮೆನು.\n\nಆಡ್ಅನ್ಸ್  ~ {}ಹೋಗಿ `ADDONS` Var ಗೆ True ಮೌಲ್ಯ ವನ್ನು ಸೇರಿಸಿ.**"
+inline_4: "**Dockyard**\n**{}**-ის პირადი Telegram სამუშაო სივრცე\n\n**მიმოხილვა**\n• პლაგინები: {}\n• დამატებები: {}\n• ბრძანებები: {}\n\nაირჩიეთ კატეგორია ქვემოთ."
 inline_5: "**ಮೆನು ಅನ್ನು ಮುಚ್ಚಲಾಗಿದೆ**"
 
 #tagnotif
@@ -95,7 +95,7 @@ chats_2: "`ಈ ಚಾಟ್ ಅನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯ�
 chats_3 : "`ನಾನು ನಿರ್ವಾಹಕನಲ್ಲ`"
 chats_4: "#ಅಳಿಸಲಾಗಿದೆ\nಅಳಿಸಲಾಗಿದೆ {}"
 chats_5: "ನಿಮ್ಮ [{}]({}) ಗ್ರೂಪ್ ಅನ್ನು ಸೃಷ್ಟಿಸಲಾಗಿದೆ!"
-chats_6: "BoudyOS ಸೇರಿಕೊಳ್ಳಿ"
+chats_6: "Dockyard ಸೇರಿಕೊಳ್ಳಿ"
 
 # converter
 
@@ -142,7 +142,7 @@ sf_14: "ಸೂಪರ್‌ಎಫ್‌ಬಾನ್ ಪೂರ್ಣಗೊಂಡ�
 sf_15: "ಮಾಸ್-ಅನ್ಫೆಡ್ಬಾನ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ ..."
 sf_16: "ಸೂಪರ್‌ಅನ್ಫೆಡ್ಬಾನ್ ಪೂರ್ಣಗೊಂಡಿದೆ.\nಒಟ್ಟು ಫೆಡ್‌ಗಳು - {}.\nಹೊರಗಿಡಲಾಗಿರುವುದು - {}.\nಬಾಧಿತ {} ಫೆಡ್‌ಗಳು.\n#TB"
 sf_17: "ಅವನ/ಅವಳ ಫೆಡ್ಸ್ಟಾಟ್ ಅನ್ನು ತಿಳಿಯಲು ನನಗೆ ಅವರ ಐಡಿ  ಅನ್ನು ನೀಡಿ ಅಥವಾ ಅವರ ಸಂದೇಶಕ್ಕೆ  ಪ್ರತ್ಯುತ್ತರಿಸಿ."
-sf_18: "List of feds {} has been banned in.\n\nCollected using BoudyOS."
+sf_18: "List of feds {} has been banned in.\n\nCollected using Dockyard."
 sf_19: "**ದೋಷ**\n `@MissRose_Bot`ಅನ್ನು ಅಂಬ್ಲಾಕ್ ಮಾಡಿ ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."
 sf_20: "`ಮಾಹಿತಿಯನ್ನು ಹೊರತೆಗೆಯಲಾಗುತ್ತಿದೆ ...`"
 sf_21: "\n\n ಫೆಡ್ ‌ಮಾಹಿತಿಯನ್ನು ಅಲ್ಟ್ರಾಯ್ಡ್‌ನಿಂದ ಹೊರತೆಗೆಯಲಾಗಿದೆ"
@@ -153,7 +153,7 @@ gdrive_1: "ನೀವು ಈಗಾಗಲೇ ಗೂಗಲ್ ಡ್ರೈವ್‌
 gdrive_2: "[ಇಲ್ಲಿ](https://console.developers.google.com/flows/enableapi?apiid=drive) ಹೋಗಿ ನಿಮ್ಮ `GDRIVE_CLIENT_ID` ಹಾಗು `GDRIVE_CLIENT_SECRET` ಅನ್ನು ಪಡೆದುಕೊಳ್ಳಿ\n\n
 ನಿಮ್ಮ GDRIVE_CLIENT_ID ಮತ್ತು GDRIVE_CLIENT_SECRET ಅನ್ನು ಈ ರೀತಿ ಕಳುಹಿಸಿ.\n`GDRIVE_CLIENT_ID GDRIVE_CLIENT_SECRET` ಅನ್ನು ಒಂದು ಅಂತರದಿಂದ ಬೇರ್ಪಡಿಸಲಾಗಿದೆ."
 gdrive_3: "`ತಪ್ಪಾದ CLIENT_ID`"
-gdrive_4: "ಏನೋ ತಪ್ಪಾಗಿದೆ! `/auth`ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಕಳಿಸಿ.\nಇದು ಮತ್ತೆ ಸಂಭವಿಸಿದಲ್ಲಿ ಸಂಪರ್ಕಿಸಿ - `BoudyOS`"
+gdrive_4: "ಏನೋ ತಪ್ಪಾಗಿದೆ! `/auth`ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಕಳಿಸಿ.\nಇದು ಮತ್ತೆ ಸಂಭವಿಸಿದಲ್ಲಿ ಸಂಪರ್ಕಿಸಿ - `Dockyard`"
 gdrive_5: "**ಯಶಸ್ವಿ!**\nಅಲ್ಟ್ರಾಯ್ಡ್ ಬಳಕೆದಾರ ಬೋಟಿನೊಂದಿಗೆ  ನೀವು ಗೂಗಲ್ ಡ್ರೈವ್ ಅನ್ನು ಬಳಸಲು ಸಿದ್ಧರಾಗಿರುವಿರಿ."
 gdrive_6: "{} ಇಲ್ಲಿಗೆ ಹೋಗಿ `/auth`ಅನ್ನು ಕಳಿಸಿ."
 gdrive_7: "**ಜಿ-ಡ್ರೈವ್‌ನಲ್ಲಿ ಫೈಲ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ :**\n\n[{}]({})"
@@ -266,7 +266,7 @@ help_autoban: "• `{i} autokick <on/off>`\n    ჩართვა.\n    გა�
 can_2: "∆ #USERNAMEUPDATE\n\n@{} შეიცვალა მომხმარებლის სახელი @{}"
 aki_1: "თამაში შეწყდა ...."
 youtube_8: "`ვიდეო სიმღერის ჩამოტვირთვა ...`"
-help_button: " -\n\n• `{i}button <text with button format`\n   Create a button; you can also reply to a photo.\n\nFormat:- `{i}button Hey There! 😎.\n[BoudyOS | https://github.com/boudywho/BoudyOS][Support | https://github.com/boudywho/BoudyOS/issues | same]\n[Repository | https://github.com/boudywho/BoudyOS]`"
+help_button: " -\n\n• `{i}button <text with button format`\n   Create a button; you can also reply to a photo.\n\nFormat:- `{i}button Hey There! 😎.\n[Dockyard | https://github.com/boudywho/Dockyard][Support | https://github.com/boudywho/Dockyard/issues | same]\n[Repository | https://github.com/boudywho/Dockyard]`"
 bot_1: "ჰეი, მე ცოცხალი ვარ."
 youtube_7: "მომეცი (YouTube) ძებნა შეკითხვა, რომ ჩამოტვირთოთ ვიდეო!"
 com_5: "ჩამოტვირთვა ..."
@@ -525,7 +525,7 @@ clst_3: "■ წარმოქმნის ცვლილებები ..."
 calc_2: "ისევ გახსენით კალკულატორი"
 blk_3: "`მიეცით სიტყვა, რომ ამოიღონ შავ სიიდან.."
 cvt_6: "დაამატა [ეს] ({}) როგორც თქვენი პერსონალური მინიატურა"
-inline_6: "** ხმოვანი ჩეთის დახმარების მენიუ {} **\n** ხელმისაწვდომი ბრძანებები: ** `{}`\n\nBoudyOS"
+inline_6: "** ხმოვანი ჩეთის დახმარების მენიუ {} **\n** ხელმისაწვდომი ბრძანებები: ** `{}`\n\nDockyard"
 pmbot_7: "`კონგატები!თქვენ არ იყავით."
 pmbot_4: "`ნახვამდის!თქვენ აკრძალეთ.\n** თქვენს მიერ გაგზავნილ შემდგომი შეტყობინებები არ გადაეგზავნება. **"
 inline_9: "თქვენ უკვე უახლეს ვერსიაზე ხართ"

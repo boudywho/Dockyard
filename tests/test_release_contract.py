@@ -50,23 +50,23 @@ class ReleaseContractTests(unittest.TestCase):
     def test_product_and_upstream_versions_are_distinct(self):
         namespace = {}
         exec((ROOT / "pyUltroid/version.py").read_text("utf-8"), namespace)
-        self.assertEqual(namespace["BOUDYOS_VERSION"], "2.4.1")
-        self.assertEqual(namespace["ultroid_version"], "2.4.1")
+        self.assertEqual(namespace["DOCKYARD_VERSION"], "3.0.0")
+        self.assertEqual(namespace["ultroid_version"], "3.0.0")
         self.assertEqual(namespace["__version__"], "2026.11.05")
 
     def test_python310_service_uses_immutable_safe_path_launcher(self):
-        launcher = ROOT / "ops/boudyos-python-launcher"
+        launcher = ROOT / "ops/dockyard-python-launcher"
         self.assertTrue(launcher.is_file())
         source = launcher.read_text("utf-8")
         self.assertIn('runpy.run_module("pyUltroid"', source)
         self.assertIn("working = Path.cwd().resolve", source)
         for name in (
-            "ops/systemd/boudyos.service.example",
-            "ops/systemd/ultroid-boudyos.conf.example",
+            "ops/systemd/dockyard.service.example",
+            "ops/systemd/ultroid-dockyard.conf.example",
         ):
             unit = (ROOT / name).read_text("utf-8")
             self.assertNotIn(" -P ", unit)
-            self.assertIn("-s /var/lib/boudyos/current/source/ops/boudyos-python-launcher", unit)
+            self.assertIn("-s /var/lib/dockyard/current/source/ops/dockyard-python-launcher", unit)
             self.assertIn("PYTHONDONTWRITEBYTECODE=1", unit)
 
     def test_runtime_has_no_generic_eval_or_shell_true(self):
@@ -108,13 +108,13 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("check_for_update", source)
         self.assertIn("request_deployment", source)
 
-    def test_docker_uses_profile_dependencies_and_boudyos_origin(self):
+    def test_docker_uses_profile_dependencies_and_dockyard_origin(self):
         dockerfile = (ROOT / "Dockerfile").read_text("utf-8")
         self.assertIn("python:3.13-slim", dockerfile)
         self.assertIn("requirements/media.txt", dockerfile)
         self.assertNotIn("optional-requirements.txt", dockerfile)
         self.assertIn("org.opencontainers.image.revision", dockerfile)
-        self.assertIn("/opt/boudyos-release.json", dockerfile)
+        self.assertIn("/opt/dockyard-release.json", dockerfile)
         self.assertNotIn("git reset", dockerfile)
 
     def test_telethon_patch_is_full_commit_and_import_is_fail_fast(self):
@@ -229,32 +229,32 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("release_identity", alive)
 
     def test_root_truth_is_read_only_to_service_and_app_status_is_separate(self):
-        deploy = (ROOT / "ops/boudyos-deploy").read_text("utf-8")
-        backup = (ROOT / "ops/boudyos-backup").read_text("utf-8")
-        unit = (ROOT / "ops/systemd/boudyos.service.example").read_text("utf-8")
+        deploy = (ROOT / "ops/dockyard-deploy").read_text("utf-8")
+        backup = (ROOT / "ops/dockyard-backup").read_text("utf-8")
+        unit = (ROOT / "ops/systemd/dockyard.service.example").read_text("utf-8")
         docs = (ROOT / "docs/operations.md").read_text("utf-8")
         self.assertIn('STATUS_OWNER="root"', deploy)
         self.assertIn('install -d -o "$STATUS_OWNER" -g "$STATUS_GROUP" -m 0750', deploy)
         self.assertIn('chown "root:$STATUS_GROUP"', backup)
         self.assertNotIn('chown "$RUNTIME_USER:$RUNTIME_GROUP" "$STATUS_DIR"', deploy)
         self.assertIn(
-            "ReadOnlyPaths=/opt/boudyos/releases /var/lib/boudyos/current "
-            "/var/lib/boudyos/workspaces /var/lib/boudyos/status",
+            "ReadOnlyPaths=/opt/dockyard/releases /var/lib/dockyard/current "
+            "/var/lib/dockyard/workspaces /var/lib/dockyard/status",
             unit,
         )
         self.assertIn(
-            "ReadWritePaths=/run/boudyos "
-            "-/var/lib/boudyos/current/work /var/lib/boudyos/app-status",
+            "ReadWritePaths=/run/dockyard "
+            "-/var/lib/dockyard/current/work /var/lib/dockyard/app-status",
             unit,
         )
-        self.assertIn("BOUDYOS_APP_STATUS_DIR=/var/lib/boudyos/app-status", unit)
-        self.assertIn("StateDirectory=boudyos/app-status", unit)
+        self.assertIn("DOCKYARD_APP_STATUS_DIR=/var/lib/dockyard/app-status", unit)
+        self.assertIn("StateDirectory=dockyard/app-status", unit)
         self.assertIn("root-owned", docs)
         self.assertIn("app-status", docs)
 
     def test_shared_status_files_do_not_record_origins_or_paths(self):
-        deploy = (ROOT / "ops/boudyos-deploy").read_text("utf-8")
-        migration = (ROOT / "ops/boudyos-migrate-ultroid").read_text("utf-8")
+        deploy = (ROOT / "ops/dockyard-deploy").read_text("utf-8")
+        migration = (ROOT / "ops/dockyard-migrate-ultroid").read_text("utf-8")
         release_writes = [
             line for line in (deploy + "\n" + migration).splitlines()
             if 'schema_version":1' in line and 'checked_at' in line
@@ -273,11 +273,11 @@ class ReleaseContractTests(unittest.TestCase):
 
     def test_unzip_uses_private_finally_cleaned_workspace(self):
         source = (ROOT / "plugins/ziptools.py").read_text("utf-8")
-        self.assertIn('private_workspace(Path.cwd(), ".boudyos-unzip-")', source)
+        self.assertIn('private_workspace(Path.cwd(), ".dockyard-unzip-")', source)
         self.assertNotIn('shutil.rmtree("unzip"', source)
 
     def test_release_git_index_stays_inside_immutable_policy(self):
-        deploy = (ROOT / "ops/boudyos-deploy").read_text("utf-8")
+        deploy = (ROOT / "ops/dockyard-deploy").read_text("utf-8")
         self.assertIn(
             'GIT_OPTIONAL_LOCKS=0 git -C "$destination" status', deploy
         )

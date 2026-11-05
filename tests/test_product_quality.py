@@ -77,7 +77,7 @@ def load_branding_function():
         for node in tree.body
         if isinstance(node, (ast.Assign, ast.AnnAssign))
         and any(
-            target.id.startswith(("BOUDYOS_BRAND_VERSION", "BOTFATHER_"))
+            target.id.startswith(("DOCKYARD_BRAND_VERSION", "BOTFATHER_"))
             for target in (
                 node.targets if isinstance(node, ast.Assign) else [node.target]
             )
@@ -90,7 +90,7 @@ def load_branding_function():
         if isinstance(node, ast.AsyncFunctionDef)
         and node.name
         in {
-            "_apply_boudyos_branding",
+            "_apply_dockyard_branding",
             "_latest_botfather_response",
             "_require_botfather_success",
         }
@@ -192,7 +192,7 @@ class LocaleQualityTests(unittest.TestCase):
         for name, catalog in self.catalogs.items():
             dashboard = catalog["inline_4"]
             with self.subTest(locale=name):
-                self.assertIn("BoudyOS", dashboard)
+                self.assertIn("Dockyard", dashboard)
                 self.assertEqual(dashboard.count("{}"), 4)
 
     def test_all_locales_have_no_stale_legacy_branding_variants(self):
@@ -307,9 +307,9 @@ class ProductSurfaceTests(unittest.TestCase):
         self.assertNotIn("git init", dockerfile)
         self.assertNotIn("git fetch", dockerfile)
         self.assertNotIn("git reset", dockerfile)
-        self.assertIn("ARG BOUDYOS_SOURCE_COMMIT=unknown", dockerfile)
-        self.assertIn("ARG BOUDYOS_SOURCE_DIRTY=1", dockerfile)
-        self.assertIn("/opt/boudyos-release.json", dockerfile)
+        self.assertIn("ARG DOCKYARD_SOURCE_COMMIT=unknown", dockerfile)
+        self.assertIn("ARG DOCKYARD_SOURCE_DIRTY=1", dockerfile)
+        self.assertIn("/opt/dockyard-release.json", dockerfile)
 
     def test_docker_context_keeps_required_source_assets_and_tests(self):
         patterns = (ROOT / ".dockerignore").read_text("utf-8").splitlines()
@@ -317,7 +317,7 @@ class ProductSurfaceTests(unittest.TestCase):
             "README.md",
             ".github/workflows/codeql-analysis.yml",
             "pyUltroid/__init__.py",
-            "resources/extras/boudyos_avatar.jpg",
+            "resources/extras/dockyard_avatar.jpg",
             "tests/test_product_quality.py",
         ):
             with self.subTest(required=required):
@@ -382,8 +382,8 @@ class ProductSurfaceTests(unittest.TestCase):
         )
         mapping = namespace["Fonts"]["small caps"]
         self.assertEqual(len(mapping), len(string.ascii_letters))
-        transformed = namespace["gen_font"]("abc BoudyOS", mapping)
-        self.assertNotEqual(transformed, "abc BoudyOS")
+        transformed = namespace["gen_font"]("abc Dockyard", mapping)
+        self.assertNotEqual(transformed, "abc Dockyard")
         self.assertTrue(transformed.startswith("ᴀʙᴄ "))
 
     def test_dashboard_buttons_are_readable_and_stable(self):
@@ -426,7 +426,7 @@ class ProductSurfaceTests(unittest.TestCase):
             compile(ast.Module([inline_pic], type_ignores=[]), str(path), "exec"),
             namespace,
         )
-        bundled_avatar = str(ROOT / "resources/extras/boudyos_avatar.jpg")
+        bundled_avatar = str(ROOT / "resources/extras/dockyard_avatar.jpg")
         self.assertEqual(namespace["inline_pic"](), bundled_avatar)
 
         namespace["udB"] = FakeDatabase(
@@ -440,7 +440,7 @@ class ProductSurfaceTests(unittest.TestCase):
 
         bot_source = (ROOT / "plugins" / "bot.py").read_text("utf-8")
         self.assertIn(
-            'inline_pic() or str(source_resource("extras", "boudyos_avatar.jpg"))',
+            'inline_pic() or str(source_resource("extras", "dockyard_avatar.jpg"))',
             bot_source,
         )
 
@@ -464,7 +464,7 @@ class ProductSurfaceTests(unittest.TestCase):
 
         helper_source = (ROOT / "pyUltroid/fns/helper.py").read_text("utf-8")
         self.assertIn(
-            'output += "\\nBoudyOS - https://github.com/boudywho/BoudyOS"',
+            'output += "\\nDockyard - https://github.com/boudywho/Dockyard"',
             helper_source,
         )
 
@@ -475,14 +475,14 @@ class ProductSurfaceTests(unittest.TestCase):
                 self.assertNotIn("theUltroid", english[key])
                 self.assertNotIn("UseUltroid", english[key])
         self.assertEqual(placeholders(english["help_button"]), ["i", "i"])
-        self.assertIn("BoudyOS", english["chats_5"])
+        self.assertIn("Dockyard", english["chats_5"])
 
         inlinestuff_source = (ROOT / "assistant/inlinestuff.py").read_text(
             "utf-8"
         )
-        self.assertIn('"Search On Google": "go BoudyOS"', inlinestuff_source)
+        self.assertIn('"Search On Google": "go Dockyard"', inlinestuff_source)
         self.assertIn(
-            '"Piston Eval": "run javascript console.log(\'Hello BoudyOS\')"',
+            '"Piston Eval": "run javascript console.log(\'Hello Dockyard\')"',
             inlinestuff_source,
         )
         self.assertIn('"Twitter User": "twitter telegram"', inlinestuff_source)
@@ -490,20 +490,20 @@ class ProductSurfaceTests(unittest.TestCase):
 
         tools_source = (ROOT / "pyUltroid/fns/tools.py").read_text("utf-8")
         self.assertIn(
-            'kwargs["title"] = kwargs.get("title", "BoudyOS")', tools_source
+            'kwargs["title"] = kwargs.get("title", "Dockyard")', tools_source
         )
         self.assertIn(
-            'else "https://github.com/boudywho/BoudyOS"', tools_source
+            'else "https://github.com/boudywho/Dockyard"', tools_source
         )
 
         cb_source = (ROOT / "assistant/callbackstuffs.py").read_text("utf-8")
         self.assertNotIn("@ultroidplugins", cb_source)
         self.assertIn(
-            "Only install plugins from trusted BoudyOS repositories", cb_source
+            "Only install plugins from trusted Dockyard repositories", cb_source
         )
 
         init_source = (ROOT / "pyUltroid/__init__.py").read_text("utf-8")
-        self.assertIn('print("pyUltroid - BoudyOS")', init_source)
+        self.assertIn('print("pyUltroid - Dockyard")', init_source)
 
     def test_manager_help_has_dashboard_navigation(self):
         source = (ROOT / "assistant" / "manager" / "_help.py").read_text(
@@ -525,8 +525,8 @@ class ProductSurfaceTests(unittest.TestCase):
 
     def test_bundled_brand_assets_and_startup_fallback(self):
         for relative in (
-            "resources/extras/boudyos_logo.png",
-            "resources/extras/boudyos_avatar.jpg",
+            "resources/extras/dockyard_logo.png",
+            "resources/extras/dockyard_avatar.jpg",
         ):
             path = ROOT / relative
             with self.subTest(path=relative):
@@ -534,36 +534,36 @@ class ProductSurfaceTests(unittest.TestCase):
                 self.assertGreater(path.stat().st_size, 0)
 
         startup = (ROOT / "pyUltroid" / "startup" / "funcs.py").read_text("utf-8")
-        self.assertGreaterEqual(startup.count("boudyos_avatar.jpg"), 3)
+        self.assertGreaterEqual(startup.count("dockyard_avatar.jpg"), 3)
         self.assertNotIn("graph.org/file", startup)
 
 
 class AssistantBrandingTests(unittest.IsolatedAsyncioTestCase):
     async def test_existing_photo_does_not_prevent_one_time_branding(self):
         branding = load_branding_function()
-        database = FakeDatabase({branding["BOUDYOS_BRAND_VERSION_KEY"]: 0})
+        database = FakeDatabase({branding["DOCKYARD_BRAND_VERSION_KEY"]: 0})
         assistant, user, notification = branding_clients()
 
-        await branding["_apply_boudyos_branding"](assistant, database, user)
+        await branding["_apply_dockyard_branding"](assistant, database, user)
 
         commands = [call.args[1] for call in user.send_message.await_args_list]
         self.assertIn("/setuserpic", commands)
         self.assertIn("/setname", commands)
-        self.assertIn("BoudyOS Assistant", commands)
+        self.assertIn("Dockyard Assistant", commands)
         self.assertIn("/setabouttext", commands)
         self.assertIn("/setdescription", commands)
         self.assertNotIn("/newbot", commands)
         self.assertNotIn("/setusername", commands)
         user.send_file.assert_awaited_once_with(
-            "botfather", str(ROOT / "resources/extras/boudyos_avatar.jpg")
+            "botfather", str(ROOT / "resources/extras/dockyard_avatar.jpg")
         )
         notification.edit.assert_awaited_once()
         self.assertEqual(
             database.set_calls,
             [
                 (
-                    branding["BOUDYOS_BRAND_VERSION_KEY"],
-                    branding["BOUDYOS_BRAND_VERSION"],
+                    branding["DOCKYARD_BRAND_VERSION_KEY"],
+                    branding["DOCKYARD_BRAND_VERSION"],
                 )
             ],
         )
@@ -571,11 +571,11 @@ class AssistantBrandingTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_brand_version_skips_completed_migration(self):
         branding = load_branding_function()
-        version_key = branding["BOUDYOS_BRAND_VERSION_KEY"]
-        database = FakeDatabase({version_key: branding["BOUDYOS_BRAND_VERSION"]})
+        version_key = branding["DOCKYARD_BRAND_VERSION_KEY"]
+        database = FakeDatabase({version_key: branding["DOCKYARD_BRAND_VERSION"]})
         assistant, user, _ = branding_clients()
 
-        await branding["_apply_boudyos_branding"](assistant, database, user)
+        await branding["_apply_dockyard_branding"](assistant, database, user)
 
         assistant.send_message.assert_not_awaited()
         user.send_message.assert_not_awaited()
@@ -587,11 +587,11 @@ class AssistantBrandingTests(unittest.IsolatedAsyncioTestCase):
         database = FakeDatabase()
         assistant, user, notification = branding_clients(fail_avatar=True)
 
-        await branding["_apply_boudyos_branding"](assistant, database, user)
+        await branding["_apply_dockyard_branding"](assistant, database, user)
 
         notification.edit.assert_not_awaited()
         self.assertEqual(database.set_calls, [])
-        self.assertNotIn(branding["BOUDYOS_BRAND_VERSION_KEY"], database.values)
+        self.assertNotIn(branding["DOCKYARD_BRAND_VERSION_KEY"], database.values)
 
     async def test_user_mode_skips_branding_without_botfather_activity(self):
         branding = load_branding_function()
@@ -605,7 +605,7 @@ class AssistantBrandingTests(unittest.IsolatedAsyncioTestCase):
             get_messages=AsyncMock(),
         )
 
-        await branding["_apply_boudyos_branding"](
+        await branding["_apply_dockyard_branding"](
             user_client, database, user_client
         )
 
@@ -621,7 +621,7 @@ class AssistantBrandingTests(unittest.IsolatedAsyncioTestCase):
         _, bot_client, _ = branding_clients()
         bot_client.me.bot = True
 
-        await branding["_apply_boudyos_branding"](
+        await branding["_apply_dockyard_branding"](
             bot_client, database, bot_client
         )
 
@@ -641,11 +641,11 @@ class AssistantBrandingTests(unittest.IsolatedAsyncioTestCase):
             ]
         )
 
-        await branding["_apply_boudyos_branding"](assistant, database, user)
+        await branding["_apply_dockyard_branding"](assistant, database, user)
 
         notification.edit.assert_not_awaited()
         self.assertEqual(database.set_calls, [])
-        self.assertNotIn(branding["BOUDYOS_BRAND_VERSION_KEY"], database.values)
+        self.assertNotIn(branding["DOCKYARD_BRAND_VERSION_KEY"], database.values)
         commands = [call.args[1] for call in user.send_message.await_args_list]
         self.assertNotIn("/setname", commands)
 
@@ -781,7 +781,7 @@ class InlineAliveBehaviorTests(unittest.IsolatedAsyncioTestCase):
         )
 
         # 1. Configured local bundled path
-        bundled_path = str(ROOT / "resources/extras/boudyos_avatar.jpg")
+        bundled_path = str(ROOT / "resources/extras/dockyard_avatar.jpg")
         namespace = {
             "inline_pic": lambda: bundled_path,
             "SUP_BUTTONS": [[]],
@@ -798,7 +798,7 @@ class InlineAliveBehaviorTests(unittest.IsolatedAsyncioTestCase):
         await namespace["inline_alive"](event)
         builder.photo.assert_awaited_once_with(
             file=bundled_path,
-            text="**BoudyOS**",
+            text="**Dockyard**",
             buttons=[[]],
             link_preview=False,
         )
@@ -806,7 +806,7 @@ class InlineAliveBehaviorTests(unittest.IsolatedAsyncioTestCase):
             ["photo_result"],
             private=True,
             cache_time=300,
-            switch_pm="BoudyOS",
+            switch_pm="Dockyard",
             switch_pm_param="start",
         )
 
@@ -817,7 +817,7 @@ class InlineAliveBehaviorTests(unittest.IsolatedAsyncioTestCase):
         await namespace["inline_alive"](event)
         builder.photo.assert_awaited_once_with(
             file="https://example.com/override.jpg",
-            text="**BoudyOS**",
+            text="**Dockyard**",
             buttons=[[]],
             link_preview=False,
         )
@@ -825,7 +825,7 @@ class InlineAliveBehaviorTests(unittest.IsolatedAsyncioTestCase):
             ["photo_result"],
             private=True,
             cache_time=300,
-            switch_pm="BoudyOS",
+            switch_pm="Dockyard",
             switch_pm_param="start",
         )
 
@@ -835,9 +835,9 @@ class InlineAliveBehaviorTests(unittest.IsolatedAsyncioTestCase):
         namespace["inline_pic"] = lambda: None
         await namespace["inline_alive"](event)
         builder.article.assert_awaited_once_with(
-            title="BoudyOS",
+            title="Dockyard",
             description="Personal Telegram workspace",
-            text="**BoudyOS**",
+            text="**Dockyard**",
             buttons=[[]],
             link_preview=False,
         )
@@ -845,7 +845,7 @@ class InlineAliveBehaviorTests(unittest.IsolatedAsyncioTestCase):
             ["article_result"],
             private=True,
             cache_time=300,
-            switch_pm="BoudyOS",
+            switch_pm="Dockyard",
             switch_pm_param="start",
         )
 

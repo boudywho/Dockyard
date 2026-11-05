@@ -6,7 +6,7 @@ umask 077
     echo "Usage: $0 <encrypted-backup.tar.age>" >&2
     exit 2
 }
-readonly CONFIG_FILE="${BOUDYOS_BACKUP_CONFIG:-/etc/boudyos/backup.conf}"
+readonly CONFIG_FILE="${DOCKYARD_BACKUP_CONFIG:-/etc/dockyard/backup.conf}"
 [[ -r "$CONFIG_FILE" ]] || {
     echo "Backup configuration is not readable." >&2
     exit 1
@@ -15,7 +15,7 @@ readonly CONFIG_FILE="${BOUDYOS_BACKUP_CONFIG:-/etc/boudyos/backup.conf}"
 source "$CONFIG_FILE"
 : "${AGE_IDENTITY_FILE:?AGE_IDENTITY_FILE must be configured}"
 : "${HMAC_KEY_FILE:?HMAC_KEY_FILE must be configured}"
-readonly OPS_HELPER="${BOUDYOS_OPS_HELPER:-/usr/local/lib/boudyos/boudyos_ops.py}"
+readonly OPS_HELPER="${DOCKYARD_OPS_HELPER:-/usr/local/lib/dockyard/dockyard_ops.py}"
 
 backup="$(readlink -f "$1")"
 [[ -f "$backup" && "$backup" == *.tar.age ]] || {
@@ -32,7 +32,7 @@ python3 "$OPS_HELPER" hmac-verify "$backup" "$HMAC_KEY_FILE" "$signature" || {
     echo "Backup authentication failed." >&2
     exit 1
 }
-work="$(mktemp -d /tmp/boudyos-restore-verify.XXXXXX)"
+work="$(mktemp -d /tmp/dockyard-restore-verify.XXXXXX)"
 trap 'rm -rf --one-file-system -- "$work"' EXIT
 age --decrypt --identity "$AGE_IDENTITY_FILE" --output "$work/archive.tar" "$backup"
 python3 "$OPS_HELPER" extract "$work/archive.tar" "$work/restored"

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-08-21T13:45:28Z",
-  "title": "Design System: BoudyOS",
+  "title": "Design System: Dockyard",
   "extensions": {
     "colorMeta": {
       "canvas": {
@@ -48,30 +48,30 @@
       },
       "label": {
         "displayName": "Noto Sans label",
-        "purpose": "Short context labels in authored BoudyOS media."
+        "purpose": "Short context labels in authored Dockyard media."
       }
     },
     "motion": [],
     "breakpoints": [],
     "assetProvenance": [
       {
-        "path": "resources/extras/boudyos_avatar.jpg",
-        "origin": "Existing BoudyOS canonical brand asset in the repository."
+        "path": "resources/extras/dockyard_avatar.jpg",
+        "origin": "Existing Dockyard canonical brand asset in the repository."
       },
       {
         "path": "resources/extras/inline.jpg",
-        "origin": "Generated locally by scripts/build_boudyos_inline_banner.py from the canonical BoudyOS avatar and deterministic palette/layout code."
+        "origin": "Generated locally by scripts/build_dockyard_inline_banner.py from the canonical Dockyard avatar and deterministic palette/layout code."
       }
     ]
   },
   "components": [],
   "narrative": {
     "northStar": "The focused control surface",
-    "overview": "BoudyOS is operated inside Telegram. Its UI uses native messages and inline keyboards as a calm command surface: context first, grouped actions second, progressive disclosure for detail, and a reversible path at every step.",
+    "overview": "Dockyard is operated inside Telegram. Its UI uses native messages and inline keyboards as a calm command surface: context first, grouped actions second, progressive disclosure for detail, and a reversible path at every step.",
     "keyCharacteristics": [
       "Telegram-native text-labeled controls",
       "Deep navy with electric blue and cyan signals",
-      "BoudyOS language in user-facing copy",
+      "Dockyard language in user-facing copy",
       "Deterministic bundled media by default"
     ],
     "rules": [
@@ -87,7 +87,7 @@
       }
     ],
     "dos": [
-      "Do use BoudyOS in user-facing help and dashboard copy.",
+      "Do use Dockyard in user-facing help and dashboard copy.",
       "Do keep every operational screen reversible.",
       "Do default to immutable bundled media."
     ],

@@ -1,6 +1,6 @@
 # Owner YouTube/media workflow
 
-Use `.yt <URL>` from the BoudyOS owner account in the destination chat. The
+Use `.yt <URL>` from the Dockyard owner account in the destination chat. The
 user account presents a numbered text wizard with metadata, available practical
 video resolutions, M4A and MP3 audio choices, timestamp controls, and a final
 confirmation. Reply in the same chat with the displayed number or option name.

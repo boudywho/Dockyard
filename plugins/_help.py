@@ -17,7 +17,7 @@ from pyUltroid.fns.tools import cmd_regex_replace
 
 from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroid_cmd
 
-_HELP_FOOTER = "\n\nBoudyOS help - github.com/boudywho/BoudyOS"
+_HELP_FOOTER = "\n\nDockyard help - github.com/boudywho/Dockyard"
 
 _main_help_menu = [
     [
@@ -35,7 +35,7 @@ _main_help_menu = [
         ),
     ],
     [
-        Button.url("Support", url="https://github.com/boudywho/BoudyOS/issues"),
+        Button.url("Support", url="https://github.com/boudywho/Dockyard/issues"),
         Button.inline("Close", data="close"),
     ],
 ]

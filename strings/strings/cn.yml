@@ -20,17 +20,17 @@ autopic_2: "找不到的结果 `{}`"
 autopic_3: "有收藏吗 `{}` 与您的搜索相关 !\n开始自选 !"
 
 # inline
-inline_1: "[BoudyOS 帮助](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_1: "[Dockyard 帮助](https://github.com/boudywho/Dockyard/issues)\n\n
 **帮助菜单 {}.\n\n
 插件 ~ {}**"
-inline_2: "[BoudyOS 帮助](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_2: "[Dockyard 帮助](https://github.com/boudywho/Dockyard/issues)\n\n
 **帮助菜单 {}.\n\n
 附加组件 ~ {}**"
-inline_3: "[BoudyOS 帮助](https://github.com/boudywho/BoudyOS/issues)\n\n
+inline_3: "[Dockyard 帮助](https://github.com/boudywho/Dockyard/issues)\n\n
 **帮助菜单 {}.\n\n
 附加组件 ~ {}\n\n
 去添加 `附加组件` var为true的值**"
-inline_4: "**BoudyOS**\n**{}** 的个人 Telegram 工作空间\n\n**概览**\n• 插件：{}\n• 附加组件：{}\n• 命令：{}\n\n请在下方选择一个类别。"
+inline_4: "**Dockyard**\n**{}** 的个人 Telegram 工作空间\n\n**概览**\n• 插件：{}\n• 附加组件：{}\n• 命令：{}\n\n请在下方选择一个类别。"
 inline_5: "**菜单已关闭**"
 
 # tagnotif
@@ -50,7 +50,7 @@ afk_5: "`去 AFK.`\n\n**原因:** `{}`"
 afk_6: "我要去 AFK."
 
 # bot
-alive_1: "**BoudyOS 用户机器人...**\n\n
+alive_1: "**Dockyard 用户机器人...**\n\n
 **{}**\n\n
 ┏━━━━━━━━━━━━━━━━━━━━━\n
 ┣ **所有者** - `{}`\n
@@ -61,7 +61,7 @@ alive_1: "**BoudyOS 用户机器人...**\n\n
 ┣ **Telethon** - `{}`\n
 ┣ **分支** - `{}`\n
 ┗━━━━━━━━━━━━━━━━━━━━━"
-log: "**Heroku** BoudyOS 日志.\n粘贴 [here]({}) too!"
+log: "**Heroku** Dockyard 日志.\n粘贴 [here]({}) too!"
 ping: "**Pong !!** `{}毫秒`\n**Uptime** - `{}`"
 usage: "**⚙️ Dyno 用法 ⚙️**:\n\n
  -> `Dyno 用法 for`  **{}**:\n
@@ -94,7 +94,7 @@ chats_2: "`无法删除此聊天`"
 chats_3: "`我不是管理员`"
 chats_4: "#已删除\n已删除 {}"
 chats_5: "你的 [{}]({}) 组已经成为了 Boss!"
-chats_6: "加入 BoudyOS"
+chats_6: "加入 Dockyard"
 
 # converter
 cvt_1: "回复任一媒体或文件."
@@ -150,8 +150,8 @@ gdrive_1: "`你已经授权过 Google Drive`"
 gdrive_2: "去 [这里](https://console.developers.google.com/flows/enableapi?apiid=drive) 获取你的 `GDRIVE_CLIENT_ID` 和 `GDRIVE_CLIENT_SECRET`\n\n
 发送你的 GDRIVE_CLIENT_ID 和 GDRIVE_CLIENT_SECRET 到这里.\n`GDRIVE_CLIENT_ID GDRIVE_CLIENT_SECRET` 用空格分开."
 gdrive_3: "`错误的 Client Id`"
-gdrive_4: "`发生了一些错误! 再次发送 `/auth`.\n如果发生同样的问题请联系 `BoudyOS"
-gdrive_5: "`成功!\n你已经在 BoudyOS 用户机器人 上设置好了 Google Drive.`"
+gdrive_4: "`发生了一些错误! 再次发送 `/auth`.\n如果发生同样的问题请联系 `Dockyard"
+gdrive_5: "`成功!\n你已经在 Dockyard 用户机器人 上设置好了 Google Drive.`"
 gdrive_6: "`去 `{}` 并发送 ``/auth.`"
 gdrive_7: "**文件成功上传到 G-Drive :**\n\n[{}]({})"
 
@@ -227,10 +227,10 @@ wrd_4: "`Give a Word to Find Its Meaning..`"
 help_blacklist: "-\n\n• `{i}blacklist <word/all words with a space>`\n    blacklist the choosen word in that chat.\n\n• `{i}remblacklist <word>`\n    Remove the word from blacklist..\n\n• `{i}listblacklist`\n    list all blacklisted words.\n\n  'if a person uses blacklist Word his/her msg will be deleted'\n  'And u Must be Admin in that Chat'"
 vct_1: "`Voice Chat Started...`"
 vcbot_5: "`Re-joining this voice chat.`"
-calc_1: "• BoudyOS Inline Calculator •"
+calc_1: "• Dockyard Inline Calculator •"
 autopic_4: "AUTOPIC was not in use !!"
 ascii_2: "`Converting to html...`"
-help_bot: "• `{i}alive` | `{i}alive inline`\n    Check if your bot is working.\n\n• `{i}ping`\n    Check BoudyOS's response time.\n\n• `{i}update`\n    See changelogs if any update is available.\n\n• `{i}cmds`\n    View all plugin names.\n\n• `{i}restart`\n    To restart your bot.\n\n• `{i}logs (sys)`\n    Get the full terminal logs.\n• `{i}logs carbon`\n    Get the carbonized sys logs.\n• `{i}logs heroku`\n   Get the latest 100 lines of heroku logs.\n\n• `{i}shutdown`\n    Turn off your bot."
+help_bot: "• `{i}alive` | `{i}alive inline`\n    Check if your bot is working.\n\n• `{i}ping`\n    Check Dockyard's response time.\n\n• `{i}update`\n    See changelogs if any update is available.\n\n• `{i}cmds`\n    View all plugin names.\n\n• `{i}restart`\n    To restart your bot.\n\n• `{i}logs (sys)`\n    Get the full terminal logs.\n• `{i}logs carbon`\n    Get the carbonized sys logs.\n• `{i}logs heroku`\n   Get the latest 100 lines of heroku logs.\n\n• `{i}shutdown`\n    Turn off your bot."
 ascii_1: "`Reply to image.`"
 sts_2: "`Reply to an Animated Sticker...`"
 ban_4: "{} **was banned by** {} **in** `{}`"
@@ -263,7 +263,7 @@ help_autoban: "• `{i}autokick <on/off>`\n    on - To enable.\n    off - To dis
 can_2: "∆ #UsernameUpdate\n\n@{} changed username to @{}"
 aki_1: "Game has been Terminated...."
 youtube_8: "`Downloading video song...`"
-help_button: "-\n\n• `{i}button <text with button format`\n   create button u can reply to pic also\n\nFormat:- `{i}button Hey There! @username 😎.\n[BoudyOS | https://github.com/boudywho/BoudyOS][Support | https://github.com/boudywho/BoudyOS/issues | same]\n[BoudyOS | https://github.com/boudywho/BoudyOS]`"
+help_button: "-\n\n• `{i}button <text with button format`\n   create button u can reply to pic also\n\nFormat:- `{i}button Hey There! @username 😎.\n[Dockyard | https://github.com/boudywho/Dockyard][Support | https://github.com/boudywho/Dockyard/issues | same]\n[Dockyard | https://github.com/boudywho/Dockyard]`"
 bot_1: "Hey,  I am alive."
 youtube_7: "Give me a (youtube) search query to download video from!"
 com_5: "Downloading..."
@@ -550,7 +550,7 @@ fsub_7: "This Message is Not for You"
 clst_1: "`Userbot dyno build in progress, please wait for it to complete.`"
 help_specialtools: "-\n\n• `{i}wspr <username>`\n    Send secret message..\n\n• `{i}q <color-optional>`\n• `{i}q @username`\n• `{i}q r <color-optional>`\n• `{i}q count` : `multiple quotes`\n    Create quotes..\n\n• `{i}sticker <query>`\n    Search Stickers as Per ur Wish..\n\n• `{i}getaudio <reply to an audio>`\n    Download Audio To put in ur Desired Video/Gif.\n\n• `{i}addaudio <reply to Video/gif>`\n    It will put the above audio to the replied video/gif.\n\n• `{i}dob <date of birth>`\n    Put in dd/mm/yy Format only(eg .dob 01/01/1999).\n\n• `{i}wall <query>`\n    Search Hd Wallpaper as Per ur Wish.."
 zip_1: "Reply to any media/Document."
-inline_6: "**Voice Chat Help Menu for {}**\n**Available Commands:** `{}`\n\nBoudyOS"
+inline_6: "**Voice Chat Help Menu for {}**\n**Available Commands:** `{}`\n\nDockyard"
 py_d2: "`Full Sudo User Required...`"
 ast_4: "List Of Available Languages."
 py_d8: "`Sending media or sticker is not allowed in this chat.`"

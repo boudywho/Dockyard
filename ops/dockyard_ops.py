@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pure policy helpers shared by BoudyOS operational scripts."""
+"""Pure policy helpers shared by Dockyard operational scripts."""
 
 import hashlib
 import hmac
@@ -491,7 +491,7 @@ def rotation_keep(
 ) -> List[Path]:
     """Keep only the newest archives, regardless of their age."""
     parsed = []
-    pattern = re.compile(r"^boudyos-(\d{8}T\d{6}Z)\.tar\.age$")
+    pattern = re.compile(r"^dockyard-(\d{8}T\d{6}Z)\.tar\.age$")
     for path in paths:
         match = pattern.match(path.name)
         if match:
@@ -591,12 +591,12 @@ def _main() -> int:
     args = parser.parse_args()
     if args.command == "manifest":
         root = args.root.resolve()
-        manifest = build_manifest(root, {"product": "BoudyOS"})
+        manifest = build_manifest(root, {"product": "Dockyard"})
         atomic_json(args.output, manifest)
         return 0
     if args.command == "rotate":
         now = datetime.now(timezone.utc)
-        backups = list(args.directory.glob("boudyos-*.tar.age"))
+        backups = list(args.directory.glob("dockyard-*.tar.age"))
         keep = set(rotation_keep(backups, now=now))
         for path in backups:
             if path not in keep:

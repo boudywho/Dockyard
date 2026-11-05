@@ -54,7 +54,7 @@ INFO_TEXT = f"""
 2. You can install that requirement whenever you want with 'pip install' (a very basic python+bash knowledge is required.)
 
 3. Some of the plugins are disabled for 'Termux Users' to save resources (by adding in EXCLUDE_OFFICIAL).
-   - Documentation - https://github.com/boudywho/BoudyOS
+   - Documentation - https://github.com/boudywho/Dockyard
    - Also, way to enable the disabled plugins is mentioned in that post.
 
    # Disabled Plugins Name
@@ -179,8 +179,8 @@ print(
 █       █       █ █   █ █   █  █ █       █   █       █
 █▄▄▄▄▄▄▄█▄▄▄▄▄▄▄█ █▄▄▄█ █▄▄▄█  █▄█▄▄▄▄▄▄▄█▄▄▄█▄▄▄▄▄▄█ 
 {Style.RESET_ALL}
-{Fore.GREEN}- BoudyOS Termux installation -
-  This script deploys BoudyOS with a lightweight set of requirements.
+{Fore.GREEN}- Dockyard Termux installation -
+  This script deploys Dockyard with a lightweight set of requirements.
 {Fore.RESET}
 
 {COPYRIGHT}
@@ -243,7 +243,7 @@ Enter [ A = Ask for each, I = Install all, S = Skip, E = Exit]"""
 ask_and_wait_opt()
 
 print(f"\n{Fore.RED}#EXTRA Features...\n")
-print(f"{Fore.YELLOW}* Enable colored BoudyOS logs? [Y/N] ")
+print(f"{Fore.YELLOW}* Enable colored Dockyard logs? [Y/N] ")
 inp = input("").strip().lower()
 if inp in ["yes", "y"]:
     print(f"{Fore.GREEN}Colored logs are used when the reviewed dependency is present.")
@@ -257,10 +257,10 @@ if not path.exists(".env"):
 
 print(with_header(f"\n{Fore.GREEN}You are all Done! 🥳"))
 sleep(0.2)
-print(f"Use 'bash startup' to run BoudyOS.{Fore.RESET}")
+print(f"Use 'bash startup' to run Dockyard.{Fore.RESET}")
 sleep(0.5)
 print(
-    "\nSupport: https://github.com/boudywho/BoudyOS/issues"
+    "\nSupport: https://github.com/boudywho/Dockyard/issues"
 )
 sleep(0.5)
 print("\nMade with ❤️ by @TeamUltroid...")

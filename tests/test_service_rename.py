@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "ops/boudyos-rename-service"
+SCRIPT = ROOT / "ops/dockyard-rename-service"
 
 
 class ServiceRenameTests(unittest.TestCase):
@@ -27,22 +27,22 @@ class ServiceRenameTests(unittest.TestCase):
             "Environment=PRIVATE_TOKEN=fixture-secret\n",
             "utf-8",
         )
-        override = dropin / "boudyos.conf"
+        override = dropin / "dockyard.conf"
         override.write_text(
             "[Service]\nUser=ultroid\nGroup=ultroid\n"
-            "WorkingDirectory=/var/lib/boudyos/current/work\n"
-            "EnvironmentFile=/etc/boudyos/runtime.env\n"
-            "Environment=PYTHONPATH=/var/lib/boudyos/current/source\n"
+            "WorkingDirectory=/var/lib/dockyard/current/work\n"
+            "EnvironmentFile=/etc/dockyard/runtime.env\n"
+            "Environment=PYTHONPATH=/var/lib/dockyard/current/source\n"
             "ExecStart=\n"
-            "ExecStart=/var/lib/boudyos/current/source/.venv/bin/python -s "
-            "/var/lib/boudyos/current/source/ops/boudyos-python-launcher\n",
+            "ExecStart=/var/lib/dockyard/current/source/.venv/bin/python -s "
+            "/var/lib/dockyard/current/source/ops/dockyard-python-launcher\n",
             "utf-8",
         )
         unit.chmod(0o640)
         override.chmod(0o600)
         configs = []
         for name, prefix in (
-            ("deploy.conf", "BOUDYOS_SERVICE="),
+            ("deploy.conf", "DOCKYARD_SERVICE="),
             ("backup.conf", "QUIESCE_SERVICE="),
             ("health.conf", "SERVICE="),
         ):
@@ -88,9 +88,9 @@ case "$command" in
     ;;
   start)
     echo "$service" >"$FAKE_STATE/active"
-    if [[ "$service" == "boudyos.service" ]]; then pid=202; else pid=303; fi
+    if [[ "$service" == "dockyard.service" ]]; then pid=202; else pid=303; fi
     echo "$pid" >"$FAKE_STATE/pid"
-    python3 - "$BOUDYOS_READY_FILE" "$pid" <<'PY'
+    python3 - "$DOCKYARD_READY_FILE" "$pid" <<'PY'
 import json, sys, time
 with open(sys.argv[1], "w", encoding="ascii") as stream:
     json.dump({"schema_version": 1, "pid": int(sys.argv[2]),
@@ -99,7 +99,7 @@ PY
     ;;
   is-enabled)
     if [[ "$service" == "ultroid.service" ]]; then
-      if [[ -f "$BOUDYOS_RENAME_UNIT_DIR/$service" ]]; then
+      if [[ -f "$DOCKYARD_RENAME_UNIT_DIR/$service" ]]; then
         cat "$FAKE_STATE/legacy-enabled"
       else
         echo not-found; exit 1
@@ -111,11 +111,11 @@ PY
     fi
     ;;
   enable)
-    [[ "$service" != "boudyos.service" ]] || echo enabled >"$FAKE_STATE/target-enabled"
+    [[ "$service" != "dockyard.service" ]] || echo enabled >"$FAKE_STATE/target-enabled"
     [[ "$service" != "ultroid.service" ]] || echo enabled >"$FAKE_STATE/legacy-enabled"
     ;;
   disable)
-    [[ "$service" != "boudyos.service" ]] || echo disabled >"$FAKE_STATE/target-enabled"
+    [[ "$service" != "dockyard.service" ]] || echo disabled >"$FAKE_STATE/target-enabled"
     [[ "$service" != "ultroid.service" ]] || echo disabled >"$FAKE_STATE/legacy-enabled"
     ;;
   daemon-reload) ;;
@@ -130,8 +130,8 @@ esac
             health.write_text(
                 "#!/usr/bin/env bash\nset -e\n"
                 "[[ \"$PYTHONPATH\" == \"$EXPECTED_HEALTH_PYTHONPATH\" ]]\n"
-                "if [[ \"$(cat \"$FAKE_STATE/active\")\" == boudyos.service ]]; then\n"
-                "  grep -Fxq SERVICE=boudyos.service \"$BOUDYOS_HEALTH_CONFIG\"\n"
+                "if [[ \"$(cat \"$FAKE_STATE/active\")\" == dockyard.service ]]; then\n"
+                "  grep -Fxq SERVICE=dockyard.service \"$DOCKYARD_HEALTH_CONFIG\"\n"
                 "fi\n",
                 "utf-8",
             )
@@ -139,9 +139,9 @@ esac
             health.write_text(
                 "#!/usr/bin/env bash\nset -e\n"
                 "[[ \"$PYTHONPATH\" == \"$EXPECTED_HEALTH_PYTHONPATH\" ]]\n"
-                "if [[ \"$(cat \"$FAKE_STATE/active\")\" == boudyos.service ]]; then\n"
-                "  grep -Fxq SERVICE=boudyos.service \"$BOUDYOS_HEALTH_CONFIG\"\n"
-                "  grep -Fxq BOUDYOS_SERVICE=ultroid.service \"$LIVE_DEPLOY\"\n"
+                "if [[ \"$(cat \"$FAKE_STATE/active\")\" == dockyard.service ]]; then\n"
+                "  grep -Fxq SERVICE=dockyard.service \"$DOCKYARD_HEALTH_CONFIG\"\n"
+                "  grep -Fxq DOCKYARD_SERVICE=ultroid.service \"$LIVE_DEPLOY\"\n"
                 "  grep -Fxq QUIESCE_SERVICE=ultroid.service \"$LIVE_BACKUP\"\n"
                 "  grep -Fxq SERVICE=ultroid.service \"$LIVE_HEALTH\"\n"
                 "  exit 1\n"
@@ -155,15 +155,15 @@ esac
             **os.environ,
             "PATH": str(bin_dir) + os.pathsep + os.environ["PATH"],
             "FAKE_STATE": str(state),
-            "BOUDYOS_RENAME_TEST_MODE": "1",
-            "BOUDYOS_RENAME_LIB": "1",
-            "BOUDYOS_RENAME_UNIT_DIR": str(unit_dir),
-            "BOUDYOS_DEPLOY_CONFIG": str(configs[0]),
-            "BOUDYOS_BACKUP_CONFIG": str(configs[1]),
-            "BOUDYOS_HEALTH_CONFIG": str(configs[2]),
-            "BOUDYOS_HEALTH_PYTHONPATH": str(health_pythonpath),
-            "BOUDYOS_READY_FILE": str(ready),
-            "BOUDYOS_HEALTH_HELPER": str(health),
+            "DOCKYARD_RENAME_TEST_MODE": "1",
+            "DOCKYARD_RENAME_LIB": "1",
+            "DOCKYARD_RENAME_UNIT_DIR": str(unit_dir),
+            "DOCKYARD_DEPLOY_CONFIG": str(configs[0]),
+            "DOCKYARD_BACKUP_CONFIG": str(configs[1]),
+            "DOCKYARD_HEALTH_CONFIG": str(configs[2]),
+            "DOCKYARD_HEALTH_PYTHONPATH": str(health_pythonpath),
+            "DOCKYARD_READY_FILE": str(ready),
+            "DOCKYARD_HEALTH_HELPER": str(health),
             "PYTHONPATH": str(inherited_pythonpath),
             "EXPECTED_HEALTH_PYTHONPATH": os.pathsep.join(
                 (str(health_pythonpath), str(inherited_pythonpath))
@@ -171,10 +171,10 @@ esac
             "LIVE_DEPLOY": str(configs[0]),
             "LIVE_BACKUP": str(configs[1]),
             "LIVE_HEALTH": str(configs[2]),
-            "BOUDYOS_RENAME_RECORD": str(root / "rename-record"),
-            "BOUDYOS_RENAME_LOCK": str(root / "rename.lock"),
-            "BOUDYOS_RENAME_READY_ATTEMPTS": "2",
-            "BOUDYOS_RENAME_READY_INTERVAL": "0",
+            "DOCKYARD_RENAME_RECORD": str(root / "rename-record"),
+            "DOCKYARD_RENAME_LOCK": str(root / "rename.lock"),
+            "DOCKYARD_RENAME_READY_ATTEMPTS": "2",
+            "DOCKYARD_RENAME_READY_INTERVAL": "0",
         }
         return unit_dir, configs, state, env
 
@@ -196,19 +196,19 @@ esac
             result = self.run_rename(env)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertFalse((unit_dir / "ultroid.service").exists())
-            target = unit_dir / "boudyos.service"
+            target = unit_dir / "dockyard.service"
             self.assertTrue(target.is_file())
             combined = target.read_text("utf-8") + (
-                unit_dir / "boudyos.service.d/boudyos.conf"
+                unit_dir / "dockyard.service.d/dockyard.conf"
             ).read_text("utf-8")
             self.assertIn("User=ultroid", combined)
             self.assertIn("Group=ultroid", combined)
             self.assertIn("Requires=ultroid-redis.service", combined)
-            self.assertNotIn("boudyos-redis.service", combined)
+            self.assertNotIn("dockyard-redis.service", combined)
             for config in configs:
-                self.assertIn("boudyos.service", config.read_text("utf-8"))
+                self.assertIn("dockyard.service", config.read_text("utf-8"))
                 self.assertEqual(stat.S_IMODE(config.stat().st_mode), 0o640)
-            self.assertEqual((state / "active").read_text().strip(), "boudyos.service")
+            self.assertEqual((state / "active").read_text().strip(), "dockyard.service")
             self.assertEqual((state / "target-enabled").read_text().strip(), "enabled")
             self.assertNotIn("fixture-secret", result.stdout + result.stderr)
             self.assertNotIn("do-not-print-this", result.stdout + result.stderr)
@@ -219,14 +219,14 @@ esac
             unit_dir, configs, _state, env = self.make_fixture(root)
             watched = [
                 unit_dir / "ultroid.service",
-                unit_dir / "ultroid.service.d/boudyos.conf",
+                unit_dir / "ultroid.service.d/dockyard.conf",
                 *configs,
             ]
             before = {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in watched}
             result = self.run_rename(env, "plan")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("plan:", result.stdout)
-            self.assertFalse((unit_dir / "boudyos.service").exists())
+            self.assertFalse((unit_dir / "dockyard.service").exists())
             self.assertFalse((root / "rename-record").exists())
             for path, expected in before.items():
                 self.assertEqual((path.read_bytes(), path.stat().st_mtime_ns), expected)
@@ -246,7 +246,7 @@ esac
             self.assertEqual(legacy_state.stdout.strip(), "not-found")
             before = {
                 path: (path.read_bytes(), path.stat().st_mtime_ns)
-                for path in [unit_dir / "boudyos.service", *configs]
+                for path in [unit_dir / "dockyard.service", *configs]
             }
             second = self.run_rename(env, "plan")
             self.assertEqual(second.returncode, 0, second.stderr)
@@ -262,15 +262,15 @@ esac
             )
             original_unit = (unit_dir / "ultroid.service").read_bytes()
             original_dropin = (
-                unit_dir / "ultroid.service.d/boudyos.conf"
+                unit_dir / "ultroid.service.d/dockyard.conf"
             ).read_bytes()
             original_configs = [(p.read_bytes(), stat.S_IMODE(p.stat().st_mode)) for p in configs]
             result = self.run_rename(env)
             self.assertNotEqual(result.returncode, 0)
-            self.assertFalse((unit_dir / "boudyos.service").exists())
+            self.assertFalse((unit_dir / "dockyard.service").exists())
             self.assertEqual((unit_dir / "ultroid.service").read_bytes(), original_unit)
             self.assertEqual(
-                (unit_dir / "ultroid.service.d/boudyos.conf").read_bytes(),
+                (unit_dir / "ultroid.service.d/dockyard.conf").read_bytes(),
                 original_dropin,
             )
             for path, expected in zip(configs, original_configs):

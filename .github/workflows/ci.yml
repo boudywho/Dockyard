@@ -97,14 +97,14 @@ jobs:
       - name: Build exact committed context
         run: |
           tag="$(git describe --tags --exact-match 2>/dev/null || printf untagged)"
-          docker build --tag boudyos:ci \
-            --build-arg BOUDYOS_SOURCE_COMMIT="$GITHUB_SHA" \
-            --build-arg BOUDYOS_SOURCE_TAG="$tag" \
-            --build-arg BOUDYOS_SOURCE_DIRTY=0 .
+          docker build --tag dockyard:ci \
+            --build-arg DOCKYARD_SOURCE_COMMIT="$GITHUB_SHA" \
+            --build-arg DOCKYARD_SOURCE_TAG="$tag" \
+            --build-arg DOCKYARD_SOURCE_DIRTY=0 .
       - name: Clean runtime imports and identity
         run: |
-          docker run --rm --entrypoint python3 boudyos:ci -m compileall -q pyUltroid plugins assistant
-          docker run --rm --entrypoint python3 boudyos:ci -c "import bs4, htmlwebshot, telethonpatch; import hiredis, psycopg2, pymongo, redis; from telethonpatch import TelegramClient; from pyUltroid.startup.BaseClient import UltroidClient"
-          docker run --rm --entrypoint python3 boudyos:ci -m unittest discover -s tests -v
-          docker run --rm -e EXPECTED="$GITHUB_SHA" --entrypoint python3 boudyos:ci \
-            -c "import json, os; value=json.load(open(os.environ['BOUDYOS_RELEASE_METADATA'])); assert value['commit'] == os.environ['EXPECTED'] and value['dirty'] == 0"
+          docker run --rm --entrypoint python3 dockyard:ci -m compileall -q pyUltroid plugins assistant
+          docker run --rm --entrypoint python3 dockyard:ci -c "import bs4, htmlwebshot, telethonpatch; import hiredis, psycopg2, pymongo, redis; from telethonpatch import TelegramClient; from pyUltroid.startup.BaseClient import UltroidClient"
+          docker run --rm --entrypoint python3 dockyard:ci -m unittest discover -s tests -v
+          docker run --rm -e EXPECTED="$GITHUB_SHA" --entrypoint python3 dockyard:ci \
+            -c "import json, os; value=json.load(open(os.environ['DOCKYARD_RELEASE_METADATA'])); assert value['commit'] == os.environ['EXPECTED'] and value['dirty'] == 0"
