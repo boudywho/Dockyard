@@ -16,6 +16,7 @@ dist/
 *.mp3
 *.webm
 *.webp
+!resources/extras/quote_bg_*.webp
 *.mp4
 *.tgs
 *.txt

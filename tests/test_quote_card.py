@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageStat
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -51,11 +51,35 @@ class QuoteCardRenderTests(unittest.TestCase):
         image = Image.open(io.BytesIO(data))
         self.assertEqual(image.size, (512, 512))
         self.assertEqual(image.format, "WEBP")
+        self.assertNotIn("A", image.getbands())
 
-    def test_corner_is_transparent_and_card_interior_is_opaque(self):
+    def test_scene_is_opaque_with_dark_corners(self):
         image = Image.open(io.BytesIO(quote_card.render(self.card()))).convert("RGBA")
-        self.assertEqual(image.getpixel((0, 0))[3], 0)
-        self.assertGreaterEqual(image.getpixel((256, 256))[3], 240)
+        for corner in ((0, 0), (511, 0), (0, 511), (511, 511)):
+            self.assertEqual(image.getpixel(corner)[3], 255)
+
+        rgb = image.convert("RGB")
+        for corner in ((0, 0), (511, 0), (0, 511), (511, 511)):
+            self.assertLess(sum(rgb.getpixel(corner)) / 3, 40)
+
+        # The glass panel lifts the scene at the same height as the margin.
+        inside = sum(rgb.getpixel((256, 440))) / 3
+        outside = sum(rgb.getpixel((4, 440))) / 3
+        self.assertGreater(inside, outside)
+
+    def test_card_rect_is_blurred_and_tinted_over_the_background(self):
+        image = Image.open(io.BytesIO(quote_card.render(self.card()))).convert("RGB")
+        background = Image.open(
+            ROOT / "resources" / "extras" / "quote_bg_512.webp"
+        ).convert("RGB")
+        patch = (420, 420, 480, 470)
+        rendered = ImageStat.Stat(image.crop(patch))
+        raw = ImageStat.Stat(background.crop(patch))
+        difference = sum(
+            abs(a - b) for a, b in zip(rendered.mean, raw.mean)
+        ) / 3
+        self.assertGreater(difference, 5)
+        self.assertLess(max(rendered.stddev), max(raw.stddev))
 
     def test_message_clamps_at_five_lines_with_ellipsis(self):
         text = "The quick brown fox jumps over the lazy dog. " * 12

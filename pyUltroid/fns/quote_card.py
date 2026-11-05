@@ -6,6 +6,12 @@
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """Render the Dockyard quote sticker.
 
+The sticker is a complete scene rather than a bare card: a baked ribbon
+background fills an opaque canvas, a soft vignette settles the edges, and
+a frosted glass panel floats over the ribbons. The panel reuses the
+background directly beneath it — blurred and tinted — so the scene reads
+through the glass instead of sitting behind a flat fill.
+
 The approved design was drawn with Inter. Inter is not bundled with
 Dockyard, so Roboto stands in for it here; the rest of the geometry,
 colours, and typography sizes follow the approved 512 px master.
@@ -19,6 +25,7 @@ from __future__ import annotations
 
 import io
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
@@ -35,10 +42,21 @@ _MAX_SHARE_CHARS = 260
 _EMPTY_TEXT = "No text"
 _QUOTE_GAP = 10
 
-_FILL = (30, 33, 38, 240)
-_BORDER = (228, 234, 245, 115)
+_BACKGROUND_512 = _ROOT / "resources" / "extras" / "quote_bg_512.webp"
+_BACKGROUND_1080 = _ROOT / "resources" / "extras" / "quote_bg_1080.webp"
+
+# Scene measurements are authored in 512 px units and scaled per layout.
+_GLASS_BLUR = 24
+_GLASS_TINT = (40, 43, 48, 122)
+_SHADOW = (0, 0, 0, 110)
+_SHADOW_OFFSET = 13
+_SHADOW_BLUR = 40
+_BORDER_WIDTH = 1.5
+_HIGHLIGHT_WIDTH = 1
+_BORDER = (220, 229, 245, 76)
 _HIGHLIGHT = (255, 255, 255, 115)
-_SHADOW = (0, 0, 0, 140)
+_VIGNETTE_STRENGTH = 85
+
 _TEXT = (245, 246, 248)
 _MUTED = (185, 192, 204)
 _INITIALS_FILL = (58, 63, 72)
@@ -80,9 +98,6 @@ class _Layout:
     wrap_width: int
     max_lines: int
     char_limit: int
-    shadow_offset: int
-    shadow_blur: int
-    border_width: float
     ring_width: float
 
 
@@ -111,9 +126,6 @@ _STICKER = _Layout(
     wrap_width=412,
     max_lines=5,
     char_limit=_MAX_STICKER_CHARS,
-    shadow_offset=26,
-    shadow_blur=26,
-    border_width=1.5,
     ring_width=1.5,
 )
 
@@ -142,9 +154,6 @@ _SHARE = _Layout(
     wrap_width=824,
     max_lines=12,
     char_limit=_MAX_SHARE_CHARS,
-    shadow_offset=52,
-    shadow_blur=52,
-    border_width=3,
     ring_width=3,
 )
 
@@ -426,6 +435,47 @@ def _identity_fit(
     )
 
 
+@lru_cache(maxsize=2)
+def _load_background(path: str) -> Image.Image:
+    with Image.open(path) as source:
+        return source.convert("RGB").copy()
+
+
+def _cover(image: Image.Image, size: tuple[int, int]) -> Image.Image:
+    """Scale to fill size without distortion, centre-cropping the overflow."""
+    target_width, target_height = size
+    source_width, source_height = image.size
+    ratio = max(target_width / source_width, target_height / source_height)
+    scaled_size = (
+        max(target_width, round(source_width * ratio)),
+        max(target_height, round(source_height * ratio)),
+    )
+    scaled = image.resize(scaled_size, Image.LANCZOS)
+    left = (scaled_size[0] - target_width) // 2
+    top = (scaled_size[1] - target_height) // 2
+    return scaled.crop((left, top, left + target_width, top + target_height))
+
+
+def _scene_background(layout: _Layout) -> Image.Image:
+    """Build the opaque ribbon scene, vignette included, at draw resolution."""
+    width, height = layout.canvas
+    size = (width * layout.scale, height * layout.scale)
+    path = _BACKGROUND_512 if width <= _STICKER.canvas[0] else _BACKGROUND_1080
+    scene = _cover(_load_background(str(path)), size).convert("RGBA")
+
+    # A soft radial falloff that starts past the card and settles the corners.
+    gradient = Image.radial_gradient("L").resize(size, Image.BILINEAR)
+    alpha = gradient.point(
+        lambda value: max(
+            0,
+            min(255, round((value - 120) * _VIGNETTE_STRENGTH / 135)),
+        )
+    )
+    shade = Image.new("RGBA", size, (0, 0, 0, 0))
+    shade.putalpha(alpha)
+    return Image.alpha_composite(scene, shade)
+
+
 def _draw_card(
     card: QuoteCard,
     layout: _Layout,
@@ -434,7 +484,8 @@ def _draw_card(
 ) -> Image.Image:
     scale = layout.scale
     width, height = layout.canvas
-    canvas = Image.new("RGBA", (width * scale, height * scale), (0, 0, 0, 0))
+    canvas = _scene_background(layout)
+    design_scale = width / _STICKER.canvas[0]
 
     pad = layout.pad_x * scale
     avatar_size = layout.avatar * scale
@@ -477,31 +528,39 @@ def _draw_card(
     card_height = min(card_height, (height - 8) * scale)
     card_top = ((height * scale) - card_height) // 2
 
-    # The drop shadow is painted first so the solid card always covers it.
+    # Frosted glass reuses the scene under the card before any shadow lands.
+    card_box = (card_left, card_top, card_left + card_width, card_top + card_height)
+    glass = canvas.crop(card_box).filter(
+        ImageFilter.GaussianBlur(radius=_GLASS_BLUR * design_scale * scale)
+    )
+    glass = Image.alpha_composite(glass, Image.new("RGBA", glass.size, _GLASS_TINT))
+    glass_mask = Image.new("L", glass.size, 0)
+    ImageDraw.Draw(glass_mask).rounded_rectangle(
+        (0, 0, card_width - 1, card_height - 1),
+        radius=radius,
+        fill=255,
+    )
+
+    # The drop shadow sits behind the panel so the glass stays clean.
+    shadow_offset = _SHADOW_OFFSET * design_scale * scale
     shadow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     ImageDraw.Draw(shadow).rounded_rectangle(
         (
             card_left,
-            card_top + layout.shadow_offset * scale,
+            card_top + shadow_offset,
             card_left + card_width,
-            card_top + card_height + layout.shadow_offset * scale,
+            card_top + card_height + shadow_offset,
         ),
         radius=radius,
         fill=_SHADOW,
     )
     shadow = shadow.filter(
-        ImageFilter.GaussianBlur(radius=layout.shadow_blur * scale)
+        ImageFilter.GaussianBlur(radius=_SHADOW_BLUR * design_scale * scale)
     )
     canvas.alpha_composite(shadow)
+    canvas.paste(glass, (card_left, card_top), glass_mask)
 
-    draw = ImageDraw.Draw(canvas)
-    draw.rounded_rectangle(
-        (card_left, card_top, card_left + card_width, card_top + card_height),
-        radius=radius,
-        fill=_FILL,
-    )
-
-    border_px = max(1, int(round(layout.border_width * scale)))
+    border_px = max(1, int(round(_BORDER_WIDTH * design_scale * scale)))
     rim = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     rim_draw = ImageDraw.Draw(rim)
     inset_border = border_px / 2
@@ -519,14 +578,15 @@ def _draw_card(
 
     # A single inset highlight across the top edge gives the card its cut-glass rim.
     highlight_y = card_top + border_px + 1
-    inset = max(1, int(radius * 0.35))
+    inset = max(1, int(radius))
     rim_draw.line(
         (card_left + inset, highlight_y, card_left + card_width - inset, highlight_y),
         fill=_HIGHLIGHT,
-        width=max(1, scale),
+        width=max(1, int(round(_HIGHLIGHT_WIDTH * design_scale * scale))),
     )
     canvas.alpha_composite(rim)
 
+    draw = ImageDraw.Draw(canvas)
     content_left = card_left + pad
     content_top = card_top + (card_height - content_height) // 2
 
@@ -592,7 +652,7 @@ def _draw_card(
             anchor="la",
         )
 
-    return canvas.resize(layout.canvas, Image.LANCZOS)
+    return canvas.convert("RGB").resize(layout.canvas, Image.LANCZOS)
 
 
 def _encode_webp(image: Image.Image) -> bytes:
@@ -606,13 +666,13 @@ def _encode_webp(image: Image.Image) -> bytes:
 
 
 def render(card: QuoteCard) -> bytes:
-    """Render a 512x512 transparent WebP sticker."""
+    """Render a 512x512 opaque WebP sticker."""
     image = _draw_card(card, _STICKER, limit=_MAX_STICKER_CHARS)
     return _encode_webp(image)
 
 
 def render_png(card: QuoteCard) -> bytes:
-    """Render a 1080x1350 transparent PNG share card."""
+    """Render an opaque 1080x1350 PNG share card."""
     image = _draw_card(card, _SHARE, limit=_MAX_SHARE_CHARS)
     buffer = io.BytesIO()
     image.save(buffer, "PNG", optimize=True)
