@@ -1,5 +1,10 @@
 # Changelog
 
+## Dockyard 3.2.0
+
+- The sticker now renders the full reference composition — ribbon scene,
+  vignette and frosted glass card — instead of a transparent card.
+
 ## Dockyard 3.1.1
 
 - Quote cards now autofit display names and handles: the header measures the
