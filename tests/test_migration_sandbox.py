@@ -320,14 +320,59 @@ class HostMigrationSandboxTests(unittest.TestCase):
         self.assertNotIn("systemctl start dockyard.service", log)
         self.assertFalse(marker.exists(), "systemctl was invoked in the sandbox")
 
+        record = (snapshot / "unit-enablement.txt").read_text("utf-8")
+        self.assertIn("boudyos-health.timer enabled", record)
+        self.assertIn("boudyos-backup.timer enabled", record)
+        self.assertIn("boudyos-deploy.path enabled", record)
+
+        # The deploy/activation path hardens the shared root to 0750 root:ultroid.
+        os.chmod(fake / "var/lib/dockyard", 0o750)
         verify = self.run_script(
             "verify", "--root", fake, environment=environment
         )
         self.assertEqual(verify.returncode, 0, verify.stderr)
         self.assertIn("verify: all checks passed", verify.stdout)
         self.assertIn("ok: no BoudyOS unit files remain", verify.stdout)
+        self.assertIn(
+            f"ok: {fake / 'var/lib/dockyard'} has mode 0750", verify.stdout
+        )
         self.assertIn("warn: stale workspace source pruned", verify.stdout)
         self.assertNotIn(SECRET, verify.stdout + verify.stderr)
+
+    def test_verify_rejects_an_unhardened_runtime_root(self):
+        fake, snapshot, environment, _marker = self.make_fixture()
+        applied = self.run_script(
+            "apply",
+            "--root", fake,
+            "--snapshot", snapshot,
+            "--tag", "v3.0.0",
+            "--commit", COMMIT,
+            environment=environment,
+        )
+        self.assertEqual(applied.returncode, 0, applied.stderr)
+
+        runtime = fake / "var/lib/dockyard"
+        os.chmod(runtime, 0o777)
+        rejected = self.run_script(
+            "verify", "--root", fake, environment=environment
+        )
+        self.assertEqual(rejected.returncode, 1)
+        self.assertIn(
+            f"FAIL: {runtime} has mode 0777, expected 0750, 0755",
+            rejected.stdout,
+        )
+
+        if os.geteuid() == 0:
+            os.chmod(runtime, 0o750)
+            os.chown(runtime, 65534, 65534)
+            rejected_owner = self.run_script(
+                "verify", "--root", fake, environment=environment
+            )
+            self.assertEqual(rejected_owner.returncode, 1)
+            self.assertIn(
+                f"FAIL: {runtime} is owned by uid 65534, expected root",
+                rejected_owner.stdout,
+            )
 
     def test_apply_preserves_disabled_legacy_units(self):
         fake, snapshot, environment, marker = self.make_fixture()
@@ -363,6 +408,30 @@ class HostMigrationSandboxTests(unittest.TestCase):
             )
             self.assertIn(f"enable {unit} ({legacy} was enabled)", log)
         self.assertNotIn("systemctl enable dockyard-backup.timer", log)
+        self.assertFalse(marker.exists(), "systemctl was invoked in the sandbox")
+
+        record = (snapshot / "unit-enablement.txt").read_text("utf-8")
+        self.assertIn("boudyos-health.timer enabled", record)
+        self.assertIn("boudyos-backup.timer disabled", record)
+
+        rolled_back = self.run_script(
+            "rollback",
+            "--root", fake,
+            "--snapshot", snapshot,
+            environment=environment,
+        )
+        self.assertEqual(rolled_back.returncode, 0, rolled_back.stderr)
+        log = (snapshot / "migration.log").read_text("utf-8")
+        self.assertIn(
+            "[sandbox] would run: systemctl enable boudyos-health.timer", log
+        )
+        self.assertIn(
+            "re-enable boudyos-health.timer (recorded enabled)", log
+        )
+        self.assertNotIn("systemctl enable boudyos-backup.timer", log)
+        self.assertIn(
+            "leave boudyos-backup.timer disabled (recorded disabled)", log
+        )
         self.assertFalse(marker.exists(), "systemctl was invoked in the sandbox")
 
     def test_rollback_restores_the_legacy_layout_and_is_idempotent(self):

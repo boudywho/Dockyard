@@ -316,6 +316,32 @@ class ReleaseContractTests(unittest.TestCase):
             for line in lines:
                 self.assertIn(line, unit, name)
 
+    def test_health_unit_provides_pythonpath_without_a_drop_in(self):
+        health = (ROOT / "ops/systemd/dockyard-health.service").read_text("utf-8")
+        self.assertIn("Environment=PYTHONPATH=/usr/local/lib/dockyard", health)
+
+        helpers = {
+            path.name
+            for path in (ROOT / "ops").iterdir()
+            if path.is_file() and "from dockyard_ops import" in path.read_text("utf-8")
+        }
+        self.assertIn("dockyard-health", helpers)
+        for path in (ROOT / "ops/systemd").iterdir():
+            if not path.is_file() or ".service" not in path.name:
+                continue
+            unit = path.read_text("utf-8")
+            for helper in helpers:
+                if f"/usr/local/sbin/{helper}" in unit:
+                    self.assertIn(
+                        "Environment=PYTHONPATH=/usr/local/lib/dockyard",
+                        unit,
+                        path.name,
+                    )
+        self.assertFalse(
+            list((ROOT / "ops/systemd").rglob("*.service.d")),
+            "shipped units must not rely on PYTHONPATH drop-ins",
+        )
+
     def test_shared_status_files_do_not_record_origins_or_paths(self):
         deploy = (ROOT / "ops/dockyard-deploy").read_text("utf-8")
         migration = (ROOT / "ops/dockyard-migrate-ultroid").read_text("utf-8")

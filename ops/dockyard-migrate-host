@@ -316,6 +316,44 @@ legacy_unit_for() {
     return 1
 }
 
+write_unit_enablement_record() {
+    local unit state record="$SNAPSHOT/unit-enablement.txt"
+    [[ -n "$SNAPSHOT" ]] || fail "--snapshot is required"
+    log "write legacy unit enablement record $record before stopping anything"
+    : >"$record"
+    chmod 0600 "$record"
+    for unit in "${LEGACY_UNITS[@]}"; do
+        if unit_exists "$unit" && unit_is_enabled "$unit"; then
+            state="enabled"
+        else
+            state="disabled"
+        fi
+        printf '%s %s\n' "$unit" "$state" >>"$record"
+        log "record $unit as $state"
+    done
+}
+
+restore_unit_enablement() {
+    local unit state record="$SNAPSHOT/unit-enablement.txt"
+    if [[ ! -f "$record" ]]; then
+        warn "no unit enablement record; leave units as restored"
+        return 0
+    fi
+    while IFS=' ' read -r unit state; do
+        [[ -n "$unit" ]] || continue
+        if [[ "$state" != "enabled" ]]; then
+            log "leave $unit disabled (recorded $state)"
+            continue
+        fi
+        if unit_exists "$unit"; then
+            run_priv systemctl enable "$unit"
+            log "re-enable $unit (recorded enabled)"
+        else
+            warn "cannot re-enable $unit: unit is not installed"
+        fi
+    done <"$record"
+}
+
 ensure_dir() {
     local path="$1" mode="$2"
     log "create directory $path ($mode)"
@@ -639,6 +677,7 @@ apply_steps() {
     local -A legacy_name=()
 
     log "record legacy unit enablement before stopping anything"
+    write_unit_enablement_record
     for mapping in "${ENABLE_MAP[@]}"; do
         legacy="${mapping%%:*}"
         new="${mapping#*:}"
@@ -848,8 +887,8 @@ verify_config_strings() {
 }
 
 verify_modes() {
-    local path expected actual
-    for path in "$NEW_ETC:0700" "$NEW_OPT:0755" "$NEW_VARLIB:0755" "$NEW_BACKUPS:0700"; do
+    local path expected actual owner
+    for path in "$NEW_ETC:0700" "$NEW_OPT:0755" "$NEW_VARLIB:0750,0755" "$NEW_BACKUPS:0700"; do
         expected="${path##*:}"
         path="${path%:*}"
         if [[ ! -d "$path" ]]; then
@@ -858,12 +897,20 @@ verify_modes() {
         fi
         actual="$(stat -c %a "$path")"
         actual="$(printf '%04o' "$((8#$actual))")"
-        if [[ "$actual" == "$expected" ]]; then
-            check_ok "$path has mode $expected"
+        if [[ ",$expected," == *",$actual,"* ]]; then
+            check_ok "$path has mode $actual"
         else
-            check_failed "$path has mode $actual, expected $expected"
+            check_failed "$path has mode $actual, expected ${expected//,/, }"
         fi
     done
+    if [[ -d "$NEW_VARLIB" ]]; then
+        owner="$(stat -c %u "$NEW_VARLIB")"
+        if [[ "$owner" == "0" ]]; then
+            check_ok "$NEW_VARLIB is owned by root"
+        else
+            check_failed "$NEW_VARLIB is owned by uid $owner, expected root"
+        fi
+    fi
 }
 
 verify_symlinks() {
@@ -1124,6 +1171,7 @@ run_rollback() {
     remove_new_assets
     restore_archive
     run_priv systemctl daemon-reload
+    restore_unit_enablement
     if [[ -e "$NEW_TMPFILES" ]]; then
         rm -f -- "$NEW_TMPFILES"
         log "removed $NEW_TMPFILES"

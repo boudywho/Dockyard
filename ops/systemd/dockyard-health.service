@@ -8,6 +8,7 @@ Type=oneshot
 User=root
 Group=root
 ExecStart=/usr/local/sbin/dockyard-health
+Environment=PYTHONPATH=/usr/local/lib/dockyard
 TimeoutStartSec=45s
 UMask=0077
 PrivateTmp=yes
