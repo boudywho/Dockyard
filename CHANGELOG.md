@@ -1,5 +1,11 @@
 # Changelog
 
+## Dockyard 3.0.1
+
+- Host migration no longer aborts when a historic workspace points at a
+  release that has already been pruned. Only the active `current` workspace
+  must resolve; stale links are rewritten and reported as warnings.
+
 ## Dockyard 3.0.0
 
 This is a rename release. The product, repository, install paths, service
