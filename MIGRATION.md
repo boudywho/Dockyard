@@ -15,8 +15,8 @@ Before deploying 3.0.0 over an installation created by the previous release:
    files as `/etc/dockyard/*`.
 3. Move or re-provision managed state under the new paths: `/opt/dockyard`,
    `/var/lib/dockyard`, `/run/dockyard`, and `/var/backups/dockyard`. The
-   canonical service account for a fresh managed install is `dockyard`; legacy
-   migrations may keep the `ultroid` account.
+   service account remains `ultroid` for fresh and legacy managed installs; it
+   is a compatibility contract with Redis and existing session state.
 4. Convert every legacy environment/configuration key to its `DOCKYARD_*`
    equivalent, including the deploy, backup, health, and systemd values.
 5. Point the deploy configuration at the `dockyard-*` helpers and the

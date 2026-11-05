@@ -6,8 +6,9 @@ Requires=dockyard-paths.service
 
 [Service]
 Type=simple
-User=dockyard
-Group=dockyard
+# The service account stays ultroid for compatibility with Redis and existing session state.
+User=ultroid
+Group=ultroid
 WorkingDirectory=/var/lib/dockyard/current/work
 EnvironmentFile=/etc/dockyard/runtime.env
 Environment=PYTHONPATH=/var/lib/dockyard/current/source

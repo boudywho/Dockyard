@@ -252,6 +252,42 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("root-owned", docs)
         self.assertIn("app-status", docs)
 
+    def test_runtime_service_account_stays_ultroid(self):
+        unit = (ROOT / "ops/systemd/dockyard.service.example").read_text("utf-8")
+        self.assertIn("User=ultroid", unit)
+        self.assertIn("Group=ultroid", unit)
+        self.assertNotIn("User=dockyard", unit)
+
+        sudoers = (ROOT / "ops/sudoers/dockyard-deploy").read_text("utf-8")
+        rule = next(
+            line
+            for line in sudoers.splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        )
+        self.assertTrue(rule.startswith("ultroid ALL="))
+
+        for name in (
+            "ops/config/deploy.conf.example",
+            "ops/config/health.conf.example",
+        ):
+            config = (ROOT / name).read_text("utf-8")
+            self.assertIn("RUNTIME_USER=ultroid", config)
+
+        forbidden = (
+            b"User=dockyard",
+            b"Group=dockyard",
+            b"RUNTIME_USER=dockyard",
+            b"RUNTIME_GROUP=dockyard",
+        )
+        for path in (ROOT / "ops").rglob("*"):
+            if not path.is_file():
+                continue
+            data = path.read_bytes()
+            for pattern in forbidden:
+                self.assertNotIn(
+                    pattern, data, str(path.relative_to(ROOT))
+                )
+
     def test_shared_status_files_do_not_record_origins_or_paths(self):
         deploy = (ROOT / "ops/dockyard-deploy").read_text("utf-8")
         migration = (ROOT / "ops/dockyard-migrate-ultroid").read_text("utf-8")

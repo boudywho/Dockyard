@@ -452,7 +452,7 @@ def main():
         alerts.append("backup stale")
     if not update_fresh:
         alerts.append("update status stale")
-    runtime_user = config.get("RUNTIME_USER", "dockyard")
+    runtime_user = config.get("RUNTIME_USER", "ultroid")
     runtime_group = config.get("RUNTIME_GROUP", runtime_user)
     try:
         runtime_uid = pwd.getpwnam(runtime_user).pw_uid
