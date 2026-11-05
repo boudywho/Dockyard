@@ -2,7 +2,8 @@
 # Telethon-Patch is deliberately a full-commit VCS dependency: startup imports
 # telethonpatch unconditionally and has no standard-Telethon fallback.
 telethon-patch @ git+https://github.com/New-dev0/Telethon-Patch.git@369fa3266c8a9c9aefb4a6c5608e8d44c09c7087
-telethon>=1.44.0,<2
+# telethon-patch still imports button types that Telethon 1.45 removed.
+telethon>=1.44.0,<1.45
 gitpython>=3.1.60,<4
 python-decouple>=3.8,<4
 python-dotenv>=1.2.2,<2

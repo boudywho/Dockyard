@@ -309,7 +309,9 @@ fetch_exact_release() {
     git -C "$destination" checkout --quiet --detach "$RELEASE_COMMIT"
     [[ "$(git -C "$destination" rev-parse HEAD)" == "$RELEASE_COMMIT" ]]
     [[ "$(git -C "$destination" remote get-url origin)" == "$APPROVED_ORIGIN" ]]
-    [[ -z "$(git -C "$destination" status --porcelain --untracked-files=normal)" ]]
+    [[ -z "$(GIT_OPTIONAL_LOCKS=0 git -C "$destination" status \
+        --porcelain --untracked-files=normal)" ]]
+    chmod 0640 "$destination/.git/index"
 }
 
 verify_forward_history() {
@@ -362,6 +364,7 @@ PY
         bash -n "$script"
     done < <(find "$source/ops" -type f -perm -0100 -print0)
     git -C "$source" diff --check
+    chmod 0640 "$source/.git/index"
 }
 
 validate_state_source() {
@@ -939,6 +942,7 @@ deploy_release() {
     install -d -m 0700 "$stage/source"
     fetch_exact_release "$stage/source"
     verify_forward_history "$stage/source" "$current"
+    chmod 0640 "$stage/source/.git/index"
     if [[ "$current" == "$RELEASE_COMMIT" ]]; then
         if ! active_release_verified; then
             update_status "blocked"

@@ -69,6 +69,11 @@ def ULTPIC():
     return inline_pic() or str(source_resource("extras", "boudyos_avatar.jpg"))
 
 
+def branch_link():
+    """Release label and source link, safe for detached or archive checkouts."""
+    return release_identity()
+
+
 buttons = [
     [
         Button.url(get_string("bot_3"), "https://github.com/boudywho/BoudyOS"),
@@ -116,7 +121,7 @@ async def lol(ult):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
     header = udB.get_key("ALIVE_TEXT") or get_string("bot_1")
-    release_label, rep = release_identity()
+    release_label, rep = branch_link()
     kk = f" `[{release_label}]({rep})` "
     if inline:
         kk = f'<a href="{rep}">{release_label}</a>'
@@ -267,7 +272,7 @@ async def inline_alive(ult):
         pic = choice(pic)
     uptime = time_formatter((time.time() - start_time) * 1000)
     header = udB.get_key("ALIVE_TEXT") or get_string("bot_1")
-    release_label, rep = release_identity()
+    release_label, rep = branch_link()
     kk = f'<a href="{rep}">{release_label}</a>'
     als = in_alive.format(
         header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk

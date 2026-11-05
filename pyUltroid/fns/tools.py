@@ -98,6 +98,8 @@ def json_parser(data, indent=None, ascii=False):
             if indent:
                 parsed = json.dumps(data, indent=indent, ensure_ascii=ascii)
     except JSONDecodeError:
+        # data can be a remote API response; safe_data_value parses it with
+        # ast.literal_eval and never executes it.
         parsed = safe_data_value(data)
     return parsed
 

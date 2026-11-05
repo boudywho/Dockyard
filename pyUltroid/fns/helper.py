@@ -308,7 +308,12 @@ if run_as_module:
         UPSTREAM_REPO_URL = repo.remotes[0].config_reader.get("url").replace(
             ".git", ""
         )
-        ac_br = repo.active_branch.name
+        # Detached release checkouts have no active branch; use the commit.
+        ac_br = (
+            repo.head.commit.hexsha[:7]
+            if repo.head.is_detached
+            else repo.git.rev_parse("--abbrev-ref", "HEAD")
+        )
         ch_log = tldr_log = ""
         ch = f"<b>BoudyOS {ultroid_version} updates for <a href={UPSTREAM_REPO_URL}/tree/{ac_br}>[{ac_br}]</a>:</b>"
         ch_tl = f"BoudyOS {ultroid_version} updates for {ac_br}:"
@@ -534,7 +539,8 @@ def mediainfo(media):
                 i = str(media.document.attributes[0])
                 if "supports_streaming=True" in i:
                     m = "video"
-                m = "video as doc"
+                else:
+                    m = "video as doc"
             else:
                 m = "video"
         elif "audio" in mim:
