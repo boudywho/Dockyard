@@ -276,6 +276,17 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn('private_workspace(Path.cwd(), ".boudyos-unzip-")', source)
         self.assertNotIn('shutil.rmtree("unzip"', source)
 
+    def test_release_git_index_stays_inside_immutable_policy(self):
+        deploy = (ROOT / "ops/boudyos-deploy").read_text("utf-8")
+        self.assertIn(
+            'GIT_OPTIONAL_LOCKS=0 git -C "$destination" status', deploy
+        )
+        self.assertEqual(
+            deploy.count('chmod 0640 "$destination/.git/index"'), 1
+        )
+        self.assertIn('chmod 0640 "$stage/source/.git/index"', deploy)
+        self.assertIn('chmod 0640 "$source/.git/index"', deploy)
+
     def test_workflows_are_read_only_and_actions_are_sha_pinned(self):
         workflows = list((ROOT / ".github/workflows").glob("*.y*ml"))
         self.assertGreaterEqual(len(workflows), 2)
