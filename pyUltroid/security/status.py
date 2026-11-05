@@ -189,9 +189,9 @@ def dashboard_summary(
     health_label = str(health.get("state", "unknown"))
     return (
         f"\n\n**BoudyOS {version} status**\n"
-        f"Uptime: `{uptime}s` · Official: `{official_count}` · Add-ons: `{addon_count}`\n"
-        f"Disabled optional: `{disabled_count}` · Update: `{update_label}`\n"
-        f"Redis: `{'healthy' if redis_healthy else 'unavailable'}` · "
+        f"Uptime: `{uptime}s` | Official: `{official_count}` | Add-ons: `{addon_count}`\n"
+        f"Disabled optional: `{disabled_count}` | Update: `{update_label}`\n"
+        f"Redis: `{'healthy' if redis_healthy else 'unavailable'}` | "
         f"Assistant: `{'healthy' if assistant_healthy else 'unavailable'}`\n"
-        f"Health: `{health_label}` · Backup: `{backup_label}`"
+        f"Health: `{health_label}` | Backup: `{backup_label}`"
     )

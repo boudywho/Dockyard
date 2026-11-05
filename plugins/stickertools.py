@@ -5,23 +5,22 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-❍ Commands Available -
+Commands
 
-• `{i}destroy <reply to animated sticker>`
+`{i}destroy <reply to animated sticker>`
     To destroy the sticker.
 
-• `{i}tiny <reply to media>`
+`{i}tiny <reply to media>`
     To create Tiny stickers.
 
-• `{i}kang <reply to image/sticker>`
+`{i}kang <reply to image/sticker>`
     Kang the sticker (add to your pack).
 
-• `{i}packkang <pack name>`
+`{i}packkang <pack name>`
     Kang the Complete sticker set (with custom name).
 
-• `{i}round <reply to any media>`
-    To extract round sticker.
-"""
+`{i}round <reply to any media>`
+    To extract round sticker."""
 import glob
 import io
 import os
@@ -118,7 +117,7 @@ async def pack_kangish(_):
             types.InputStickerSetItem(
                 document=x,
                 emoji=(
-                    random.choice(["😐", "👍", "😂"])
+                    random.choice(["*"])
                     if local
                     else (i.attributes[1]).alt
                 ),
@@ -138,7 +137,7 @@ async def pack_kangish(_):
         )
     except PeerIdInvalidError:
         return await msg.eor(
-            f"Hey {inline_mention(_.sender)} send `/start` to @{asst.me.username} and later try this command again.."
+            f"Hey {inline_mention(_.sender)}, send `/start` to @{asst.me.username} and try this command again."
         )
     except BaseException as er:
         LOGS.exception(er)
@@ -209,7 +208,7 @@ async def hehe(args):
         splat = args.text.split()
         pack = 1
         if not emoji:
-            emoji = "🏵"
+            emoji = "*"
         if len(splat) == 3:
             pack = splat[2]  # User sent ultroid_both
             emoji = splat[1]
@@ -328,7 +327,7 @@ async def hehe(args):
                 await conv.get_response()
                 await ultroid_bot.send_read_acknowledge(conv.chat_id)
         else:
-            await xx.edit("`Brewing a new Pack...`")
+            await xx.edit("`Creating a new pack.`")
             async with ultroid_bot.conversation("Stickers") as conv:
                 await conv.send_message(cmd)
                 await conv.get_response()

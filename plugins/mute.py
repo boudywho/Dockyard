@@ -5,27 +5,26 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}mute <reply to msg/ user id>`
+`{i}mute <reply to msg/ user id>`
     Mute user in current chat.
 
-• `{i}unmute <reply to msg/ user id>`
+`{i}unmute <reply to msg/ user id>`
     Unmute user in current chat.
 
-• `{i}dmute <reply to msg/ user id>`
+`{i}dmute <reply to msg/ user id>`
     Mute user in current chat by deleting msgs.
 
-• `{i}undmute <reply to msg/ use id>`
+`{i}undmute <reply to msg/ use id>`
     Unmute dmuted user in current chat.
 
-• `{i}tmute <time> <reply to msg/ use id>`
+`{i}tmute <time> <reply to msg/ use id>`
     s- seconds
     m- minutes
     h- hours
     d- days
-    Mute user in current chat with time.
-"""
+    Mute user in current chat with time."""
 from telethon import events
 from telethon.utils import get_display_name
 
@@ -47,7 +46,7 @@ async def watcher(event):
     pattern="dmute( (.*)|$)",
 )
 async def startmute(event):
-    xx = await event.eor("`Muting...`")
+    xx = await event.eor("`Muting.`")
     if input_ := event.pattern_match.group(1).strip():
         try:
             userid = await event.client.parse_id(input_)
@@ -65,20 +64,20 @@ async def startmute(event):
     chat = await event.get_chat()
     if "admin_rights" in vars(chat) and vars(chat)["admin_rights"] is not None:
         if not chat.admin_rights.delete_messages:
-            return await xx.eor("`No proper admin rights...`", time=5)
+            return await xx.eor("`Insufficient administrator rights.`", time=5)
     elif "creator" not in vars(chat) and not event.is_private:
-        return await xx.eor("`No proper admin rights...`", time=5)
+        return await xx.eor("`Insufficient administrator rights.`", time=5)
     if is_muted(event.chat_id, userid):
         return await xx.eor("`This user is already muted in this chat.`", time=5)
     mute(event.chat_id, userid)
-    await xx.eor("`Successfully muted...`", time=3)
+    await xx.eor("`User muted.`", time=3)
 
 
 @ultroid_cmd(
     pattern="undmute( (.*)|$)",
 )
 async def endmute(event):
-    xx = await event.eor("`Unmuting...`")
+    xx = await event.eor("`Unmuting.`")
     if input_ := event.pattern_match.group(1).strip():
         try:
             userid = await event.client.parse_id(input_)
@@ -93,7 +92,7 @@ async def endmute(event):
     if not is_muted(event.chat_id, userid):
         return await xx.eor("`This user is not muted in this chat.`", time=3)
     unmute(event.chat_id, userid)
-    await xx.eor("`Successfully unmuted...`", time=3)
+    await xx.eor("`User unmuted.`", time=3)
 
 
 @ultroid_cmd(
@@ -102,7 +101,7 @@ async def endmute(event):
     manager=True,
 )
 async def _(e):
-    xx = await e.eor("`Muting...`")
+    xx = await e.eor("`Muting.`")
     huh = e.text.split()
     try:
         tme = huh[1]
@@ -147,7 +146,7 @@ async def _(e):
     manager=True,
 )
 async def _(e):
-    xx = await e.eor("`Unmuting...`")
+    xx = await e.eor("`Unmuting.`")
     input = e.pattern_match.group(1).strip()
     chat = await e.get_chat()
     if e.reply_to_msg_id:
@@ -179,7 +178,7 @@ async def _(e):
     pattern="mute( (.*)|$)", admins_only=True, manager=True, require="ban_users"
 )
 async def _(e):
-    xx = await e.eor("`Muting...`")
+    xx = await e.eor("`Muting.`")
     input = e.pattern_match.group(1).strip()
     chat = await e.get_chat()
     if e.reply_to_msg_id:

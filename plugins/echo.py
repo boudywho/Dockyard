@@ -70,7 +70,7 @@ async def lstecho(e):
         for x in k:
             ok = await e.client.get_entity(int(x))
             kk = f"[{get_display_name(ok)}](tg://user?id={ok.id})"
-            user += f"•{kk}" + "\n"
+            user += f"{kk}" + "\n"
         await e.eor(user)
     else:
         await e.eor("`List is Empty, For echo`", time=5)

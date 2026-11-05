@@ -6,13 +6,13 @@
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 
 """
-✘ Commands Available -
+Commands
 
-• `{i}write <text or reply to text>`
-   It will write on a paper.
+`{i}write <text or reply to text>`
+    Write the text on paper.
 
-• `{i}image <text or reply to html or any doc file>`
-   Write a image from html or any text.
+`{i}image <text or reply to html or any doc file>`
+    Create an image from HTML or text.
 """
 
 import os

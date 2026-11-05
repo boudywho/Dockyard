@@ -6,11 +6,10 @@
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 
 """
-✘ Commands Available -
+Commands
 
-• `{i}webupload`
-    Upload files on another server.
-"""
+`{i}webupload`
+    Upload files on another server."""
 
 import os
 
@@ -40,7 +39,7 @@ async def _(event):
             )
             _webupload_cache[int(event.chat_id)][int(event.id)] = file.name
     else:
-        return await xx.eor("Reply to file or give file path...")
+        return await xx.eor("Reply to a file or provide a file path.")
     if not event.client._bot:
         results = await event.client.inline_query(
             asst.me.username, f"fl2lnk {event.chat_id}:{event.id}"
@@ -64,4 +63,4 @@ async def _(event):
                 Button.inline("siasky", data=f"flsiasky//{__cache}"),
             ],
         ]
-        await xx.edit("Choose Server to Upload File...", buttons=buttons)
+        await xx.edit("Choose a server to upload the file.", buttons=buttons)

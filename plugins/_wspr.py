@@ -147,7 +147,7 @@ async def _(e):
             Button.url("Private", url=url),
             Button.switch_inline(
                 "Secret msg",
-                query=f"wspr {query} Hello 👋",
+                query=f"wspr {query} Hello",
                 same_peer=True,
             ),
         ]

@@ -46,7 +46,7 @@ async def _(ult):
         # Values may contain credentials even for unknown/custom keys.
         msg = f"**DB key updated:** `{key}` (value hidden)."
         if warn:
-            msg += f"\n\n⚠️ {warn}"
+            msg += f"\n\nWarning: {warn}"
         await ult.eor(msg)
 
     except BaseException:
@@ -86,7 +86,7 @@ async def _(ult):
 async def _(ult):
     match = ult.pattern_match.group(1).strip()
     if not match:
-        return await ult.eor("`Provide Keys name to rename..`")
+        return await ult.eor("`Provide the key name to rename.`")
     delim = " " if re.search("[|]", match) is None else " | "
     data = match.split(delim)
     if Redis(data[0]):

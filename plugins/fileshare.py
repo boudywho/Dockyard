@@ -92,4 +92,4 @@ async def file_short(event):
         title = "You have no stored file :("
         text = f"{title}\n\nRead `{HNDLR}help fileshare` to know how to store."
         return await event.answer([await event.builder.article(title=title, text=text)])
-    await event.answer(res, switch_pm="• File Store •", switch_pm_param="start")
+    await event.answer(res, switch_pm="File Store", switch_pm_param="start")

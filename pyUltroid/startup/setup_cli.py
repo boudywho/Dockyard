@@ -124,7 +124,7 @@ def _print_install(profile):
 
 
 def cmd_setup():
-    print("BoudyOS setup — hosted platforms should set dashboard config vars instead.")
+    print("BoudyOS setup - hosted platforms should set dashboard config vars instead.")
     if not _is_interactive():
         print("Non-interactive: create a private .env (chmod 600), using .env.sample as a guide; no files changed.")
         _print_install("minimal")

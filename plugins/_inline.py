@@ -169,7 +169,7 @@ async def _(event):
         raw = f"{ok}/raw"
     result = await event.builder.article(
         title="Paste",
-        text="Pasted to Spacebin 🌌",
+        text="Pasted to Spacebin.",
         buttons=[
             [
                 Button.url("SpaceBin", url=link),
@@ -227,7 +227,7 @@ async def uptd_plugin(event):
     if "|" in file:
         file, index = file.split("|")
     key_ = HELP.get(key, [])
-    hel_p = f"Plugin Name - `{file}`\n"
+    hel_p = f"Plugin: {file}\n\n"
     help_ = ""
     try:
         for i in key_[file]:
@@ -240,7 +240,7 @@ async def uptd_plugin(event):
                 help_ += "\n"
     if not help_:
         help_ = f"{file} has no Detailed Help!"
-    help_ += "\n\nBoudyOS help • github.com/boudywho/BoudyOS"
+    help_ += "\n\nBoudyOS help - github.com/boudywho/BoudyOS"
     buttons = []
     if inline_pic():
         data = f"sndplug_{key}_{file}"
@@ -277,7 +277,7 @@ async def _(event):
     if not state.update_available:
         return await event.answer(get_string("inline_9"), cache_time=0, alert=True)
     if not inline_pic():
-        return await event.answer(f"Do '{HNDLR}update' to update..")
+        return await event.answer(f"Use `{HNDLR}update` to update.")
     report, link = format_changelog_report(state)
     buttons = [
         [Button.inline("Update Now", data="updatenow")],
@@ -345,9 +345,8 @@ def page_num(index, key):
     rows = udB.get_key("HELP_ROWS") or 5
     cols = udB.get_key("HELP_COLUMNS") or 2
     loaded = HELP.get(key, [])
-    emoji = udB.get_key("EMOJI_IN_HELP") or "✘"
     List = [
-        Button.inline(f"{emoji} {x} {emoji}", data=f"uplugin_{key}_{x}|{index}")
+        Button.inline(x, data=f"uplugin_{key}_{x}|{index}")
         for x in sorted(loaded)
     ]
     all_ = split_list(List, cols)

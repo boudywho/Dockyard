@@ -94,7 +94,7 @@ async def on_out_mssg(event):
             k = await asst.get_entity(to_user)
             photu = await event.client.download_profile_photo(k.id)
             await event.reply(
-                f"• **Name :** {get_display_name(k)}\n• **ID :** `{k.id}`\n• **Link :** {inline_mention(k)}",
+                f"**Name :** {get_display_name(k)}\n**ID :** `{k.id}`\n**Link :** {inline_mention(k)}",
                 file=photu,
             )
             if photu:

@@ -71,7 +71,7 @@ async def _(e):
             msg = (await e.client.get_messages(e.chat_id, limit=1, max_id=e.id))[0]
         except IndexError:
             return await e.eor(
-                "`You have previously sent no message to reply again...`", time=5
+                "`No previous message is available to reply to.`", time=5
             )
         except BaseException as er:
             return await e.eor(f"**ERROR:** `{er}`")

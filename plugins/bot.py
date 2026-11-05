@@ -82,12 +82,12 @@ buttons = [
 alive_txt = """
 BoudyOS
 
-  ◍ Version - {}
-  ◍ Py-Ultroid - {}
-  ◍ Telethon - {}
+  Version - {}
+  Py-Ultroid - {}
+  Telethon - {}
 """
 
-in_alive = "{}\n\n🌀 <b>BoudyOS version:</b> <code>{}</code>\n🌀 <b>pyUltroid:</b> <code>{}</code>\n🌀 <b>Python:</b> <code>{}</code>\n🌀 <b>Uptime:</b> <code>{}</code>\n🌀 <b>Branch:</b> [ {} ]\n\n<b>github.com/boudywho/BoudyOS</b>"
+in_alive = "{}\n\n<b>BoudyOS version:</b> <code>{}</code>\n<b>pyUltroid:</b> <code>{}</code>\n<b>Python:</b> <code>{}</code>\n<b>Uptime:</b> <code>{}</code>\n<b>Branch:</b> [ {} ]\n\n<b>github.com/boudywho/BoudyOS</b>"
 
 
 @callback("alive")
@@ -130,8 +130,6 @@ async def lol(ult):
             kk,
         )
 
-        if _e := udB.get_key("ALIVE_EMOJI"):
-            als = als.replace("🌀", _e)
     else:
         parse = "md"
         als = (get_string("alive_1")).format(
@@ -145,8 +143,6 @@ async def lol(ult):
             kk,
         )
 
-        if a := udB.get_key("ALIVE_EMOJI"):
-            als = als.replace("✵", a)
     if pic:
         try:
             await ult.reply(
@@ -277,8 +273,6 @@ async def inline_alive(ult):
         header, f"{ultroid_version} [{HOSTED_ON}]", UltVer, pyver(), uptime, kk
     )
 
-    if _e := udB.get_key("ALIVE_EMOJI"):
-        als = als.replace("🌀", _e)
     builder = ult.builder
     if pic:
         try:
@@ -352,7 +346,7 @@ async def updava(event):
     await asst.send_file(
         udB.get_key("LOG_CHANNEL"),
         ULTPIC(),
-        caption="• **Update Available** •",
+        caption="**Update Available** ",
         force_document=False,
         buttons=Button.inline("Changelogs", data="changes"),
     )

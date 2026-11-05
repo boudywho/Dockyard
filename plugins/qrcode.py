@@ -5,17 +5,16 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}qrcode <text/reply to text>`
+`{i}qrcode <text/reply to text>`
    `Makes qrcode of text`
 
-• `{i}addqr <reply image> <text>`
+`{i}addqr <reply image> <text>`
    `Makes qr of text and add it to image.`
 
-• `{i}qrdecode <reply to qrcode>`
-   `It decodes the qrcode.`
-"""
+`{i}qrdecode <reply to qrcode>`
+   `It decodes the qrcode.`"""
 import os
 
 from pyUltroid import ULTConfig

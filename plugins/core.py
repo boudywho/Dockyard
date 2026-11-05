@@ -167,7 +167,7 @@ async def get_the_addons_lol(event):
             entry = registry.get(name)
             if entry is None:
                 return await xx.edit("`That add-on is not in the trusted registry.`")
-            await xx.edit("`Downloading and verifying the trusted add-on...`")
+            await xx.edit("`Downloading and verifying the trusted add-on.`")
             content = await asyncio.to_thread(download_https, entry.source_url)
             destination = Path("addons") / entry.name
             prior = destination.read_bytes() if destination.exists() else None

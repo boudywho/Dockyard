@@ -116,7 +116,7 @@ async def _(e):
             link = Inv.link
     if link:
         return await e.eor(f"Link:- {link}")
-    await e.eor("`Failed to getlink!\nSeems like link is inaccessible to you...`")
+    await e.eor("`Could not get the link.\nThe link is not accessible to you.`")
 
 
 @ultroid_cmd(
@@ -189,7 +189,7 @@ async def _(e):
 )
 async def _(ult):
     if not ult.is_reply:
-        return await ult.eor("`Reply to a Media..`", time=5)
+        return await ult.eor("`Reply to a media file.`", time=5)
     match = ult.pattern_match.group(1).strip()
     if not ult.client._bot and match:
         try:
@@ -204,7 +204,7 @@ async def _(ult):
     elif reply.document and reply.document.thumbs:
         replfile = await reply.download_media(thumb=-1)
     else:
-        return await ult.eor("Reply to a Photo or Video..")
+        return await ult.eor("Reply to a photo or video.")
     mediain = mediainfo(reply.media)
     if "animated" in mediain:
         replfile = await con.convert(replfile, convert_to="mp4")
@@ -233,7 +233,7 @@ async def _(ult):
         chat = match
     try:
         await ult.client(EditPhotoRequest(chat, types.InputChatPhotoEmpty()))
-        text = "`Removed Chat Photo..`"
+        text = "`Removed the chat photo.`"
     except Exception as E:
         text = str(E)
     return await ult.eor(text, time=5)
@@ -356,13 +356,13 @@ async def _(event):
         required_string = f"**>> Kicked** `{c} / {p}` **users**\n\n"
     else:
         required_string = f"**>> Total** `{p}` **users**\n\n"
-    required_string += f"  `{HNDLR}rmusers deleted`  **••**  `{d}`\n"
-    required_string += f"  `{HNDLR}rmusers empty`  **••**  `{y}`\n"
-    required_string += f"  `{HNDLR}rmusers month`  **••**  `{m}`\n"
-    required_string += f"  `{HNDLR}rmusers week`  **••**  `{w}`\n"
-    required_string += f"  `{HNDLR}rmusers offline`  **••**  `{o}`\n"
-    required_string += f"  `{HNDLR}rmusers online`  **••**  `{q}`\n"
-    required_string += f"  `{HNDLR}rmusers recently`  **••**  `{r}`\n"
-    required_string += f"  `{HNDLR}rmusers bot`  **••**  `{b}`\n"
-    required_string += f"  `{HNDLR}rmusers none`  **••**  `{n}`"
+    required_string += f"  `{HNDLR}rmusers deleted`   -   `{d}`\n"
+    required_string += f"  `{HNDLR}rmusers empty`   -   `{y}`\n"
+    required_string += f"  `{HNDLR}rmusers month`   -   `{m}`\n"
+    required_string += f"  `{HNDLR}rmusers week`   -   `{w}`\n"
+    required_string += f"  `{HNDLR}rmusers offline`   -   `{o}`\n"
+    required_string += f"  `{HNDLR}rmusers online`   -   `{q}`\n"
+    required_string += f"  `{HNDLR}rmusers recently`   -   `{r}`\n"
+    required_string += f"  `{HNDLR}rmusers bot`   -   `{b}`\n"
+    required_string += f"  `{HNDLR}rmusers none`   -   `{n}`"
     await xx.eor(required_string)

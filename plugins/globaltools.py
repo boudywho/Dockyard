@@ -5,37 +5,36 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}gban <reply user/ username>`
-• `{i}ungban`
+`{i}gban <reply user/ username>`
+`{i}ungban`
     Ban/Unban Globally.
 
-• `{i}gstat <reply to user/userid/username>`
+`{i}gstat <reply to user/userid/username>`
    Check if user is GBanned.
 
-• `{i}listgban` : List all GBanned users.
+`{i}listgban` : List all GBanned users.
 
-• `{i}gmute` | `{i}ungmute` <reply user/ username>
+`{i}gmute` | `{i}ungmute` <reply user/ username>
     Mute/UnMute Globally.
 
-• `{i}gkick <reply/username>` `Globally Kick User`
-• `{i}gcast <text/reply>` `Globally Send msg in all grps`
+`{i}gkick <reply/username>` `Globally Kick User`
+`{i}gcast <text/reply>` `Globally Send msg in all grps`
 
-• `{i}gadmincast <text/reply>` `Globally broadcast in your admin chats`
-• `{i}gucast <text/reply>` `Globally send msg in all pm users`
+`{i}gadmincast <text/reply>` `Globally broadcast in your admin chats`
+`{i}gucast <text/reply>` `Globally send msg in all pm users`
 
-• `{i}gblacklist <chat id/username/nothing (for current chat)`
+`{i}gblacklist <chat id/username/nothing (for current chat)`
    Add chat to blacklist and ignores global broadcast.
-• `{i}ungblacklist` `Remove the chat from blacklist.`
+`{i}ungblacklist` `Remove the chat from blacklist.`
 
-• `{i}gpromote <reply to user> <channel/group/all> <rank>`
+`{i}gpromote <reply to user> <channel/group/all> <rank>`
     globally promote user where you are admin
     - Set whether To promote only in groups/channels/all.
     Eg- `gpromote group boss` ~ promotes user in all grps.
         `gpromote @username all sar` ~ promote the user in all group & channel
-• `{i}gdemote` - `demote user globally`
-"""
+`{i}gdemote` - `demote user globally`"""
 import asyncio
 import os
 
@@ -287,7 +286,7 @@ async def _(e):
 
 @ultroid_cmd(pattern="ungban( (.*)|$)", fullsudo=True)
 async def _(e):
-    xx = await e.eor("`UnGbanning...`")
+    xx = await e.eor("`Removing the global ban.`")
     match = e.pattern_match.group(1).strip()
     peer = None
     if e.reply_to_msg_id:
@@ -300,13 +299,13 @@ async def _(e):
         try:
             userid = (await e.client.get_entity(userid)).id
         except Exception as er:
-            return await xx.edit(f"Failed to get User...\nError: {er}")
+            return await xx.edit(f"Could not find the user.\nError: {er}")
     elif e.is_private:
         userid = e.chat_id
     else:
         return await xx.eor("`Reply to some msg or add their id.`", time=5)
     if not is_gbanned(userid):
-        return await xx.edit("`User/Channel is not Gbanned...`")
+        return await xx.edit("`The user or channel is not globally banned.`")
     try:
         if not peer:
             peer = await e.client.get_entity(userid)
@@ -351,7 +350,7 @@ async def _(e):
 
 @ultroid_cmd(pattern="gban( (.*)|$)", fullsudo=True)
 async def _(e):
-    xx = await e.eor("`Gbanning...`")
+    xx = await e.eor("`Applying the global ban.`")
     reason = ""
     if e.reply_to_msg_id:
         userid = (await e.get_reply_message()).sender_id
@@ -444,10 +443,10 @@ async def gcast(event):
             msg, btn = get_msg_button(msg)
     else:
         return await eor(
-            event, "`Give some text to Globally Broadcast or reply a message..`"
+            event, "`Provide text or reply to a message to broadcast globally.`"
         )
 
-    kk = await event.eor("`Globally Broadcasting Msg...`")
+    kk = await event.eor("`Broadcasting globally.`")
     er = 0
     done = 0
     err = ""
@@ -504,10 +503,10 @@ async def gcast(event):
                             )
                         done += 1
                     except Exception as rr:
-                        err += f"• {rr}\n"
+                        err += f"{rr}\n"
                         er += 1
                 except BaseException as h:
-                    err += f"• {str(h)}" + "\n"
+                    err += f"{str(h)}" + "\n"
                     er += 1
     text += f"Done in {done} chats, error in {er} chat(s)"
     if err != "":
@@ -530,9 +529,9 @@ async def gucast(event):
             msg, btn = get_msg_button(msg)
     else:
         return await eor(
-            event, "`Give some text to Globally Broadcast or reply a message..`"
+            event, "`Provide text or reply to a message to broadcast globally.`"
         )
-    kk = await event.eor("`Globally Broadcasting Msg...`")
+    kk = await event.eor("`Broadcasting globally.`")
     er = 0
     done = 0
     if event.client._dialogs:
@@ -567,7 +566,7 @@ async def gucast(event):
 
 @ultroid_cmd(pattern="gkick( (.*)|$)", fullsudo=True)
 async def gkick(e):
-    xx = await e.eor("`Gkicking...`")
+    xx = await e.eor("`Applying the global kick.`")
     if e.reply_to_msg_id:
         userid = (await e.get_reply_message()).sender_id
     elif e.pattern_match.group(1).strip():
@@ -599,7 +598,7 @@ async def gkick(e):
 
 @ultroid_cmd(pattern="gmute( (.*)|$)", fullsudo=True)
 async def _(e):
-    xx = await e.eor("`Gmuting...`")
+    xx = await e.eor("`Applying the global mute.`")
     if e.reply_to_msg_id:
         userid = (await e.get_reply_message()).sender_id
     elif e.pattern_match.group(1).strip():
@@ -634,7 +633,7 @@ async def _(e):
 
 @ultroid_cmd(pattern="ungmute( (.*)|$)", fullsudo=True)
 async def _(e):
-    xx = await e.eor("`UnGmuting...`")
+    xx = await e.eor("`Removing the global mute.`")
     if e.reply_to_msg_id:
         userid = (await e.get_reply_message()).sender_id
     elif e.pattern_match.group(1).strip():

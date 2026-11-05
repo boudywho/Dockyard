@@ -44,4 +44,4 @@ def get_filter(chat):
 def list_filter(chat):
     ok = get_stuff()
     if ok.get(chat):
-        return "".join(f"👉 `{z}`\n" for z in ok[chat])
+        return "".join(f"- `{z}`\n" for z in ok[chat])

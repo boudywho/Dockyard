@@ -55,8 +55,8 @@ _settings = [
 
 _start = [
     [
-        Button.inline("Language 🌐", data="lang"),
-        Button.inline("Settings ⚙️", data="setter"),
+        Button.inline("Language", data="lang"),
+        Button.inline("Settings", data="setter"),
     ],
     [
         Button.inline("Stats", data="stat"),
@@ -175,7 +175,7 @@ Total users: {}""".format(
 async def bdcast(event):
     keym = KeyManager("BOT_USERS", cast=list)
     total = keym.count()
-    await event.edit(f"• Broadcast to {total} users.")
+    await event.edit(f"Broadcast to {total} users.")
     async with event.client.conversation(OWNER_ID) as conv:
         await conv.send_message(
             "Enter your broadcast message.\nUse /cancel to stop the broadcast.",

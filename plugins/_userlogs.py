@@ -170,14 +170,14 @@ if udB.get_key("TAG_LOG"):
             return LOGS.exception(er)
         TEXT = MSG.text
         if msg:
-            TEXT += "\n\n🖋 **Later Edited to !**"
+            TEXT += "\n\n**Later edited to:**"
         strf = event.edit_date.strftime("%H:%M:%S")
         if "\n" not in event.text:
-            TEXT += f"\n• `{strf}` : {event.text}"
+            TEXT += f"\n`{strf}` : {event.text}"
         else:
-            TEXT += f"\n• `{strf}` :\n-> {event.text}"
+            TEXT += f"\n`{strf}` :\n-> {event.text}"
         if d_["count"] == 10:
-            TEXT += "\n\n• __Only the first 10 Edits are shown.__"
+            TEXT += "\n\n__Only the first 10 Edits are shown.__"
         try:
             msg = await MSG.edit(TEXT, buttons=await parse_buttons(event))
             d_["msg"] = msg

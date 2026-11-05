@@ -104,7 +104,7 @@ async def _(e):
                 eta = ((total - elapsed) / speed) * 1000 if speed else 0
                 await xxx.edit(
                     f"`Compressing {file_name} at {crf} CRF.\n"
-                    f"{percent:.2f}% · {humanbytes(size)} · "
+                    f"{percent:.2f}% - {humanbytes(size)} - "
                     f"~{time_formatter(eta)}`"
                 )
             except (OSError, ValueError, IndexError, ZeroDivisionError, MessageNotModifiedError):

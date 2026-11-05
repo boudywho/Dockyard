@@ -5,15 +5,14 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-•`{i}size <reply to media>`
+`{i}size <reply to media>`
    To get size of it.
 
-•`{i}resize <number> <number>`
+`{i}resize <number> <number>`
    To resize image on x, y axis.
-   eg. `{i}resize 690 960`
-"""
+   eg. `{i}resize 690 960`"""
 from PIL import Image
 
 from . import HNDLR, eor, get_string, os, ultroid_cmd

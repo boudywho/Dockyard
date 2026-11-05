@@ -503,9 +503,9 @@ async def plug(plugin_channels):
     if not os.path.exists("addons/__init__.py"):
         with open("addons/__init__.py", "w") as f:
             f.write("from plugins import *\n\nbot = ultroid_bot")
-    LOGS.info("• Loading Plugins from Plugin Channel(s) •")
+    LOGS.info("Loading plugins from plugin channels.")
     for chat in plugin_channels:
-        LOGS.info(f"{'•'*4} {chat}")
+        LOGS.info("    %s", chat)
         try:
             async for x in ultroid_bot.iter_messages(
                 chat, search=".py", filter=InputMessagesFilterDocument, wait_time=10

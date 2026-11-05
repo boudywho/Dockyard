@@ -44,4 +44,4 @@ def get_notes(chat, word):
 def list_note(chat):
     ok = get_stuff()
     if ok.get(int(chat)):
-        return "".join(f"👉 #{z}\n" for z in ok[chat])
+        return "".join(f"- #{z}\n" for z in ok[chat])

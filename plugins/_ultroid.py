@@ -19,8 +19,8 @@ REPOMSG = """
 
 Personal Telegram workspace built on TeamUltroid/Ultroid.
 
-• [Source and documentation](https://github.com/boudywho/BoudyOS)
-• [Support](https://github.com/boudywho/BoudyOS/issues)
+[Source and documentation](https://github.com/boudywho/BoudyOS)
+[Support](https://github.com/boudywho/BoudyOS/issues)
 """
 
 RP_BUTTONS = [

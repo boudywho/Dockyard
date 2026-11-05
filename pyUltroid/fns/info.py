@@ -121,62 +121,62 @@ async def get_chat_info(chat, event):
             admins = participants_admins.count if participants_admins else None
         except Exception as e:
             LOGS.info(f"Exception: {e}")
-    caption = "ℹ️ <b>[<u>CHAT INFO</u>]</b>\n"
-    caption += f"🆔 <b>ID:</b> <code>{chat.id}</code>\n"
+    caption = "<b>[CHAT INFO]</b>\n"
+    caption += f"<b>ID:</b> <code>{chat.id}</code>\n"
     if chat_title is not None:
-        caption += f"📛 <b>{chat_type} name:</b> <code>{chat_title}</code>\n"
+        caption += f"<b>{chat_type} name:</b> <code>{chat_title}</code>\n"
     if chat.username:
-        caption += f"🔗 <b>Link:</b> @{chat.username}\n"
+        caption += f"<b>Link:</b> @{chat.username}\n"
     else:
-        caption += f"🗳 <b>{chat_type} type:</b> Private\n"
+        caption += f"<b>{chat_type} type:</b> Private\n"
     if creator_username:
-        caption += f"🖌 <b>Creator:</b> {creator_username}\n"
+        caption += f"<b>Creator:</b> {creator_username}\n"
     elif creator_valid:
-        caption += f'🖌 <b>Creator:</b> <a href="tg://user?id={creator_id}">{creator_firstname}</a>\n'
+        caption += f'<b>Creator:</b> <a href="tg://user?id={creator_id}">{creator_firstname}</a>\n'
     if created:
-        caption += f"🖌 <b>Created:</b> <code>{created.date().strftime('%b %d, %Y')} - {created.time()}</code>\n"
+        caption += f"<b>Created:</b> <code>{created.date().strftime('%b %d, %Y')} - {created.time()}</code>\n"
     else:
-        caption += f"🖌 <b>Created:</b> <code>{chat.date.date().strftime('%b %d, %Y')} - {chat.date.time()}</code> ⚠\n"
-    caption += f"🗡 <b>Data Centre ID:</b> {dc_id}\n"
+        caption += f"<b>Created:</b> <code>{chat.date.date().strftime('%b %d, %Y')} - {chat.date.time()}</code>\n"
+    caption += f"<b>Data Centre ID:</b> {dc_id}\n"
     if exp_count is not None:
         chat_level = int((1 + math.sqrt(1 + 7 * exp_count / 14)) / 2)
-        caption += f"⭐️ <b>{chat_type} level:</b> <code>{chat_level}</code>\n"
+        caption += f"<b>{chat_type} level:</b> <code>{chat_level}</code>\n"
     if messages_viewable is not None:
-        caption += f"💬 <b>Viewable messages:</b> <code>{messages_viewable}</code>\n"
+        caption += f"<b>Viewable messages:</b> <code>{messages_viewable}</code>\n"
     if messages_sent:
-        caption += f"💬 <b>Messages sent:</b> <code>{messages_sent}</code>\n"
+        caption += f"<b>Messages sent:</b> <code>{messages_sent}</code>\n"
     elif messages_sent_alt:
-        caption += f"💬 <b>Messages sent:</b> <code>{messages_sent_alt}</code> ⚠\n"
+        caption += f"<b>Messages sent:</b> <code>{messages_sent_alt}</code>\n"
     if members is not None:
-        caption += f"👥 <b>Members:</b> <code>{members}</code>\n"
+        caption += f"<b>Members:</b> <code>{members}</code>\n"
     if admins:
-        caption += f"👮 <b>Administrators:</b> <code>{admins}</code>\n"
+        caption += f"<b>Administrators:</b> <code>{admins}</code>\n"
     if full.bot_info:
-        caption += f"🤖 <b>Bots:</b> <code>{len(full.bot_info)}</code>\n"
+        caption += f"<b>Bots:</b> <code>{len(full.bot_info)}</code>\n"
     if members_online:
-        caption += f"👀 <b>Currently online:</b> <code>{members_online}</code>\n"
+        caption += f"<b>Currently online:</b> <code>{members_online}</code>\n"
     if restricted_users is not None:
-        caption += f"🔕 <b>Restricted users:</b> <code>{restricted_users}</code>\n"
+        caption += f"<b>Restricted users:</b> <code>{restricted_users}</code>\n"
     if banned_users:
-        caption += f"📨 <b>Banned users:</b> <code>{banned_users}</code>\n"
+        caption += f"<b>Banned users:</b> <code>{banned_users}</code>\n"
     if group_stickers:
-        caption += f'📹 <b>{chat_type} stickers:</b> <a href="t.me/addstickers/{full.stickerset.short_name}">{group_stickers}</a>\n'
+        caption += f'<b>{chat_type} stickers:</b> <a href="t.me/addstickers/{full.stickerset.short_name}">{group_stickers}</a>\n'
     if not broadcast:
         if getattr(chat, "slowmode_enabled", None):
-            caption += f"👉 <b>Slow mode:</b> <code>True</code>"
-            caption += f", 🕐 <code>{full.slowmode_seconds}s</code>\n"
+            caption += "<b>Slow mode:</b> <code>True</code>"
+            caption += f", <code>{full.slowmode_seconds}s</code>\n"
         else:
-            caption += f"🦸‍♂ <b>Supergroup:</b> {supergroup}\n"
+            caption += f"<b>Supergroup:</b> {supergroup}\n"
     if getattr(chat, "restricted", None):
-        caption += f"🎌 <b>Restricted:</b> {chat.restricted}\n"
+        caption += f"<b>Restricted:</b> {chat.restricted}\n"
         rist = chat.restriction_reason[0]
         caption += f"> Platform: {rist.platform}\n"
         caption += f"> Reason: {rist.reason}\n"
         caption += f"> Text: {rist.text}\n\n"
     if getattr(chat, "scam", None):
-        caption += "⚠ <b>Scam:</b> <b>Yes</b>\n"
+        caption += "<b>Scam:</b> <b>Yes</b>\n"
     if getattr(chat, "verified", None):
-        caption += f"✅ <b>Verified by Telegram:</b> <code>Yes</code>\n\n"
+        caption += "<b>Verified by Telegram:</b> <code>Yes</code>\n\n"
     if full.about:
-        caption += f"🗒 <b>Description:</b> \n<code>{full.about}</code>\n"
+        caption += f"<b>Description:</b> \n<code>{full.about}</code>\n"
     return chat_photo, caption

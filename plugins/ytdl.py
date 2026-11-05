@@ -5,13 +5,13 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.gnu.org/licenses/agpl-3.0.html>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}yt <URL>`
-   Download a URL with quality and timestamp controls.
+`{i}yt <URL>`
+    Download a URL with quality and timestamp controls.
 
-• `{i}ytcancel`
-   Cancel the pending or active download in this chat.
+`{i}ytcancel`
+    Cancel the pending or active download in this chat.
 """
 
 import asyncio
@@ -253,7 +253,7 @@ async def _run_job(state):
                     "Uploading media…",
                 )
                 await _upload(state, output, selected)
-        await _edit_status(state, "Media sent. ✅")
+        await _edit_status(state, "Media sent.")
     except DownloadCancelled:
         await _edit_status(state, "Download cancelled.")
     except asyncio.CancelledError:

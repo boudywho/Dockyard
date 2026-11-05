@@ -5,14 +5,13 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}lock <msgs/media/sticker/gif/games/inline/polls/invites/pin/changeinfo>`
+`{i}lock <msgs/media/sticker/gif/games/inline/polls/invites/pin/changeinfo>`
     Lock the Used Setting in Used Group.
 
-• `{i}unlock <msgs/media/sticker/gif/games/inline/polls/invites/pin/changeinfo>`
-    UNLOCK the Used Setting in Used Group.
-"""
+`{i}unlock <msgs/media/sticker/gif/games/inline/polls/invites/pin/changeinfo>`
+    UNLOCK the Used Setting in Used Group."""
 from telethon.tl.functions.messages import EditChatDefaultBannedRightsRequest
 
 from pyUltroid.fns.admins import lock_unlock
@@ -26,7 +25,7 @@ from . import ultroid_cmd
 async def un_lock(e):
     mat = e.pattern_match.group(2).strip()
     if not mat:
-        return await e.eor("`Give some Proper Input..`", time=5)
+        return await e.eor("`Provide valid input.`", time=5)
     lock = e.pattern_match.group(1) == ""
     ml = lock_unlock(mat, lock)
     if not ml:

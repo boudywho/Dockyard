@@ -25,8 +25,8 @@ Use the dashboard to browse plugins, add-ons, voice-chat tools, settings, and up
 Keep your session string, bot token, and database credentials private.""",
     4: f"""**Commands**
 
-• `{HNDLR}help` — open the dashboard
-• `{HNDLR}cmds` — list available command groups""",
+`{HNDLR}help` - open the dashboard
+`{HNDLR}cmds` - list available command groups""",
     5: """**You are all set.**
 
 For source, updates, or support, visit [BoudyOS on GitHub](https://github.com/boudywho/BoudyOS).""",

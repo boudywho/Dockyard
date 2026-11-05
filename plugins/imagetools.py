@@ -5,53 +5,52 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}border <reply to photo/sticker>`
+`{i}border <reply to photo/sticker>`
     To create border around that media..
     Ex - `{i}border 12,22,23`
        - `{i}border 12,22,23 ; width (in number)`
 
-• `{i}grey <reply to any media>`
+`{i}grey <reply to any media>`
     To make it black nd white.
 
-• `{i}color <reply to any Black nd White media>`
+`{i}color <reply to any Black nd White media>`
     To make it Colorfull.
 
-• `{i}toon <reply to any media>`
+`{i}toon <reply to any media>`
     To make it toon.
 
-• `{i}danger <reply to any media>`
+`{i}danger <reply to any media>`
     To make it look Danger.
 
-• `{i}negative <reply to any media>`
+`{i}negative <reply to any media>`
     To make negative image.
 
-• `{i}blur <reply to any media>`
+`{i}blur <reply to any media>`
     To make it blurry.
 
-• `{i}quad <reply to any media>`
+`{i}quad <reply to any media>`
     create a Vortex.
 
-• `{i}mirror <reply to any media>`
+`{i}mirror <reply to any media>`
     To create mirror pic.
 
-• `{i}flip <reply to any media>`
+`{i}flip <reply to any media>`
     To make it flip.
 
-• `{i}sketch <reply to any media>`
+`{i}sketch <reply to any media>`
     To draw its sketch.
 
-• `{i}blue <reply to any media>`
+`{i}blue <reply to any media>`
     just cool.
 
-• `{i}csample <color name /color code>`
+`{i}csample <color name /color code>`
    example : `{i}csample red`
              `{i}csample #ffffff`
 
-• `{i}pixelator <reply image>`
-    Create a Pixelated Image..
-"""
+`{i}pixelator <reply image>`
+    Create a Pixelated Image.."""
 import os
 
 from . import LOGS, con
@@ -91,7 +90,7 @@ async def _(event):
     reply = await event.get_reply_message()
     if not (reply and reply.media):
         return await event.eor("`Reply To a Black and White Image`")
-    xx = await event.eor("`Coloring image 🎨🖌️...`")
+    xx = await event.eor("`Coloring image.`")
     image = await reply.download_media()
     img = cv2.VideoCapture(image)
     ret, frame = img.read()
@@ -210,7 +209,7 @@ async def sampl(ult):
 )
 async def ultd(event):
     ureply = await event.get_reply_message()
-    xx = await event.eor("`...`")
+    xx = await event.eor("`Processing.`")
     if not (ureply and (ureply.media)):
         await xx.edit(get_string("cvt_3"))
         return
@@ -244,7 +243,7 @@ async def ultd(event):
 async def ok(event):
     hm = await event.get_reply_message()
     if not (hm and (hm.photo or hm.sticker)):
-        return await event.eor("`Reply to Sticker or Photo..`")
+        return await event.eor("`Reply to a sticker or photo.`")
     col = event.pattern_match.group(1).strip()
     wh = 20
     if not col:
@@ -257,7 +256,7 @@ async def ok(event):
                 col = col_[0]
             col = [int(col) for col in col.split(",")[:2]]
         except ValueError:
-            return await event.eor("`Not a Valid Input...`")
+            return await event.eor("`Invalid input.`")
     okla = await hm.download_media()
     img1 = cv2.imread(okla)
     constant = cv2.copyMakeBorder(img1, wh, wh, wh, wh, cv2.BORDER_CONSTANT, value=col)

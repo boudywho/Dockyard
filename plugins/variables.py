@@ -5,20 +5,19 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}get var <variable name>`
+`{i}get var <variable name>`
    Get value of the given variable name.
 
-• `{i}get type <variable name>`
+`{i}get type <variable name>`
    Get variable type.
 
-• `{i}get db <key>`
+`{i}get db <key>`
    Get db value of the given key.
 
-• `{i}get keys`
-   Get all redis keys.
-"""
+`{i}get keys`
+   Get all redis keys."""
 
 import os
 
@@ -83,7 +82,7 @@ async def get_var(event):
     elif opt == "keys":
         keys = sorted(udB.keys())
         msg = "".join(
-            f"• `{i}`" + "\n"
+            f"`{i}`" + "\n"
             for i in keys
             if not i.isdigit()
             and not i.startswith("-")

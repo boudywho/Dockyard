@@ -12,76 +12,75 @@ START = """
 
 Manage groups and use everyday tools from one place.
 
-• /start — Check assistant status
-• /help — Open this help menu
-• /repo — View the BoudyOS source
+/start - Check assistant status
+/help - Open this help menu
+/repo - View the BoudyOS source
 
 Choose a category below.
 """
 
-ADMINTOOLS = """✘ **AdminTools** ✘
+ADMINTOOLS = """**Admin tools**
 
-• /pin : Pins the Replied Message
-• /pinned : Get Pinned message in chat.
-• /unpin : Unpin the Replied message
-• /unpin all : Unpin all Pinned Messages.
+/pin - Pin the replied message.
+/pinned - Get the pinned message in the chat.
+/unpin - Unpin the replied message.
+/unpin all - Unpin all pinned messages.
 
-• /ban (username/id/reply) : Ban the User
-• /unban (username/id/reply) : UnBan the User.
+/ban (username/id/reply) - Ban the user.
+/unban (username/id/reply) - Unban the user.
 
-• /mute (username/id/reply) : Mute the User.
-• /unmute (username/id/reply) : Unmute the User.
+/mute (username/id/reply) - Mute the user.
+/unmute (username/id/reply) - Unmute the user.
 
-• /tban (username/id/reply) (time) : Temporary ban a user
-• /tmute (username/id/reply) (time) : temporary Mutes a User.
+/tban (username/id/reply) (time) - Temporarily ban a user.
+/tmute (username/id/reply) (time) - Temporarily mute a user.
 
-• /purge (purge messages)
+/purge - Purge messages.
 
-• /setgpic (reply photo) : keep Chat Photo of Group.
-• /delgpic : remove current chat Photo."""
+/setgpic (reply photo) - Set the group photo.
+/delgpic - Remove the current chat photo."""
 
 UTILITIES = """
-✘ ** Utilities ** ✘
+**Utilities**
 
-• /info (reply/username/id) : get detailed info of user.
-• /id : get chat/user id.
-• /tr : Translate Languages..
-• /q : Create Quotes.
+/info (reply/username/id) - Get detailed information about a user.
+/id - Get the chat or user ID.
+/tr - Translate languages.
+/q - Create quotes.
 
-• /paste (reply file/text) : paste content on Spaceb.in
-• /meaning (text) : Get Meaning of that Word.
-• /google (query) : Search Something on Google..
+/paste (reply file/text) - Paste content on Spaceb.in.
+/google (query) - Search Google.
 
-• /suggest (query/reply) : Creates a Yes / No Poll.
+/suggest (query/reply) - Create a yes/no poll.
 """
 
 LOCKS = """
-✘ ** Locks ** ✘
+**Locks**
 
-• /lock (query) : lock particular content in chat.
-• /unlock (query) : Unlock some content.
+/lock (query) - Lock particular content in the chat.
+/unlock (query) - Unlock particular content in the chat.
 
-• All Queries
-- `msgs` : for messages.
-- `inlines` : for inline queries.
-- `media` : for all medias.
-- `games` : for games.
-- `sticker` : for stickers.
-- `polls` : for polls.
-- `gif` : for gifs.
-- `pin` : for pins.
-- `changeinfo` : for change info right.
+Available queries:
+`msgs` - messages
+`inlines` - inline queries
+`media` - all media
+`games` - games
+`sticker` - stickers
+`polls` - polls
+`gif` - GIFs
+`pin` - pinned messages
+`changeinfo` - chat information changes
 """
 
 MISC = """
-✘  **Misc**  ✘
+**Miscellaneous**
 
-• /joke : Get Random Jokes.
-• /decide : Decide Something..
+/joke - Get a random joke.
+/decide - Make a decision.
 
-**✘ Stickertools ✘**
-• /kang : add sticker to your pack.
-• /listpack : get all of yours pack..
+**Sticker tools**
+/kang - Add a sticker to your pack.
+/listpack - List your sticker packs.
 """
 
 STRINGS = {"Admintools": ADMINTOOLS, "locks": LOCKS, "Utils": UTILITIES, "Misc": MISC}
@@ -93,7 +92,7 @@ CATEGORY_LABELS = {
     "Misc": "Miscellaneous",
 }
 
-MNGE = udB.get_key("MNGR_EMOJI") or "•"
+MNGE = udB.get_key("MNGR_EMOJI") or ""
 
 
 def get_buttons():
@@ -102,7 +101,11 @@ def get_buttons():
     while keys:
         BT = []
         for i in list(keys)[:2]:
-            text = f"{MNGE} {CATEGORY_LABELS[i]} {MNGE}"
+            text = (
+                f"{MNGE} {CATEGORY_LABELS[i]} {MNGE}".strip()
+                if MNGE
+                else CATEGORY_LABELS[i]
+            )
             BT.append(Button.inline(text, f"hlp_{i}"))
             del keys[i]
         BTTS.append(BT)
@@ -139,4 +142,4 @@ async def home_aja(e):
 @callback(re.compile("hlp_(.*)"))
 async def do_something(event):
     match = event.pattern_match.group(1).strip().decode("utf-8")
-    await event.edit(STRINGS[match], buttons=Button.inline("<< Back", "mnghome"))
+    await event.edit(STRINGS[match], buttons=Button.inline("Back", "mnghome"))

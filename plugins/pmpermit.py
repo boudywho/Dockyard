@@ -5,41 +5,40 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}a` or `{i}approve`
+`{i}a` or `{i}approve`
     Approve someone to PM.
 
-• `{i}da` or `{i}disapprove`
+`{i}da` or `{i}disapprove`
     Disapprove someone to PM.
 
-• `{i}block`
+`{i}block`
     Block someone.
 
-• `{i}unblock` | `{i}unblock all`
+`{i}unblock` | `{i}unblock all`
     Unblock someone.
 
-• `{i}nologpm`
+`{i}nologpm`
     Stop logging messages from the user.
 
-• `{i}logpm`
+`{i}logpm`
     Start logging messages from the user.
 
-• `{i}startarchive`
+`{i}startarchive`
     Archive new PMs.
 
-• `{i}stoparchive`
+`{i}stoparchive`
     Don't archive new PMs.
 
-• `{i}cleararchive`
+`{i}cleararchive`
     Unarchive all chats.
 
-• `{i}listapproved`
+`{i}listapproved`
    List all approved PMs.
 
-• `{i}pmpermit on/off`
-    Enable or disable PMPermit. Check current status with no argument.
-"""
+`{i}pmpermit on/off`
+    Enable or disable PMPermit. Check current status with no argument."""
 
 import asyncio
 import re
@@ -521,7 +520,7 @@ async def unblockpm(event):
             u_s = await event.client(GetBlockedRequest(0, 0))
             count = len(u_s.users)
             if not count:
-                return await eor(msg, "__You have not blocked Anyone...__")
+                return await eor(msg, "__You have not blocked anyone.__")
             for user in u_s.users:
                 await asyncio.sleep(1)
                 await event.client(UnblockRequest(user.id))
@@ -825,8 +824,8 @@ async def _admin_tools(event):
 @callback(re.compile("don_(.*)"))
 async def _mejik(e):
     data = e.pattern_match.group(1).strip().decode("utf-8").split("/")
-    text = "👮‍♂ Warn Count : " + data[0]
-    text += "\n🤖 Total Warn Count : " + data[1]
+    text = "Warn count: " + data[0]
+    text += "\nTotal warn count: " + data[1]
     await e.answer(text, alert=True)
 
 

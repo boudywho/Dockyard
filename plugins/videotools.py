@@ -5,17 +5,16 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-•`{i}sample <duration in seconds>`
+`{i}sample <duration in seconds>`
    Creates Short sample of video..
 
-• `{i}vshots <number of shots>`
+`{i}vshots <number of shots>`
    Creates screenshot of video..
 
-• `{i}vtrim <start time> - <end time> in seconds`
-    Crop a Lengthy video..
-"""
+`{i}vtrim <start time> - <end time> in seconds`
+    Crop a Lengthy video.."""
 
 import glob
 import os

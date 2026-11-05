@@ -90,7 +90,7 @@ def _as_addon_mode(raw: str) -> str:
 def _as_hndlr(raw: str) -> str:
     s = str(raw).strip()
     if not s or len(s) > 5:
-        raise ValueError("handler must be 1–5 characters")
+        raise ValueError("handler must be 1-5 characters")
     return s
 
 
@@ -163,6 +163,6 @@ def format_keys_help(filter_text: str | None = None) -> str:
     if not items:
         return "No matching known keys."
     for key, (tname, _p, desc) in items:
-        lines.append(f"• `{key}` ({tname}) — {desc}")
+        lines.append(f"`{key}` ({tname}) - {desc}")
     lines.append("\nUnknown keys are still accepted as free-form strings.")
     return "\n".join(lines)

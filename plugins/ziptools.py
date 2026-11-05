@@ -5,22 +5,21 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available
+Commands
 
-• `{i}zip <reply to file>`
+`{i}zip <reply to file>`
     zip the replied file
     To set password on zip: `{i}zip <password>` reply to file
 
-• `{i}unzip <reply to zip file>`
+`{i}unzip <reply to zip file>`
     unzip the replied file.
 
-• `{i}azip <reply to file>`
+`{i}azip <reply to file>`
    add file to batch for batch upload zip
 
-• `{i}dozip`
+`{i}dozip`
    upload batch zip the files u added from `{i}azip`
    To set Password: `{i}dozip <password>`
-
 """
 import os
 import shutil

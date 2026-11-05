@@ -57,7 +57,7 @@ async def broadcast_blacklist_list(event):
     bl = BlackM.get()
     if not bl:
         return await event.eor("`Broadcast blacklist is empty.`", time=5)
-    msg = "**Broadcast Blacklist:**\n" + "\n".join(f"• `{c}`" for c in bl)
+    msg = "**Broadcast Blacklist:**\n" + "\n".join(f"`{c}`" for c in bl)
     await event.eor(msg)
 
 
@@ -179,7 +179,7 @@ async def forw(event):
         return await event.eor(get_string("ex_1"))
     ultroid_bot = event.client
     channels = KeyM.get()
-    x = await event.eor("Sending...")
+    x = await event.eor("Sending.")
     if not channels:
         return await x.edit(f"Please add channels by using `{HNDLR}add` in them.")
     error_count = 0
@@ -226,7 +226,7 @@ async def sending(event):
     channels = KeyM.get()
     if not channels:
         return await x.edit(f"Please add channels by using `{HNDLR}add` in them.")
-    await x.edit("Sending....")
+    await x.edit("Sending.")
     if event.reply_to_msg_id:
         previous_message = await event.get_reply_message()
         if previous_message.poll:

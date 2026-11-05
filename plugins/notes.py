@@ -5,21 +5,20 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}addnote <word><reply to a message>`
+`{i}addnote <word><reply to a message>`
     add note in the used chat with replied message and choosen word.
 
-• `{i}remnote <word>`
+`{i}remnote <word>`
     Remove the note from used chat.
 
-• `{i}listnote`
+`{i}listnote`
     list all notes.
 
-• Use :
+Use :
    set notes in group so all can use it.
-   type `#(Keyword of note)` to get it
-"""
+   type `#(Keyword of note)` to get it"""
 import os
 
 from . import upload_file as uf

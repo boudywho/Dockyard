@@ -5,18 +5,17 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}poll <question> ; <option> ; <option>`
+`{i}poll <question> ; <option> ; <option>`
     Get the Anonymous Poll with Given Options
 
-• `{i}poll <question> ; <option> ; <option> | <type>`
+`{i}poll <question> ; <option> ; <option> | <type>`
     Get the poll specified with desired type!
     type should be any of  `public`,  `multiple` or `quiz`
 
-• `{i}poll <question> ; <option> ; <option> | quiz_<answerno>`
+`{i}poll <question> ; <option> ; <option> | quiz_<answerno>`
     Get the quiz poll where answerno is the number of option which is correct
-
 """
 from telethon.tl.types import InputMediaPoll, Poll, PollAnswer, TextWithEntities
 
@@ -31,7 +30,7 @@ async def uri_poll(e):
         return await e.eor("`Use this in Group/Channel.`", time=15)
     match = e.pattern_match.group(1).strip()
     if not match:
-        return await e.eor("`Give Proper Input...`", time=5)
+        return await e.eor("`Provide valid input.`", time=5)
     if ";" not in match:
         return await e.eor("`Unable to Determine Options.`.", time=5)
     ques = match.split(";")[0]
@@ -47,7 +46,7 @@ async def uri_poll(e):
             karzo = [str(int(ptype.split("_")[1]) - 1).encode()]
             ptype = ptype.split("_")[0]
         if ptype not in ["public", "quiz", "multiple"]:
-            return await e.eor("`Invalid Poll Type...`", time=5)
+            return await e.eor("`Invalid poll type.`", time=5)
         if ptype == "multiple":
             mpp = True
         elif ptype == "public":
@@ -55,7 +54,7 @@ async def uri_poll(e):
         elif ptype == "quiz":
             quizo = True
     if len(option) <= 1:
-        return await e.eor("`Options Should be More than 1..`", time=5)
+        return await e.eor("`Provide more than one option.`", time=5)
     m = await e.eor(get_string("com_1"))
     OUT = [PollAnswer(TextWithEntities(option[on], entities=[]), str(on).encode()) for on in range(len(option))]
     await e.respond(

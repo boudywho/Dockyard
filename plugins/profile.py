@@ -5,26 +5,25 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}setname <first name // last name>`
+`{i}setname <first name // last name>`
     Change your profile name.
 
-• `{i}setbio <bio>`
+`{i}setbio <bio>`
     Change your profile bio.
 
-• `{i}setpic <reply to pic>`
+`{i}setpic <reply to pic>`
     Change your profile pic.
 
-• `{i}delpfp <n>(optional)`
+`{i}delpfp <n>(optional)`
     Delete one profile pic, if no value given, else delete n number of pics.
 
-• `{i}poto <username>/reply`
+`{i}poto <username>/reply`
   `{i}poto <reply/upload-limit>/all`
 
   Ex: `{i}poto 10` - uploads starting 10 pfps of user.
-    Upload the photo of Chat/User if Available.
-"""
+    Upload the photo of Chat/User if Available."""
 import os
 
 from telethon.tl.functions.account import UpdateProfileRequest
@@ -39,7 +38,7 @@ TMP_DOWNLOAD_DIRECTORY = "resources/downloads/"
 
 @ultroid_cmd(pattern="setbio( (.*)|$)", fullsudo=True)
 async def _(ult):
-    ok = await ult.eor("...")
+    ok = await ult.eor("`Processing.`")
     set = ult.pattern_match.group(1).strip()
     try:
         await ult.client(UpdateProfileRequest(about=set))
@@ -53,7 +52,7 @@ async def _(ult):
 
 @ultroid_cmd(pattern="setname ?((.|//)*)", fullsudo=True)
 async def _(ult):
-    ok = await ult.eor("...")
+    ok = await ult.eor("`Processing.`")
     names = first_name = ult.pattern_match.group(1).strip()
     last_name = ""
     if "//" in names:
@@ -76,7 +75,7 @@ async def _(ult):
 @ultroid_cmd(pattern="setpic$", fullsudo=True)
 async def _(ult):
     if not ult.is_reply:
-        return await ult.eor("`Reply to a Media..`", time=5)
+        return await ult.eor("`Reply to a media file.`", time=5)
     reply_message = await ult.get_reply_message()
     ok = await ult.eor(get_string("com_1"))
     replfile = await reply_message.download_media()
@@ -97,7 +96,7 @@ async def _(ult):
 
 @ultroid_cmd(pattern="delpfp( (.*)|$)", fullsudo=True)
 async def remove_profilepic(delpfp):
-    ok = await eor(delpfp, "`...`")
+    ok = await eor(delpfp, "`Processing.`")
     group = delpfp.text[8:]
     if group == "all":
         lim = 0
@@ -154,7 +153,7 @@ async def gpoto(e):
             else:
                 okla.append(photo_path)
     if not okla:
-        return await eor(a, "`Pfp Not Found...`")
+        return await eor(a, "`Profile photo not found.`")
     if not just_dl:
         await a.delete()
         await e.reply(file=okla)

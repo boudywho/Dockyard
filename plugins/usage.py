@@ -5,16 +5,16 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available
+Commands
 
-• `{i}usage`
+`{i}usage`
     Get overall usage.
 
-• `{i}usage heroku`
-   Get heroku stats.
+`{i}usage heroku`
+    Get Heroku statistics.
 
-• `{i}usage db`
-   Get database storage usage.
+`{i}usage db`
+    Get database storage usage.
 """
 
 import math
@@ -72,7 +72,7 @@ def simple_usage():
     try:
         import psutil
     except ImportError:
-        return "Install 'psutil' to use this..."
+        return "Install psutil to use this feature."
     total, used, free = shutil.disk_usage(".")
     cpuUsage = psutil.cpu_percent()
     memory = psutil.virtual_memory().percent

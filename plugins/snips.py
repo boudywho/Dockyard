@@ -5,20 +5,19 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}addsnip <word><reply to a message>`
+`{i}addsnip <word><reply to a message>`
     add the used word as snip relating to replied message.
 
-• `{i}remsnip <word>`
+`{i}remsnip <word>`
     Remove the snip word..
 
-• `{i}listsnip`
+`{i}listsnip`
     list all snips.
 
-• Use :
-    type `$(ur snip word)` get setted reply.
-"""
+Use :
+    type `$(ur snip word)` get setted reply."""
 import os
 
 from . import upload_file as uf

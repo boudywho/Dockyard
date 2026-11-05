@@ -36,7 +36,7 @@ def validate_redis_uri(uri):
                  and not parsed.fragment)
     except ValueError:
         valid = False
-    return [] if valid else ["Invalid config: REDIS_URI — use host:port (port 1–65535), without credentials or a scheme."]
+    return [] if valid else ["Invalid config: REDIS_URI - use host:port (port 1-65535), without credentials or a scheme."]
 
 
 def _validate_url(value, name, schemes):
@@ -52,7 +52,7 @@ def _validate_url(value, name, schemes):
             valid = False
     except ValueError:
         valid = False
-    return [] if valid else [f"Invalid config: {name} — use a valid provider URI with a hostname and supported scheme."]
+    return [] if valid else [f"Invalid config: {name} - use a valid provider URI with a hostname and supported scheme."]
 
 
 def validate_mongo_uri(uri):
@@ -72,18 +72,18 @@ def collect_config_issues(Var):
     except (ValueError, TypeError):
         valid_id = False
     if not valid_id:
-        errors.append("Invalid or missing config: API_ID — a positive integer is required. " + _API_HINT)
+        errors.append("Invalid or missing config: API_ID - a positive integer is required. " + _API_HINT)
     if not api_hash or not re.fullmatch(r"[a-fA-F0-9]{32}", str(api_hash)):
-        errors.append("Invalid or missing config: API_HASH — 32 hexadecimal characters are required. " + _API_HINT)
+        errors.append("Invalid or missing config: API_HASH - 32 hexadecimal characters are required. " + _API_HINT)
     if str(api_id) == "6" or str(api_hash).lower() == _DEFAULT_HASH:
-        errors.append("Invalid config: API_ID / API_HASH — shared Telegram Android defaults are not allowed. " + _API_HINT)
+        errors.append("Invalid config: API_ID / API_HASH - shared Telegram Android defaults are not allowed. " + _API_HINT)
 
     bot_mode = _truthy(getattr(Var, "BOTMODE", os.getenv("BOTMODE")))
     if bot_mode:
         if not getattr(Var, "BOT_TOKEN", None):
             errors.append("Missing required config: BOT_TOKEN for BOTMODE.")
     elif not getattr(Var, "SESSION", None):
-        errors.append("Missing required config: SESSION — generate one with bash sessiongen.")
+        errors.append("Missing required config: SESSION - generate one with bash sessiongen.")
 
     redis_uri = getattr(Var, "REDIS_URI", None)
     redis_host = getattr(Var, "REDISHOST", None)

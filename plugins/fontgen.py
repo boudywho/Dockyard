@@ -31,7 +31,7 @@ async def _(e):
     if not input:
         m = "**Available Fonts**\n\n"
         for x in Fonts.keys():
-            m += f"• `{x}`\n"
+            m += f"`{x}`\n"
         return await e.eor(m, time=5)
     if not reply:
         try:

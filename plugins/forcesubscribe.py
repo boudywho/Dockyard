@@ -5,19 +5,19 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}fsub <chat username><id>`
-    Enable ForceSub in Used Chat !
+`{i}fsub <chat username><id>`
+    Enable force subscribe in the current chat.
 
-• `{i}checkfsub`
-    Check/Get Active ForceSub Setting of Used Chat.
+`{i}checkfsub`
+    Show the active force subscribe setting for the current chat.
 
-• `{i}remfsub`
-    Remove ForceSub from Used Chat !
+`{i}remfsub`
+    Remove force subscribe from the current chat.
 
-    Note - You Need to be Admin in Both Channel/Chats
-        in order to Use ForceSubscribe.
+    You must be an administrator in both the channel and the chat to use
+    force subscribe.
 """
 
 import re
@@ -70,7 +70,7 @@ async def remor(e):
     res = rem_forcesub(e.chat_id)
     if not res:
         return await e.eor(get_string("fsub_3"), time=5)
-    await e.eor("Removed ForceSub...")
+    await e.eor("Removed force subscribe.")
 
 
 @ultroid_cmd(pattern="checkfsub$")

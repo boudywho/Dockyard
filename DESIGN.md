@@ -91,7 +91,7 @@ The palette is a dark operating surface with high-contrast cool text and a singl
 - **Label** (semibold, tracked in authored imagery): short context labels such as workspace type or capability group.
 - **Command** (native code style): command names, callback-facing identifiers, and exact configuration values.
 
-**The Plain Label Rule.** Every button names its action in words. Emoji may be user-configured for plugin lists, but never carries the only meaning of a control.
+**The Plain Label Rule.** Every button names its action in words. User-configured emoji are optional decoration and never carry the only meaning of a control.
 
 ## Layout
 

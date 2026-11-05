@@ -5,19 +5,19 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}yta <(youtube/any) link>`
-   Download audio from the link.
+`{i}yta <(youtube/any) link>`
+    Download audio from the link.
 
-• `{i}ytv <(youtube/any) link>`
-   Download video  from the link.
+`{i}ytv <(youtube/any) link>`
+    Download video from the link.
 
-• `{i}ytsa <(youtube) search query>`
-   Search and download audio from youtube.
+`{i}ytsa <(youtube) search query>`
+    Search for and download audio from YouTube.
 
-• `{i}ytsv <(youtube) search query>`
-   Search and download video from youtube.
+`{i}ytsv <(youtube) search query>`
+    Search for and download video from YouTube.
 """
 from pyUltroid.fns.ytdl import download_yt, get_yt_link
 

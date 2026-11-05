@@ -182,7 +182,7 @@ def ultroid_cmd(
                 LOGS.exception(er)
                 await asst.send_message(
                     udB.get_key("LOG_CHANNEL"),
-                    "Session String expired, create new session from 👇",
+                    "Session string expired. Create a new session below.",
                     buttons=[
                         Button.url("Bot", "t.me/SessionGeneratorBot?start="),
                         Button.url(
@@ -327,7 +327,7 @@ def ultroid_cmd(
                             )
                         except Exception as er:
                             LOGS.exception(er)
-                    LOGS.info(f"• MANAGER [{ult.chat_id}]:")
+                    LOGS.info(f"MANAGER [{ult.chat_id}]:")
                     LOGS.exception(er)
 
             if pattern:

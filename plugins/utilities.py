@@ -5,49 +5,48 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}kickme` : Leaves the group.
+`{i}kickme` : Leaves the group.
 
-• `{i}date` : Show Calender.
+`{i}date` : Show Calender.
 
-• `{i}listreserved`
+`{i}listreserved`
     List all usernames (channels/groups) you own.
 
-• `{i}stats` : See your profile stats.
+`{i}stats` : See your profile stats.
 
-• `{i}paste` - `Include long text / Reply to text file.`
+`{i}paste` - `Include long text / Reply to text file.`
 
-• `{i}info <username/userid/chatid>`
+`{i}info <username/userid/chatid>`
     Reply to someone's msg.
 
-• `{i}invite <username/userid>`
+`{i}invite <username/userid>`
     Add user to the chat.
 
-• `{i}rmbg <reply to pic>`
+`{i}rmbg <reply to pic>`
     Remove background from that picture.
 
-• `{i}telegraph <reply to media/text>`
+`{i}telegraph <reply to media/text>`
     Upload media/text to telegraph.
 
-• `{i}json <reply to msg>`
+`{i}json <reply to msg>`
     Get the json encoding of the message.
 
-• `{i}suggest <reply to message> or <poll title>`
+`{i}suggest <reply to message> or <poll title>`
     Create a Yes/No poll for the replied suggestion.
 
-• `{i}ipinfo <ipAddress>` : Get info about that IP address.
+`{i}ipinfo <ipAddress>` : Get info about that IP address.
 
-• `{i}cpy <reply to message>`
+`{i}cpy <reply to message>`
    Copy the replied message, with formatting. Expires in 24hrs.
-• `{i}pst`
+`{i}pst`
    Paste the copied message, with formatting.
 
-• `{i}thumb <reply file>` : Download the thumbnail of the replied file.
+`{i}thumb <reply file>` : Download the thumbnail of the replied file.
 
-• `{i}getmsg <message link>`
-  Get messages from chats with forward/copy restrictions.
-"""
+`{i}getmsg <message link>`
+  Get messages from chats with forward/copy restrictions."""
 
 import asyncio
 import calendar
@@ -133,7 +132,7 @@ _copied_msg = {}
 
 @ultroid_cmd(pattern="kickme$", fullsudo=True)
 async def leave(ult):
-    await ult.eor(f"`{ult.client.me.first_name} has left this group, bye!!.`")
+    await ult.eor(f"`{ult.client.me.first_name} has left this group.`")
     await ult.client(LeaveChannelRequest(ult.chat_id))
 
 
@@ -168,7 +167,7 @@ async def _(event):
 async def stats(
     event: NewMessage.Event,
 ):
-    ok = await event.eor("`Collecting stats...`")
+    ok = await event.eor("`Collecting statistics.`")
     start_time = time.time()
     private_chats = 0
     bots = 0
@@ -223,18 +222,18 @@ async def stats(
         if me.username
         else f" (`ID: {me.id}`)"
     )
-    response = f"🔸 **Stats for {full_name}**{username_line}\n\n"
+    response = f"**Stats for {full_name}**{username_line}\n\n"
     response += f"**Private Chats:** {private_chats} \n"
-    response += f"**  •• **`Users: {private_chats - bots}` \n"
-    response += f"**  •• **`Bots: {bots}` \n"
+    response += f"**`Users: {private_chats - bots}` \n"
+    response += f"**`Bots: {bots}` \n"
     response += f"**Groups:** {groups} \n"
     response += f"**Channels:** {broadcast_channels} \n"
     response += f"**Admin in Groups:** {admin_in_groups} \n"
-    response += f"**  •• **`Creator: {creator_in_groups}` \n"
-    response += f"**  •• **`Admin Rights: {admin_in_groups - creator_in_groups}` \n"
+    response += f"**`Creator: {creator_in_groups}` \n"
+    response += f"**`Admin Rights: {admin_in_groups - creator_in_groups}` \n"
     response += f"**Admin in Channels:** {admin_in_broadcast_channels} \n"
-    response += f"**  •• **`Creator: {creator_in_channels}` \n"
-    response += f"**  •• **`Admin Rights: {admin_in_broadcast_channels - creator_in_channels}` \n"
+    response += f"**`Creator: {creator_in_channels}` \n"
+    response += f"**`Admin Rights: {admin_in_broadcast_channels - creator_in_channels}` \n"
     response += f"**Unread:** {unread} \n"
     response += f"**Unread Mentions:** {unread_mentions} \n"
     response += f"**Blocked Users:** {ct}\n"
@@ -249,7 +248,7 @@ async def _(event):
         input_str = event.text.split(maxsplit=1)[1]
     except IndexError:
         input_str = None
-    xx = await event.eor("` 《 Pasting... 》 `")
+    xx = await event.eor("`Pasting.`")
     downloaded_file_name = None
     if input_str:
         message = input_str
@@ -275,7 +274,7 @@ async def _(event):
     if not done and data.get("error"):
         return await xx.eor(data["error"])
     reply_text = (
-        f"• **Pasted to SpaceBin :** [Space]({data['link']})\n• **Raw Url :** : [Raw]({data['raw']})"
+        f"**Pasted to SpaceBin :** [Space]({data['link']})\n**Raw Url :** : [Raw]({data['raw']})"
     )
     try:
         if event.client._bot:
@@ -313,7 +312,7 @@ async def _(event):
             peer = get_peer_id(_)
             photo, capt = await get_chat_info(_, event)
             if is_gbanned(peer):
-                capt += "\n•<b> Is Gbanned:</b> <code>True</code>"
+                capt += "\n<b> Is Gbanned:</b> <code>True</code>"
             if not photo:
                 return await xx.eor(capt, parse_mode="html")
             await event.client.send_message(
@@ -348,18 +347,18 @@ async def _(event):
     else:
         dc_id = "Need a Profile Picture to check this"
     caption = """<b>Extracted Data From Telegram's Database</b>
-<b>• Telegram ID</b>: <code>{}</code>
-<b>• Permanent Link</b>: <a href='tg://user?id={}'>Click Here</a>
-<b>• First Name</b>: <code>{}</code>
-<b>• Last Name</b>: <code>{}</code>
-<b>• Bio</b>: <code>{}</code>
-<b>• DC ID</b>: <code>{}</code>
-<b>• Number of Profile Pictures</b>: <code>{}</code>
-<b>• Is Restricted</b>: <code>{}</code>
-<b>• Verified</b>: <code>{}</code>
-<b>• Is Premium</b>: <code>{}</code>
-<b>• Is A Bot</b>: <code>{}</code>
-<b>• Groups In Common</b>: <code>{}</code>
+<b>Telegram ID</b>: <code>{}</code>
+<b>Permanent Link</b>: <a href='tg://user?id={}'>Click Here</a>
+<b>First Name</b>: <code>{}</code>
+<b>Last Name</b>: <code>{}</code>
+<b>Bio</b>: <code>{}</code>
+<b>DC ID</b>: <code>{}</code>
+<b>Number of Profile Pictures</b>: <code>{}</code>
+<b>Is Restricted</b>: <code>{}</code>
+<b>Verified</b>: <code>{}</code>
+<b>Is Premium</b>: <code>{}</code>
+<b>Is A Bot</b>: <code>{}</code>
+<b>Groups In Common</b>: <code>{}</code>
 """.format(
         user_id,
         user_id,
@@ -375,8 +374,8 @@ async def _(event):
         common_chats,
     )
     if chk := is_gbanned(user_id):
-        caption += f"""<b>••Globally Banned</b>: <code>True</code>
-<b>••Reason</b>: <code>{chk}</code>"""
+        caption += f"""<b>Globally Banned</b>: <code>True</code>
+<b>Reason</b>: <code>{chk}</code>"""
     await event.client.send_message(
         event.chat_id,
         caption,
@@ -753,7 +752,7 @@ async def get_restricted_msg(event):
         await event.eor("`Please provide a link!`", time=5)
         return
     
-    xx = await event.eor("`Loading...`")
+    xx = await event.eor("`Loading.`")
     chat, msg = get_chat_and_msgid(match)
     if not (chat and msg):
         return await event.eor(

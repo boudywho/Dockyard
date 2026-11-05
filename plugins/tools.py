@@ -5,34 +5,33 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}circle`
+`{i}circle`
     Reply to a audio song or gif to get video note.
 
-• `{i}ls`
+`{i}ls`
     Get all the Files inside a Directory.
 
-• `{i}bots`
+`{i}bots`
     Shows the number of bots in the current chat with their perma-link.
 
-• `{i}hl <a link> <text-optional>`
+`{i}hl <a link> <text-optional>`
     Embeds the link with a whitespace as message.
 
-• `{i}id`
+`{i}id`
     Reply a Sticker to Get Its Id
     Reply a User to Get His Id
     Without Replying You Will Get the Chat's Id
 
-• `{i}sg <reply to a user><username/id>`
+`{i}sg <reply to a user><username/id>`
     Get His Name History of the replied user.
 
-• `{i}tr <dest lang code> <(reply to) a message>`
+`{i}tr <dest lang code> <(reply to) a message>`
     Get translated message.
 
-• `{i}webshot <url>`
-    Get a screenshot of the webpage.
-"""
+`{i}webshot <url>`
+    Get a screenshot of the webpage."""
 import asyncio
 import glob
 import io
@@ -137,9 +136,9 @@ async def _(event):
 
 @ultroid_cmd(pattern="bots( (.*)|$)", groups_only=True, manager=True)
 async def _(ult):
-    mentions = "• **Bots in this Chat**: \n"
+    mentions = "**Bots in this chat:**\n"
     if input_str := ult.pattern_match.group(1).strip():
-        mentions = f"• **Bots in **{input_str}: \n"
+        mentions = f"**Bots in {input_str}:**\n"
         try:
             chat = await ult.client.parse_id(input_str)
         except Exception as e:
@@ -152,9 +151,9 @@ async def _(ult):
             filter=ChannelParticipantsBots,
         ):
             if isinstance(x.participant, ChannelParticipantAdmin):
-                mentions += f"\n⚜️ {inline_mention(x)} `{x.id}`"
+                mentions += f"\n{inline_mention(x)} `{x.id}`"
             else:
-                mentions += f"\n• {inline_mention(x)} `{x.id}`"
+                mentions += f"\n{inline_mention(x)} `{x.id}`"
     except Exception as e:
         mentions += f" {str(e)}" + "\n"
     await ult.eor(mentions)
@@ -185,7 +184,7 @@ async def _(e):
     if not (reply and reply.media):
         return await e.eor("`Reply to a gif or audio file only.`")
     if "audio" in mediainfo(reply.media):
-        msg = await e.eor("`Downloading...`")
+        msg = await e.eor("`Downloading.`")
         try:
             bbbb = await reply.download_media(thumb=-1)
         except TypeError:
@@ -196,7 +195,7 @@ async def _(e):
         cv2.imwrite("img.jpg", output)
         thumb = "img.jpg"
         audio, _ = await e.client.fast_downloader(reply.document)
-        await msg.edit("`Creating video note...`")
+        await msg.edit("`Creating the video note.`")
         result = await run_exec(
             [
                 "ffmpeg", "-i", cli_path(thumb), "-i", cli_path(audio.name),
@@ -207,7 +206,7 @@ async def _(e):
         )
         if not result.ok:
             return await msg.edit("`ffmpeg failed to create the video note.`")
-        await msg.edit("`Uploading...`")
+        await msg.edit("`Uploading.`")
         data = await metadata("circle.mp4")
         file, _ = await e.client.fast_uploader("circle.mp4", to_delete=True)
         await e.client.send_file(
@@ -250,17 +249,17 @@ async def _(e):
 
 
 FilesEMOJI = {
-    "py": "🐍",
-    "json": "🔮",
-    ("sh", "bat"): "⌨️",
-    (".mkv", ".mp4", ".avi", ".gif", "webm"): "🎥",
-    (".mp3", ".ogg", ".m4a", ".opus"): "🔊",
-    (".jpg", ".jpeg", ".png", ".webp", ".ico"): "🖼",
-    (".txt", ".text", ".log"): "📄",
-    (".apk", ".xapk"): "📲",
-    (".pdf", ".epub"): "📗",
-    (".zip", ".rar"): "🗜",
-    (".exe", ".iso"): "⚙",
+    "py": "[PY]",
+    "json": "[JSON]",
+    ("sh", "bat"): "[SH]",
+    (".mkv", ".mp4", ".avi", ".gif", "webm"): "[VIDEO]",
+    (".mp3", ".ogg", ".m4a", ".opus"): "[AUDIO]",
+    (".jpg", ".jpeg", ".png", ".webp", ".ico"): "[IMAGE]",
+    (".txt", ".text", ".log"): "[TEXT]",
+    (".apk", ".xapk"): "[APK]",
+    (".pdf", ".epub"): "[PDF]",
+    (".zip", ".rar"): "[ARCHIVE]",
+    (".exe", ".iso"): "[BINARY]",
 }
 
 
@@ -282,7 +281,7 @@ async def _(e):
     allfiles = []
     for file in sorted(files):
         if os.path.isdir(file):
-            folders.append(f"📂 {file}")
+            folders.append(f"[DIR] {file}")
         else:
             for ext in FilesEMOJI.keys():
                 if file.endswith(ext):
@@ -290,9 +289,9 @@ async def _(e):
                     break
             else:
                 if "." in str(file)[1:]:
-                    allfiles.append(f"🏷 {file}")
+                    allfiles.append(f"[FILE] {file}")
                 else:
-                    allfiles.append(f"📒 {file}")
+                    allfiles.append(f"[FILE] {file}")
     omk = [*sorted(folders), *sorted(allfiles)]
     text = ""
     fls, fos = 0, 0
@@ -391,11 +390,11 @@ async def sangmata(event):
     except ValueError:
         userinfo = None
     if not isinstance(userinfo, types.User):
-        await event.edit("`Can't fetch the user...`")
+        await event.edit("`Could not fetch the user.`")
         await asyncio.sleep(10)
         return await event.delete()
 
-    await event.edit("`Processing...`")
+    await event.edit("`Processing.`")
     async with event.client.conversation("@SangMata_beta_bot") as conv:
         try:
             await conv.send_message(f"{userinfo.id}")
@@ -427,7 +426,7 @@ async def sangmata(event):
         if userinfo.last_name
         else userinfo.first_name
     )
-    output = f"**➜ User Info :**  {mentionuser(user_name, userinfo.id)}\n**➜ {check[1]} History :**\n{check[0]}"
+    output = f"**User info:**  {mentionuser(user_name, userinfo.id)}\n**{check[1]} history:**\n{check[0]}"
     await event.edit(output)
 
 

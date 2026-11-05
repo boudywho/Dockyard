@@ -17,7 +17,7 @@ from pyUltroid.fns.tools import cmd_regex_replace
 
 from . import HNDLR, LOGS, OWNER_NAME, asst, get_string, inline_pic, udB, ultroid_cmd
 
-_HELP_FOOTER = "\n\nBoudyOS help • github.com/boudywho/BoudyOS"
+_HELP_FOOTER = "\n\nBoudyOS help - github.com/boudywho/BoudyOS"
 
 _main_help_menu = [
     [
@@ -48,19 +48,19 @@ async def _help(ult):
     if plug:
         try:
             if plug in HELP["Official"]:
-                output = f"**Plugin** - `{plug}`\n"
+                output = f"Plugin: {plug}\n\n"
                 for i in HELP["Official"][plug]:
                     output += i
                 output += _HELP_FOOTER
                 await ult.eor(output)
             elif HELP.get("Addons") and plug in HELP["Addons"]:
-                output = f"**Plugin** - `{plug}`\n"
+                output = f"Plugin: {plug}\n\n"
                 for i in HELP["Addons"][plug]:
                     output += i
                 output += _HELP_FOOTER
                 await ult.eor(output)
             elif HELP.get("VCBot") and plug in HELP["VCBot"]:
-                output = f"**Plugin** - `{plug}`\n"
+                output = f"Plugin: {plug}\n\n"
                 for i in HELP["VCBot"][plug]:
                     output += i
                 output += _HELP_FOOTER
@@ -124,7 +124,7 @@ async def _help(ult):
                         # category hint
                         cats = [k for k in HELP if HELP.get(k)]
                         if cats:
-                            text += f"\nBrowse: `{HNDLR}help` · categories: " + ", ".join(
+                            text += f"\nBrowse: `{HNDLR}help` - categories: " + ", ".join(
                                 f"`{c}`" for c in cats
                             )
                         return await ult.eor(text)

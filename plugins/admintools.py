@@ -288,9 +288,9 @@ async def unp(ult):
 async def pin_message(ult):
     match = ult.pattern_match.group(1).strip()
     if not ult.is_reply:
-        return await ult.eor("`Reply to message..`", time=6)
+        return await ult.eor("`Reply to a message.`", time=6)
     if not match:
-        return await ult.eor("`Please provide time..`", time=8)
+        return await ult.eor("`Provide a time.`", time=8)
     msg = await ult.eor(get_string("com_1"))
     msg_id = ult.reply_to_msg_id
     try:
@@ -453,7 +453,7 @@ async def get_all_pinned(event):
 async def autodelte(ult):
     match = ult.pattern_match.group(1).strip()
     if not match or match not in ["24h", "7d", "1m", "off"]:
-        return await ult.eor("`Please Use in Proper Format..`", time=5)
+        return await ult.eor("`Use the correct format.`", time=5)
     if match == "24h":
         tt = 3600 * 24
     elif match == "7d":
@@ -488,7 +488,7 @@ async def kickall_cmd(ult):
             f"`Are you sure? This will kick ALL non-admin members!\nUse` `{HNDLR}kickall confirm` `to proceed.`",
             time=10,
         )
-    xx = await ult.eor("`Starting KickAll...`")
+    xx = await ult.eor("`Starting kick-all.`")
     kicked = 0
     failed = 0
     async for member in ult.client.iter_participants(ult.chat_id):

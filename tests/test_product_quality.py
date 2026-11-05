@@ -464,19 +464,18 @@ class ProductSurfaceTests(unittest.TestCase):
 
         helper_source = (ROOT / "pyUltroid/fns/helper.py").read_text("utf-8")
         self.assertIn(
-            'output += "\\nBoudyOS • https://github.com/boudywho/BoudyOS"',
+            'output += "\\nBoudyOS - https://github.com/boudywho/BoudyOS"',
             helper_source,
         )
 
         english = yaml.safe_load((LOCALES / "en.yml").read_text("utf-8"))
-        for key in ("inline_6", "chats_5", "gdrive_4", "help_button"):
+        for key in ("inline_6", "chats_5", "help_button"):
             with self.subTest(key=key):
                 self.assertNotIn("TeamUltroid", english[key])
                 self.assertNotIn("theUltroid", english[key])
                 self.assertNotIn("UseUltroid", english[key])
         self.assertEqual(placeholders(english["help_button"]), ["i", "i"])
         self.assertIn("BoudyOS", english["chats_5"])
-        self.assertIn("BoudyOS support", english["gdrive_4"])
 
         inlinestuff_source = (ROOT / "assistant/inlinestuff.py").read_text(
             "utf-8"

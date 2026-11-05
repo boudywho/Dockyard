@@ -59,7 +59,7 @@ async def _(e):
     elif r.document and r.document.thumbs:
         dl = await r.download_media(thumb=-1)
     else:
-        return await e.eor("`Reply to Photo or media with thumb...`")
+        return await e.eor("`Reply to a photo or media file with a thumbnail.`")
     destination = Path("resources/downloads/ultroid-custom.jpg")
     try:
         atomic_copy_file(dl, destination)
@@ -145,7 +145,7 @@ async def uconverter(event):
     xx = await event.eor(get_string("com_1"))
     a = await event.get_reply_message()
     if a is None:
-        return await event.eor("`Reply to Photo or media with thumb...`")
+        return await event.eor("`Reply to a photo or media file with a thumbnail.`")
     input_ = event.pattern_match.group(1).strip()
     b = await a.download_media("resources/downloads/")
     if not b and (a.document and a.document.thumbs):

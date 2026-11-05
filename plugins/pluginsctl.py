@@ -49,9 +49,9 @@ async def list_plugins(event):
     include = set(_split_list(_setting("INCLUDE_ONLY"))).intersection(names)
     await event.eor(
         f"**BoudyOS official inventory:** `{len(names)}`\n"
-        f"**EXCLUDE_OFFICIAL:** `{_join_list(exclude) or '—'}`\n"
-        f"**INCLUDE_ONLY:** `{_join_list(include) or '—'}`\n"
-        "Toggle: `.disableplugin name` · `.enableplugin name`\n"
+        f"**EXCLUDE_OFFICIAL:** `{_join_list(exclude) or '-'}`\n"
+        f"**INCLUDE_ONLY:** `{_join_list(include) or '-'}`\n"
+        "Toggle: `.disableplugin name` - `.enableplugin name`\n"
         "Profiles also apply unless INCLUDE_ONLY is set. Restart required."
     )
 

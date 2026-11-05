@@ -43,7 +43,7 @@ def validate_session(session, logger=LOGS, _exit=True):
         # Telethon Session
         if session.startswith(CURRENT_VERSION):
             if len(session.strip()) != 353:
-                logger.error("%s\n  → %s", get_string("py_c1"), _hint)
+                logger.error("%s\n  - %s", get_string("py_c1"), _hint)
                 if _exit:
                     sys.exit(1)
                 return
@@ -75,7 +75,7 @@ def validate_session(session, logger=LOGS, _exit=True):
         else:
             logger.error(
                 "SESSION is not a valid Telethon or Pyrogram string session.\n"
-                "  → %s\n  → %s",
+                "  - %s\n  - %s",
                 get_string("py_c1"),
                 _hint,
             )
@@ -83,7 +83,7 @@ def validate_session(session, logger=LOGS, _exit=True):
                 sys.exit(1)
             return
     logger.error(
-        "SESSION is missing.\n  → %s\n  → %s",
+        "SESSION is missing.\n  - %s\n  - %s",
         get_string("py_c2"),
         _hint,
     )

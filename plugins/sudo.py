@@ -5,17 +5,16 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}addsudo`
+`{i}addsudo`
     Add Sudo Users by replying to user or using <space> separated userid(s)
 
-• `{i}delsudo`
+`{i}delsudo`
     Remove Sudo Users by replying to user or using <space> separated userid(s)
 
-• `{i}listsudo`
-    List all sudo users.
-"""
+`{i}listsudo`
+    List all sudo users."""
 
 from telethon.tl.types import User
 
@@ -54,7 +53,7 @@ async def _(ult):
     if id == ultroid_bot.uid:
         mmm = get_string("sudo_2")
     elif id in sudoers():
-        mmm = f"{name} `is already a SUDO User ...`"
+        mmm = f"{name} `is already a sudo user.`"
     else:
         udB.set_key("SUDO", "True")
         key = sudoers()
@@ -90,7 +89,7 @@ async def _(ult):
         return await ult.eor(get_string("sudo_1"), time=5)
     name = inline_mention(name) if name else f"`{id}`"
     if id not in sudoers():
-        mmm = f"{name} `wasn't a SUDO User ...`"
+        mmm = f"{name} `was not a sudo user.`"
     else:
         key = sudoers()
         key.remove(id)
@@ -113,9 +112,9 @@ async def _(ult):
         except BaseException:
             name = None
         if name:
-            msg += f"• {inline_mention(name)} ( `{i}` )\n"
+            msg += f"{inline_mention(name)} ( `{i}` )\n"
         else:
-            msg += f"• `{i}` -> Invalid User\n"
+            msg += f"`{i}` -> Invalid User\n"
     m = udB.get_key("SUDO") or True
     if not m:
         m = "[False](https://graph.org/Ultroid-04-06)"

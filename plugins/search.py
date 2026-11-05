@@ -5,24 +5,23 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}saavn <search query>`
+`{i}saavn <search query>`
     Download songs from Saavn.
 
-• `{i}google <query>`
+`{i}google <query>`
     For doing google search.
 
-• `{i}github <username>`
+`{i}github <username>`
     Get full information of the users github profile.
 
-• `{i}img <query>`
+`{i}img <query>`
   `{i}img <query> ; <no of results>`
     For doing Images search.
 
-• `{i}reverse`
-    Reply an Image or sticker to find its sauce.
-"""
+`{i}reverse`
+    Reply an Image or sticker to find its sauce."""
 import os
 
 import requests
@@ -102,7 +101,7 @@ async def google(event):
         text = res["title"]
         url = res["link"]
         des = res["description"]
-        out += f" 👉🏻  [{text}]({url})\n`{des}`\n\n"
+        out += f"  [{text}]({url})\n`{des}`\n\n"
     omk = f"**Google Search Query:**\n`{inp}`\n\n**Results:**\n{out}"
     await x.eor(omk, link_preview=False)
 
@@ -180,7 +179,7 @@ async def siesace(e):
     song = e.pattern_match.group(1).strip()
     if not song:
         return await e.eor("`Give me Something to Search", time=5)
-    eve = await e.eor(f"`Searching for {song} on Saavn...`")
+    eve = await e.eor(f"`Searching for {song} on Saavn.`")
     try:
         data = (await saavn_search(song))[0]
     except IndexError:

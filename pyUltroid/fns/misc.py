@@ -215,7 +215,7 @@ async def get_random_user_data():
     )
     data_ = (await async_searcher(base_url, re_json=True))["results"][0]
     _g = data_["gender"]
-    gender = "🤵🏻‍♂" if _g == "male" else "🤵🏻‍♀"
+    gender = "Male" if _g == "male" else "Female"
     name = data_["name"]
     loc = data_["location"]
     dob = data_["dob"]
@@ -255,7 +255,7 @@ async def get_random_user_data():
 
 async def get_synonyms_or_antonyms(word, type_of_words):
     if type_of_words not in ["synonyms", "antonyms"]:
-        return "Dude! Please give a corrent type of words you want."
+        return "Provide a valid word type: synonyms or antonyms."
     s = await async_searcher(
         f"https://tuna.thesaurus.com/pageData/{word}", re_json=True
     )

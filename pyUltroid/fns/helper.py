@@ -216,18 +216,18 @@ if run_as_module:
         finally:
             stage.unlink(missing_ok=True)
         if plug in HELP:
-            output = "**Plugin** - `{}`\n".format(plug)
+            output = "Plugin: `{}`\n".format(plug)
             for i in HELP[plug]:
                 output += i
-            output += "\nBoudyOS • https://github.com/boudywho/BoudyOS"
+            output += "\nBoudyOS - https://github.com/boudywho/BoudyOS"
             await eod(ok, f"**BoudyOS installed plugin:** `{plug}`\n\n{output}")
         elif plug in CMD_HELP:
-            output = f"Plugin Name-{plug}\n\n✘ Commands Available-\n\n"
+            output = f"Plugin: {plug}\n\nCommands\n\n"
             output += str(CMD_HELP[plug])
             await eod(ok, f"**BoudyOS installed plugin:** `{plug}`\n\n{output}")
         else:
             try:
-                x = f"Plugin Name-{plug}\n\n✘ Commands Available-\n\n"
+                x = f"Plugin: {plug}\n\nCommands\n\n"
                 for d in LIST[plug]:
                     x += HNDLR + d + "\n"
                 await eod(ok, f"**BoudyOS installed plugin:** `{plug}`\n\n`{x}`")
@@ -250,7 +250,7 @@ if run_as_module:
         except BaseException as se:
             LOGS.info(se)
             return await xx.edit(
-                "`HEROKU_API` and `HEROKU_APP_NAME` is wrong! Kindly re-check in config vars."
+                "`HEROKU_API` and `HEROKU_APP_NAME` are invalid. Check the configuration variables."
             )
         await xx.edit("`Downloading Logs...`")
         ok = app.get_log()
@@ -314,8 +314,8 @@ if run_as_module:
         ch_tl = f"BoudyOS {ultroid_version} updates for {ac_br}:"
         d_form = "%d/%m/%y || %H:%M"
         for c in repo.iter_commits(diff):
-            ch_log += f"\n\n💬 <b>{c.count()}</b> 🗓 <b>[{c.committed_datetime.strftime(d_form)}]</b>\n<b><a href={UPSTREAM_REPO_URL.rstrip('/')}/commit/{c}>[{c.summary}]</a></b> 👨‍💻 <code>{c.author}</code>"
-            tldr_log += f"\n\n💬 {c.count()} 🗓 [{c.committed_datetime.strftime(d_form)}]\n[{c.summary}] 👨‍💻 {c.author}"
+            ch_log += f"\n\nCommits: <b>{c.count()}</b> | Date: <b>[{c.committed_datetime.strftime(d_form)}]</b>\n<b><a href={UPSTREAM_REPO_URL.rstrip('/')}/commit/{c}>[{c.summary}]</a></b> | Author: <code>{c.author}</code>"
+            tldr_log += f"\n\nCommits: {c.count()} | Date: [{c.committed_datetime.strftime(d_form)}]\n[{c.summary}] | Author: {c.author}"
         if ch_log:
             return str(ch + ch_log), str(ch_tl + tldr_log)
         return ch_log, tldr_log
@@ -619,14 +619,14 @@ async def progress(current, total, event, start, type_of_ps, file_name=None):
         speed = current / diff
         time_to_completion = round((total - current) / speed) * 1000
         progress_str = "`[{0}{1}] {2}%`\n\n".format(
-            "".join("●" for i in range(math.floor(percentage / 5))),
-            "".join("" for i in range(20 - math.floor(percentage / 5))),
+            "".join("#" for i in range(math.floor(percentage / 5))),
+            "".join("-" for i in range(20 - math.floor(percentage / 5))),
             round(percentage, 2),
         )
 
         tmp = (
             progress_str
-            + "`{0} of {1}`\n\n`✦ Speed: {2}/s`\n\n`✦ ETA: {3}`\n\n".format(
+            + "`{0} of {1}`\n\n`Speed: {2}/s`\n\n`ETA: {3}`\n\n".format(
                 humanbytes(current),
                 humanbytes(total),
                 humanbytes(speed),
@@ -635,10 +635,10 @@ async def progress(current, total, event, start, type_of_ps, file_name=None):
         )
         if file_name:
             await event.edit(
-                "`✦ {}`\n\n`File Name: {}`\n\n{}".format(type_of_ps, file_name, tmp)
+                "`{}`\n\n`File Name: {}`\n\n{}".format(type_of_ps, file_name, tmp)
             )
         else:
-            await event.edit("`✦ {}`\n\n{}".format(type_of_ps, tmp))
+            await event.edit("`{}`\n\n{}".format(type_of_ps, tmp))
 
 
 # ------------------System\\Heroku stuff----------------
@@ -657,7 +657,7 @@ async def restart(ult=None):
             if ult:
                 return await eor(
                     ult,
-                    "`HEROKU_API` or `HEROKU_APP_NAME` is wrong! Kindly re-check in config vars.",
+                    "`HEROKU_API` or `HEROKU_APP_NAME` is invalid. Check the configuration variables.",
                 )
             LOGS.exception(er)
     else:
@@ -694,7 +694,7 @@ async def shutdown(ult):
         except BaseException as e:
             LOGS.exception(e)
             return await ult.edit(
-                "`HEROKU_API` and `HEROKU_APP_NAME` is wrong! Kindly re-check in config vars."
+                "`HEROKU_API` and `HEROKU_APP_NAME` are invalid. Check the configuration variables."
             )
     else:
         sys.exit()

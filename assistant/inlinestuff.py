@@ -59,7 +59,7 @@ async def _(e):
         kkkk = e.builder.article(
             title="Enter Device Codename",
             thumb=wb(ofox, 0, "image/jpeg", []),
-            text="**OFox🦊Recovery**\n\nYou didn't search anything",
+            text="**OrangeFox recovery**\n\nEnter a device codename.",
             buttons=Button.switch_inline("Search Again", query="ofox ", same_peer=True),
         )
         return await e.answer([kkkk])
@@ -202,7 +202,7 @@ async def gsearch(q_event):
                     title=title,
                     description=desc,
                     thumb=wb(gugirl, 0, "image/jpeg", []),
-                    text=f"**Google Search**\n\n**• Title •**\n`{title}`\n\n**• Description •**\n`{desc}`",
+                    text=f"**Google Search**\n\n**Title **\n`{title}`\n\n**Description **\n`{desc}`",
                     link_preview=False,
                     buttons=[
                         [Button.url("Link", url=f"{link}")],
@@ -244,7 +244,7 @@ async def _(e):
         title = a.get("title")
         desc = a.get("snippet")
         link = a.get("link")
-        text = f"**••Title••** `{title}`\n\n"
+        text = f"**Title** `{title}`\n\n"
         text += f"**Description** `{desc}`"
         modss.append(
             await e.builder.article(
@@ -305,9 +305,9 @@ async def _(e):
         name = z["title"]
         desc = unescape(z["summary"])[:300].replace("<br>", "\n") + "..."
         dev = z["developer"]["devId"]
-        text = f"**• App Name •** [{name}]({url})\n"
-        text += f"**• Developer •** `{dev}`\n"
-        text += f"**• Description •**\n`{desc}`"
+        text = f"**App Name ** [{name}]({url})\n"
+        text += f"**Developer ** `{dev}`\n"
+        text += f"**Description **\n`{desc}`"
         foles.append(
             await e.builder.article(
                 title=name,
@@ -391,13 +391,13 @@ async def piston_run(event):
     result = await event.builder.article(
         title="Result",
         description=output,
-        text=f"• **Language:**\n`{lang}`\n\n• **Code:**\n`{code}`\n\n• **Result:**\n`{output}`",
+        text=f"**Language:**\n`{lang}`\n\n**Code:**\n`{code}`\n\n**Result:**\n`{output}`",
         thumb=wb(
             "https://graph.org/file/871ee4a481f58117dccc4.jpg", 0, "image/jpeg", []
         ),
         buttons=Button.switch_inline("Fork", query=event.text, same_peer=True),
     )
-    await event.answer([result], switch_pm="• Piston •", switch_pm_param="start")
+    await event.answer([result], switch_pm="Piston ", switch_pm_param="start")
 
 
 FDROID_ = {}
@@ -413,7 +413,7 @@ async def do_magic(event):
         )
     if FDROID_.get(match):
         return await event.answer(
-            FDROID_[match], switch_pm=f"• Results for {match}", switch_pm_param="start"
+            FDROID_[match], switch_pm=f"Results for {match}", switch_pm_param="start"
         )
     link = "https://search.f-droid.org/?q=" + match.replace(" ", "+")
     content = await async_searcher(link, re_content=True)
@@ -425,9 +425,9 @@ async def do_magic(event):
             image = "https://graph.org/file/a8dd4a92c5a53a89d0eff.jpg"
         title = dat.find("h4", "package-name").text.strip()
         desc = dat.find("span", "package-summary").text.strip()
-        text = f"• **Name :** `{title}`\n\n"
-        text += f"• **Description :** `{desc}`\n"
-        text += f"• **License :** `{dat.find('span', 'package-license').text.strip()}`"
+        text = f"**Name :** `{title}`\n\n"
+        text += f"**Description :** `{desc}`\n"
+        text += f"**License :** `{dat.find('span', 'package-license').text.strip()}`"
         imga = wb(image, 0, "image/jpeg", [])
         ress.append(
             await event.builder.article(
@@ -440,9 +440,9 @@ async def do_magic(event):
                 include_media=True,
                 buttons=[
                     Button.inline(
-                        "• Download •", "fd" + dat["href"].split("packages/")[-1]
+                        "Download ", "fd" + dat["href"].split("packages/")[-1]
                     ),
-                    Button.switch_inline("• Share •", query=event.text),
+                    Button.switch_inline("Share ", query=event.text),
                 ],
             )
         )
@@ -470,7 +470,7 @@ async def twitter_search(event):
     try:
         return await event.answer(
             _ult_cache["twitter"][match],
-            switch_pm="• Twitter Search •",
+            switch_pm="Twitter Search ",
             switch_pm_param="start",
         )
     except KeyError:
@@ -486,14 +486,14 @@ async def twitter_search(event):
         thumb = wb(user["profile_image_url_https"], 0, "image/jpeg", [])
         if user.get("profile_banner_url"):
             url = user["profile_banner_url"]
-            text = f"[\xad]({url})• **Name :** `{user['name']}`\n"
+            text = f"[\xad]({url})**Name :** `{user['name']}`\n"
         else:
-            text = f"• **Name :** `{user['name']}`\n"
-        text += f"• **Description :** `{user['description']}`\n"
-        text += f"• **Username :** `@{user['screen_name']}`\n"
-        text += f"• **Followers :** `{user['followers_count']}`    • **Following :** `{user['friends_count']}`\n"
+            text = f"**Name :** `{user['name']}`\n"
+        text += f"**Description :** `{user['description']}`\n"
+        text += f"**Username :** `@{user['screen_name']}`\n"
+        text += f"**Followers :** `{user['followers_count']}`    **Following :** `{user['friends_count']}`\n"
         pro_ = "https://twitter.com/" + user["screen_name"]
-        text += f"• **Link :** [Click Here]({pro_})\n_"
+        text += f"**Link :** [Click Here]({pro_})\n_"
         reso.append(
             await event.builder.article(
                 title=user["name"],
@@ -503,7 +503,7 @@ async def twitter_search(event):
                 thumb=thumb,
             )
         )
-    swi_ = f"🐦 Showing {len(reso)} Results!" if reso else "No User Found :("
+    swi_ = f"Showing {len(reso)} results." if reso else "No user found."
     await event.answer(reso, switch_pm=swi_, switch_pm_param="start")
     if _ult_cache.get("twitter"):
         _ult_cache["twitter"].update({match: reso})
@@ -520,7 +520,7 @@ async def savn_s(event):
         query = event.text.split(maxsplit=1)[1].lower()
     except IndexError:
         return await event.answer(
-            [], switch_pm="Enter Query to search 🔍", switch_pm_param="start"
+            [], switch_pm="Enter a search query.", switch_pm_param="start"
         )
     if query in _savn_cache:
         return await event.answer(
@@ -529,15 +529,15 @@ async def savn_s(event):
             switch_pm_param="start",
         )
     results = await saavn_search(query)
-    swi = "🎵 Saavn Search" if results else "No Results Found!"
+    swi = "Saavn search" if results else "No results found."
     res = []
     for song in results:
         thumb = wb(song["image"], 0, "image/jpeg", [])
-        text = f"• **Title :** {song['title']}"
-        text += f"\n• **Year :** {song['year']}"
-        text += f"\n• **Lang :** {song['language']}"
-        text += f"\n• **Artist :** {song['artists']}"
-        text += f"\n• **Release Date :** {song['release_date']}"
+        text = f"**Title :** {song['title']}"
+        text += f"\n**Year :** {song['year']}"
+        text += f"\n**Lang :** {song['language']}"
+        text += f"\n**Artist :** {song['artists']}"
+        text += f"\n**Release Date :** {song['release_date']}"
         res.append(
             await event.builder.article(
                 title=song["title"],
@@ -546,7 +546,7 @@ async def savn_s(event):
                 text=text,
                 include_media=True,
                 buttons=Button.switch_inline(
-                    "Search Again 🔍", query="saavn", same_peer=True
+                    "Search again", query="saavn", same_peer=True
                 ),
                 thumb=thumb,
                 content=wb(
@@ -572,7 +572,7 @@ async def inline_tl(ult):
     try:
         match = ult.text.split(maxsplit=1)[1]
     except IndexError:
-        text = f"**Telegram TlObjects Searcher.**\n__(Don't use if you don't know what it is!)__\n\n• Example Usage\n`@{asst.me.username} tl GetFullUserRequest`"
+        text = f"**Telegram TlObjects Searcher.**\n__(Don't use if you don't know what it is!)__\n\nExample Usage\n`@{asst.me.username} tl GetFullUserRequest`"
         return await ult.answer(
             [
                 await ult.builder.article(
@@ -582,7 +582,7 @@ async def inline_tl(ult):
                     text=text,
                 )
             ],
-            switch_pm="Tl Search 🔍",
+            switch_pm="TL search",
             switch_pm_param="start",
         )
     res = []
@@ -614,9 +614,9 @@ InlinePlugin.update(
         "Play Store Apps": "app telegram",
         "Modded Apps": "mods minecraft",
         "Search On Google": "go BoudyOS",
-        "WhiSper": "wspr @username Hello🎉",
+        "WhiSper": "wspr @username Hello",
         "Piston Eval": "run javascript console.log('Hello BoudyOS')",
-        "OrangeFox🦊": "ofox beryllium",
+        "OrangeFox": "ofox beryllium",
         "Twitter User": "twitter telegram",
         "Fdroid Search": "fdroid telegram",
         "Saavn search": "saavn",

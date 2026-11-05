@@ -5,23 +5,22 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available
+Commands
 
-•`{i}warn <reply to user> <reason>`
+`{i}warn <reply to user> <reason>`
     Gives Warn.
 
-•`{i}resetwarn <reply to user>`
+`{i}resetwarn <reply to user>`
     To reset All Warns.
 
-•`{i}warns <reply to user>`
+`{i}warns <reply to user>`
    To Get List of Warnings of a user.
 
-•`{i}setwarn <warn count> | <ban/mute/kick>`
+`{i}setwarn <warn count> | <ban/mute/kick>`
    Set Number in warn count for warnings
    After putting " | " mark put action like ban/mute/kick
    Its Default 3 kick
    Example : `setwarn 5 | mute`
-
 """
 
 from pyUltroid.dB.warn_db import add_warn, reset_warn, warns
@@ -91,7 +90,7 @@ async def warn(e):
         r = r.split("|$|")
         text = f"User {user} Got {action} Due to {count+1} Warns.\n\n"
         for x in range(c):
-            text += f"•**{x+1}.** {r[x]}\n"
+            text += f"**{x+1}.** {r[x]}\n"
         await e.eor(text)
         return reset_warn(e.chat_id, ok.id)
     add_warn(e.chat_id, user, count + 1, r)
@@ -99,7 +98,7 @@ async def warn(e):
     user = inline_mention(ok)
     await eor(
         e,
-        f"**WARNING :** {count+1}/{number}\n**To :**{user}\n**Be Careful !!!**\n\n**Reason** : {reason}",
+        f"**Warning:** {count+1}/{number}\n**User:** {user}\n\n**Reason:** {reason}",
     )
 
 
@@ -156,7 +155,7 @@ async def twarns(e):
         r = r.split("|$|")
         text = f"User {user} Got {c} Warns.\n\n"
         for x in range(c):
-            text += f"•**{x+1}.** {r[x]}\n"
+            text += f"**{x+1}.** {r[x]}\n"
         await e.eor(text)
     else:
         await e.eor("`No Warnings`")

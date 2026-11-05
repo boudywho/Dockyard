@@ -5,21 +5,20 @@
 # PLease read the GNU Affero General Public License in
 # <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
 """
-✘ Commands Available -
+Commands
 
-• `{i}startvc`
+`{i}startvc`
     Start Group Call in a group.
 
-• `{i}stopvc`
+`{i}stopvc`
     Stop Group Call in a group.
 
-• `{i}vctitle <title>`
+`{i}vctitle <title>`
     Change the title Group call.
 
-• `{i}vcinvite`
+`{i}vcinvite`
     Invite all members of group in Group Call.
-    (You must be joined)
-"""
+    (You must be joined)"""
 
 from telethon.tl.functions.channels import GetFullChannelRequest as getchat
 from telethon.tl.functions.phone import CreateGroupCallRequest as startvc

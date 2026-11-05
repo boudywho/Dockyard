@@ -201,13 +201,13 @@ _convo = {
     "dapi": {
         "var": "DEEP_AI",
         "name": "Deep AI Api Key",
-        "text": "Get Your Deep Api from deepai.org and send here.",
+        "text": "Get a DeepAI API key from deepai.org and send it here.",
         "back": "cbs_apiset",
     },
     "oapi": {
         "var": "OCR_API",
         "name": "Ocr Api Key",
-        "text": "Get Your OCR api from ocr.space and send that Here.",
+        "text": "Get an OCR API key from ocr.space and send it here.",
         "back": "cbs_apiset",
     },
     "pmlgg": {
@@ -219,7 +219,7 @@ _convo = {
     "vcs": {
         "var": "VC_SESSION",
         "name": "Vc Session",
-        "text": "**Vc session**\nEnter the New session u generated for vc bot.\n\nUse /cancel to terminate the operation.",
+        "text": "**VC session**\nEnter the new session generated for the voice-chat bot.\n\nUse /cancel to terminate the operation.",
         "back": "cbs_vcb",
     },
     "settag": {
@@ -255,7 +255,7 @@ TOKEN_FILE = "resources/auths/auth_token.txt"
 async def send(eve):
     key, name = (eve.data_match.group(1)).decode("UTF-8").split("_")
     thumb = str(source_resource("extras", "inline.jpg"))
-    await eve.answer("■ Sending ■")
+    await eve.answer("Sending.")
     data = f"uh_{key}_"
     index = None
     if "|" in name:
@@ -388,7 +388,7 @@ async def convo_handler(event: events.CallbackQuery):
             pass
         if themssg == "/cancel":
             return await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button(back),
             )
         await setit(event, get_["var"], themssg)
@@ -500,14 +500,14 @@ async def hndlrr(event):
     CH = udB.get_key(var) or "/"
     async with event.client.conversation(pru) as conv:
         await conv.send_message(
-            f"Send The Symbol Which u want as Handler/Trigger to use your Assistant bot\nUr Current Handler is [ `{CH}` ]\n\n use /cancel to cancel.",
+            f"Send the symbol to use as the assistant handler.\nThe current handler is `{CH}`.\n\nUse /cancel to cancel.",
         )
         response = conv.wait_event(events.NewMessage(chats=pru))
         response = await response
         themssg = response.message.message
         if themssg == "/cancel":
             await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_otvars"),
             )
         elif len(themssg) > 1:
@@ -530,13 +530,13 @@ async def emoji(event):
     var = "EMOJI_IN_HELP"
     name = f"Emoji in `{HNDLR}help` menu"
     async with event.client.conversation(pru) as conv:
-        await conv.send_message("Send emoji u want to set 🙃.\n\nUse /cancel to cancel.")
+        await conv.send_message("Send the emoji to use in the help menu.\n\nUse /cancel to cancel.")
         response = conv.wait_event(events.NewMessage(chats=pru))
         response = await response
         themssg = response.message.message
         if themssg == "/cancel":
             await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_otvars"),
             )
         elif themssg.startswith(("/", HNDLR)):
@@ -560,14 +560,14 @@ async def pluginch(event):
     name = "Plugin Channel"
     async with event.client.conversation(pru) as conv:
         await conv.send_message(
-            "Send id or username of a channel from where u want to install all plugins\n\nOnly install plugins from trusted BoudyOS repositories or sources.\n\nUse /cancel to cancel.",
+            "Send the ID or username of the channel to install plugins from.\n\nOnly install plugins from trusted BoudyOS repositories or sources.\n\nUse /cancel to cancel.",
         )
         response = conv.wait_event(events.NewMessage(chats=pru))
         response = await response
         themssg = response.message.message
         if themssg == "/cancel":
             await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_otvars"),
             )
         elif themssg.startswith(("/", HNDLR)):
@@ -591,14 +591,14 @@ async def hndlrr(event):
     name = "Handler/ Trigger"
     async with event.client.conversation(pru) as conv:
         await conv.send_message(
-            f"Send The Symbol Which u want as Handler/Trigger to use bot\nUr Current Handler is [ `{HNDLR}` ]\n\n use /cancel to cancel.",
+            f"Send the symbol to use as the handler.\nThe current handler is `{HNDLR}`.\n\nUse /cancel to cancel.",
         )
         response = conv.wait_event(events.NewMessage(chats=pru))
         response = await response
         themssg = response.message.message
         if themssg == "/cancel":
             await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_otvars"),
             )
         elif len(themssg) > 1:
@@ -627,7 +627,7 @@ async def hndlrr(event):
     name = "Sudo Handler"
     async with event.client.conversation(pru) as conv:
         await conv.send_message(
-            "Send The Symbol Which u want as Sudo Handler/Trigger to use bot\n\n use /cancel to cancel."
+            "Send the symbol to use as the sudo handler.\n\nUse /cancel to cancel."
         )
 
         response = conv.wait_event(events.NewMessage(chats=pru))
@@ -635,7 +635,7 @@ async def hndlrr(event):
         themssg = response.message.message
         if themssg == "/cancel":
             await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_otvars"),
             )
         elif len(themssg) > 1:
@@ -672,7 +672,7 @@ async def tagloggrr(e):
 @callback("deltag", owner=True)
 async def _(e):
     udB.del_key("TAG_LOG")
-    await e.answer("Done!!! Tag Logger has been turned Off")
+    await e.answer("Tag logger has been turned off.")
 
 
 @callback("eaddon", owner=True)
@@ -697,7 +697,7 @@ async def eddon(event):
     var = "ADDONS"
     await setit(event, var, "True")
     await event.edit(
-        "Done! ADDONS has been turned on!!\n\n After Setting All Things Do Restart",
+        "Add-ons have been enabled.\n\nRestart after configuring the remaining settings.",
         buttons=get_back_button("eaddon"),
     )
 
@@ -706,7 +706,7 @@ async def eddon(event):
 async def eddof(event):
     udB.set_key("ADDONS", "False")
     await event.edit(
-        "Done! ADDONS has been turned off!! After Setting All Things Do Restart",
+        "Add-ons have been disabled.\n\nRestart after configuring the remaining settings.",
         buttons=get_back_button("eaddon"),
     )
 
@@ -720,7 +720,7 @@ async def pmset(event):
     )
 
     await event.edit(
-        f"SUDO MODE ~ Some peoples can use ur Bot which u selected. To know More use `{HNDLR}help sudo`",
+        f"Sudo mode allows selected users to operate the bot. Use `{HNDLR}help sudo` for details.",
         buttons=[
             BT,
             [Button.inline("Back", data="cbs_otvars")],
@@ -733,7 +733,7 @@ async def eddon(event):
     var = "SUDO"
     await setit(event, var, "True")
     await event.edit(
-        "Done! SUDO MODE has been turned on!!\n\n After Setting All Things Do Restart",
+        "Sudo mode has been enabled.\n\nRestart after configuring the remaining settings.",
         buttons=get_back_button("sudo"),
     )
 
@@ -743,7 +743,7 @@ async def eddof(event):
     var = "SUDO"
     await setit(event, var, "False")
     await event.edit(
-        "Done! SUDO MODE has been turned off!! After Setting All Things Do Restart",
+        "Sudo mode has been disabled.\n\nRestart after configuring the remaining settings.",
         buttons=get_back_button("sudo"),
     )
 
@@ -763,7 +763,7 @@ async def sfgrp(event):
         themssg = response.message.message
         if themssg == "/cancel":
             return await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_sfban"),
             )
         await setit(event, var, themssg)
@@ -788,7 +788,7 @@ async def media(event):
             themssg = response.message
             if themssg == "/cancel":
                 return await conv.send_message(
-                    "Operation cancelled!!",
+                    "Operation cancelled.",
                     buttons=get_back_button("cbs_alvcstm"),
                 )
         except BaseException as er:
@@ -839,7 +839,7 @@ async def inl_on(event):
     var = "INLINE_PM"
     await setit(event, var, "True")
     await event.edit(
-        "Done!! PMPermit type has been set to inline!",
+        "PMPermit type set to inline.",
         buttons=[[Button.inline("Back", data="cbs_pmtype")]],
     )
 
@@ -849,7 +849,7 @@ async def inl_on(event):
     var = "INLINE_PM"
     await setit(event, var, "False")
     await event.edit(
-        "Done!! PMPermit type has been set to normal!",
+        "PMPermit type set to normal.",
         buttons=[[Button.inline("Back", data="cbs_pmtype")]],
     )
 
@@ -869,12 +869,12 @@ async def name(event):
         themssg = response.message.message
         if themssg == "/cancel":
             return await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_pmcstm"),
             )
         if len(themssg) > 4090:
             return await conv.send_message(
-                "Message too long!\nGive a shorter message please!!",
+                "The message is too long.\nProvide a shorter message.",
                 buttons=get_back_button("cbs_pmcstm"),
             )
         await setit(event, var, themssg)
@@ -906,7 +906,7 @@ async def set_wrns(event):
         )
     else:
         await event.edit(
-            f"Something went wrong, please check your {HNDLR}logs!",
+            f"Something went wrong. Check `{HNDLR}logs`.",
             buttons=get_back_button("cbs_pmcstm"),
         )
 
@@ -926,7 +926,7 @@ async def media(event):
             themssg = response.message
             if themssg == "/cancel":
                 return await conv.send_message(
-                    "Operation cancelled!!",
+                    "Operation cancelled.",
                     buttons=get_back_button("cbs_pmcstm"),
                 )
         except BaseException as er:
@@ -977,7 +977,7 @@ async def apon(event):
     var = "AUTOAPPROVE"
     await setit(event, var, "True")
     await event.edit(
-        "Done!! AUTOAPPROVE  Started!!",
+        "Auto-approve enabled.",
         buttons=[[Button.inline("Back", data="cbs_apauto")]],
     )
 
@@ -987,7 +987,7 @@ async def apof(event):
     try:
         udB.set_key("AUTOAPPROVE", "False")
         return await event.edit(
-            "Done! AUTOAPPROVE Stopped!!",
+            "Auto-approve disabled.",
             buttons=[[Button.inline("Back", data="cbs_apauto")]],
         )
     except BaseException as er:
@@ -1007,7 +1007,7 @@ async def l_vcs(event):
     )
 
     await event.edit(
-        "PMLOGGER This Will Forward Ur Pm to Ur Private Group -",
+        "PMLOGGER forwards private messages to your private group.",
         buttons=[
             BT,
             [Button.inline("PmLogger Group", "abs_pmlgg")],
@@ -1020,7 +1020,7 @@ async def l_vcs(event):
 async def pmlog(event):
     await setit(event, "PMLOG", "True")
     await event.edit(
-        "Done!! PMLOGGER  Started!!",
+        "PMLOGGER enabled.",
         buttons=[[Button.inline("Back", data="pml")]],
     )
 
@@ -1030,7 +1030,7 @@ async def pmlogof(event):
     try:
         udB.del_key("PMLOG")
         return await event.edit(
-            "Done! PMLOGGER Stopped!!",
+            "PMLOGGER disabled.",
             buttons=[[Button.inline("Back", data="pml")]],
         )
     except BaseException as er:
@@ -1046,7 +1046,7 @@ async def pmonn(event):
     var = "PMSETTING"
     await setit(event, var, "True")
     await event.edit(
-        "Done! PMPermit has been turned on!!",
+        "PMPermit enabled.",
         buttons=[[Button.inline("Back", data="cbs_ppmset")]],
     )
 
@@ -1056,7 +1056,7 @@ async def pmofff(event):
     var = "PMSETTING"
     await setit(event, var, "False")
     await event.edit(
-        "Done! PMPermit has been turned off!!",
+        "PMPermit disabled.",
         buttons=[[Button.inline("Back", data="cbs_ppmset")]],
     )
 
@@ -1064,7 +1064,7 @@ async def pmofff(event):
 @callback("botmew", owner=True)
 async def hhh(e):
     async with e.client.conversation(e.chat_id) as conv:
-        await conv.send_message("Send Any Media to keep at your Bot's welcome ")
+        await conv.send_message("Send the media to use in the bot welcome message.")
         msg = await conv.get_response()
         if not msg.media or msg.text.startswith("/"):
             return await conv.send_message(
@@ -1078,7 +1078,7 @@ async def hhh(e):
 async def hhh(e):
     async with e.client.conversation(e.chat_id) as conv:
         await conv.send_message(
-            "Send message to set to Display, when user Press Info button in Bot Welcome!\n\nsend `False` to completely remove that button.."
+            "Send the message to display when the user presses the Info button in the bot welcome message.\n\nSend `False` to remove that button."
         )
         msg = await conv.get_response()
         if msg.media or msg.text.startswith("/"):
@@ -1095,7 +1095,7 @@ async def heheh(event):
     err = ""
     async with event.client.conversation(event.chat_id) as conv:
         await conv.send_message(
-            "• Send The Chat Id(s), which you want user to Join Before using Chat/Pm Bot\n\n• Send /clear to disable PmBot Force sub..\n• • Send /cancel to stop this process.."
+            "Send the chat IDs users must join before using the chat or PM bot.\n\nSend /clear to disable PM bot force subscribe.\nSend /cancel to stop this process."
         )
         await conv.send_message(
             "Example : \n`-1001234567\n-100778888`\n\nFor Multiple Chat(s)."
@@ -1103,12 +1103,12 @@ async def heheh(event):
         try:
             msg = await conv.get_response()
         except AsyncTimeOut:
-            return await conv.send_message("**• TimeUp!**\nStart from /start back.")
+            return await conv.send_message("**TimeUp!**\nStart from /start back.")
         if not msg.text or msg.text.startswith("/"):
             timyork = "Cancelled!"
             if msg.text == "/clear":
                 udB.del_key("PMBOT_FSUB")
-                timyork = "Done! Force Subscribe Stopped\nRestart your Bot!"
+                timyork = "Force subscribe disabled.\nRestart the bot."
             return await conv.send_message(
                 "Cancelled!", buttons=get_back_button("cbs_chatbot")
             )
@@ -1124,7 +1124,7 @@ async def heheh(event):
             return await conv.send_message(err)
         udB.set_key("PMBOT_FSUB", str(Ll))
         await conv.send_message(
-            "Done!\nRestart Your Bot.", buttons=get_back_button("cbs_chatbot")
+            "Done.\nRestart the bot.", buttons=get_back_button("cbs_chatbot")
         )
 
 
@@ -1136,14 +1136,14 @@ async def name(event):
     name = "Bot Welcome Message:"
     async with event.client.conversation(pru) as conv:
         await conv.send_message(
-            "**BOT WELCOME MSG**\nEnter the msg which u want to show when someone start your assistant Bot.\nYou Can use `{me}` , `{mention}` Parameters Too\nUse /cancel to terminate the operation.",
+            "**Bot welcome message**\nEnter the message to show when someone starts your assistant bot.\nYou can use the `{me}` and `{mention}` parameters.\nUse /cancel to terminate the operation.",
         )
         response = conv.wait_event(events.NewMessage(chats=pru))
         response = await response
         themssg = response.message.message
         if themssg == "/cancel":
             return await conv.send_message(
-                "Cancelled!!",
+                "Cancelled.",
                 buttons=get_back_button("cbs_chatbot"),
             )
         await setit(event, var, themssg)
@@ -1164,7 +1164,7 @@ async def chon(event):
         for i, e in AST_PLUGINS["pmbot"]:
             event.client.add_event_handler(i, events.NewMessage(**e))
     await event.edit(
-        "Done! Now u Can Chat With People Via This Bot",
+        "Chat forwarding through this bot is now enabled.",
         buttons=[Button.inline("Back", data="cbs_chatbot")],
     )
 
@@ -1177,7 +1177,7 @@ async def chon(event):
         for i, e in AST_PLUGINS["pmbot"]:
             event.client.remove_event_handler(i)
     await event.edit(
-        "Done! Chat People Via This Bot Stopped.",
+        "Chat forwarding through this bot is now disabled.",
         buttons=[Button.inline("Back", data="cbs_chatbot")],
     )
 
@@ -1197,7 +1197,7 @@ async def media(event):
             themssg = response.message
             if themssg == "/cancel":
                 return await conv.send_message(
-                    "Operation cancelled!!",
+                    "Operation cancelled.",
                     buttons=get_back_button("setter"),
                 )
         except BaseException as er:
@@ -1234,8 +1234,8 @@ async def fdroid_dler(event):
     uri = event.data_match.group(1).decode("utf-8")
     if FD_MEDIA.get(uri):
         return await event.edit(file=FD_MEDIA[uri])
-    await event.answer("• Starting Download •", alert=True)
-    await event.edit("• Downloading.. •")
+    await event.answer("Starting Download ", alert=True)
+    await event.edit("Downloading.")
     URL = f"https://f-droid.org/packages/{uri}"
     conte = await async_searcher(URL, re_content=True)
     BSC = bs(conte, "html.parser", from_encoding="utf-8")
@@ -1267,7 +1267,7 @@ async def fdroid_dler(event):
     buttons = Button.switch_inline("Search Back", query="fdroid", same_peer=True)
     try:
         msg = await event.edit(
-            f"**• [{title}]({URL}) •**", file=n_file, thumb=thumb, buttons=buttons
+            f"**[{title}]({URL}) **", file=n_file, thumb=thumb, buttons=buttons
         )
     except Exception as er:
         LOGS.exception(er)
@@ -1275,7 +1275,7 @@ async def fdroid_dler(event):
             msg = await event.client.edit_message(
                 await event.get_input_chat(),
                 event.message_id,
-                f"**• [{title}]({URL}) •**",
+                f"**[{title}]({URL}) **",
                 buttons=buttons,
                 thumb=thumb,
                 file=n_file,
