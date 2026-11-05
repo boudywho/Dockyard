@@ -193,6 +193,13 @@ log() {
     fi
 }
 
+warn() {
+    printf 'warn: %s\n' "$*"
+    if [[ -n "$LOG_FILE" ]]; then
+        printf 'warn: %s\n' "$*" >>"$LOG_FILE"
+    fi
+}
+
 start_log() {
     [[ -n "$SNAPSHOT" ]] || fail "--snapshot is required"
     [[ -d "$SNAPSHOT" ]] || fail "snapshot directory does not exist: $SNAPSHOT"
@@ -363,12 +370,41 @@ rewrite_symlink() {
     log "rewrite symlink $link -> $new_target"
 }
 
+rewrite_workspace_source() {
+    local link="$1" release_root="$2" workspace target target_name new_target
+    if [[ ! -L "$link" ]]; then
+        log "skip non-symlink $link"
+        return 0
+    fi
+    workspace="$(basename -- "$(dirname -- "$link")")"
+    target="$(readlink -- "$link")"
+    if [[ "$target" != /* ]]; then
+        log "keep relative symlink $link"
+        return 0
+    fi
+    target_name="$(basename -- "$target")"
+    [[ -n "$target_name" && "$target_name" != "/" ]] ||
+        fail "cannot derive symlink target name: $link"
+    # A workspace and its release share a name. Keep an existing target, but
+    # rebuild pruned links by convention instead of failing on the stale one.
+    if [[ -e "$release_root/$target_name" ]]; then
+        new_target="$release_root/$target_name"
+    else
+        new_target="$release_root/$workspace"
+    fi
+    ln -sfn -- "$new_target" "$link"
+    log "rewrite symlink $link -> $new_target"
+    if [[ ! -e "$new_target" ]]; then
+        warn "stale workspace $workspace keeps a source link to a pruned release"
+    fi
+}
+
 rewrite_runtime_links() {
     rewrite_symlink "$NEW_VARLIB/current" "$NEW_VARLIB/workspaces"
     local source
     shopt -s nullglob
     for source in "$NEW_VARLIB"/workspaces/*/source; do
-        rewrite_symlink "$source" "$NEW_OPT/releases"
+        rewrite_workspace_source "$source" "$NEW_OPT/releases"
     done
     shopt -u nullglob
 }
@@ -831,7 +867,7 @@ verify_modes() {
 }
 
 verify_symlinks() {
-    local link source
+    local link source workspace target
     link="$NEW_VARLIB/current"
     if [[ ! -L "$link" ]]; then
         check_failed "missing runtime symlink: $link"
@@ -844,8 +880,12 @@ verify_symlinks() {
     shopt -s nullglob
     for source in "$NEW_VARLIB"/workspaces/*/source; do
         [[ -L "$source" ]] || continue
-        if [[ ! -e "$source" ]]; then
-            check_failed "workspace source does not resolve: $source -> $(readlink -- "$source")"
+        workspace="$(basename -- "$(dirname -- "$source")")"
+        target="$(readlink -- "$source")"
+        if [[ "$target" != "$NEW_OPT/releases/"* ]]; then
+            check_failed "workspace source is outside $NEW_OPT/releases: $source -> $target"
+        elif [[ ! -e "$source" ]]; then
+            warn "stale workspace source $workspace"
         else
             check_ok "workspace source resolves: $source"
         fi

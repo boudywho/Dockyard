@@ -86,6 +86,11 @@ class HostMigrationSandboxTests(unittest.TestCase):
         os.symlink(
             "/opt/boudyos/releases/v2.2.2", workspace / "source"
         )
+        stale_workspace = fake / "var/lib/boudyos/workspaces/pruned"
+        (stale_workspace / "work").mkdir(parents=True)
+        os.symlink(
+            "/opt/boudyos/releases/pruned", stale_workspace / "source"
+        )
         os.symlink(
             "/var/lib/boudyos/workspaces/ws", fake / "var/lib/boudyos/current"
         )
@@ -240,6 +245,17 @@ class HostMigrationSandboxTests(unittest.TestCase):
         self.assertTrue(current.exists())
         self.assertTrue(source.exists())
 
+        stale_source = fake / "var/lib/dockyard/workspaces/pruned/source"
+        self.assertEqual(
+            os.readlink(stale_source),
+            str(fake / "opt/dockyard/releases/pruned"),
+        )
+        self.assertFalse(stale_source.exists())
+        self.assertIn(
+            "warn: stale workspace pruned keeps a source link to a pruned release",
+            result.stdout,
+        )
+
         deploy = (fake / "etc/dockyard/deploy.conf").read_text("utf-8")
         self.assertIn("DOCKYARD_RELEASE_TAG=v3.0.0", deploy)
         self.assertIn("DOCKYARD_RELEASE_COMMIT=" + COMMIT, deploy)
@@ -310,6 +326,7 @@ class HostMigrationSandboxTests(unittest.TestCase):
         self.assertEqual(verify.returncode, 0, verify.stderr)
         self.assertIn("verify: all checks passed", verify.stdout)
         self.assertIn("ok: no BoudyOS unit files remain", verify.stdout)
+        self.assertIn("warn: stale workspace source pruned", verify.stdout)
         self.assertNotIn(SECRET, verify.stdout + verify.stderr)
 
     def test_apply_preserves_disabled_legacy_units(self):
