@@ -19,7 +19,7 @@ PROFILE_PLUGINS = {
         (
             "audiotools", "compressor", "converter", "fileshare",
             "giftools", "imagetools", "mediatools", "pdftools", "qrcode",
-            "resize", "search", "stickertools", "videotools",
+            "quote", "resize", "search", "stickertools", "videotools",
             "webupload", "writer", "youtube", "ytdl", "ziptools",
         )
     ),
