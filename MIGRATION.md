@@ -1,5 +1,41 @@
 # Dockyard migration and rollback
 
+## Migrating a live BoudyOS host to Dockyard
+
+Use `ops/dockyard-migrate-host` for an installed host that still uses the
+legacy `/etc/boudyos`, `/opt/boudyos`, `/var/lib/boudyos`, and
+`/var/backups/boudyos` layout. The tool is fail-closed: it requires the legacy
+trees to exist, the Dockyard trees to be absent, a repository checkout, and a
+snapshot. Run the steps in this order.
+
+1. **Snapshot.** Create a root-only snapshot directory containing
+   `host-artifacts.tar.gz` of `etc/`, `usr/local/`, and `usr/lib/tmpfiles.d/`
+   before any change. Keep it outside the migrated trees.
+2. **Plan.** Review every ordered action and installed command; `plan` changes
+   nothing:
+   `sudo ops/dockyard-migrate-host plan --snapshot /root/dockyard-migration`
+3. **Apply.** Move the four trees, rewrite the `current` and workspace
+   `source` symlinks, convert configuration to `DOCKYARD_*`, install the
+   helpers/units/sudoers, and enable the new timers and
+   `dockyard-paths.service`. `dockyard.service` is deliberately left stopped:
+   `sudo ops/dockyard-migrate-host apply --snapshot /root/dockyard-migration --tag v3.0.0 --commit <40-hex>`
+4. **Deploy.** Run the pinned deploy command printed by `apply`; it stages and
+   activates the new release:
+   `sudo /usr/local/sbin/dockyard-deploy deploy`
+5. **Verify.** Run the read-only post-checks for legacy strings, modes,
+   symlinks, imports, sudoers, and the release pin:
+   `sudo ops/dockyard-migrate-host verify --snapshot /root/dockyard-migration`
+6. **Rollback.** On failure the tool rolls back automatically. To restore a
+   completed migration deliberately, restore the trees and the snapshot, then
+   start and verify the legacy unit:
+   `sudo ops/dockyard-migrate-host rollback --snapshot /root/dockyard-migration`
+
+The migration does not change the `ultroid` account or group, the Redis unit,
+database or Redis keys, callback data, commands, or the session file format.
+It only relocates the host paths and renames the operational surface. A
+non-`/` `--root` runs the same flow against a disposable tree and prints
+privileged commands as `[sandbox] would run: ...`.
+
 ## Rename migration to 3.0.0
 
 Dockyard 3.0.0 renames the product and its operational surface. The code

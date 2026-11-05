@@ -1,0 +1,1079 @@
+#!/usr/bin/env bash
+# One-shot, reversible migration from the legacy BoudyOS host layout to
+# Dockyard. Every absolute path is derived from --root so the complete flow can
+# be exercised against a disposable tree.
+set -euo pipefail
+umask 077
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+readonly SCRIPT_DIR
+DEFAULT_REPO="$(dirname "$SCRIPT_DIR")"
+readonly DEFAULT_REPO
+readonly REPO="${DOCKYARD_MIGRATE_REPO:-$DEFAULT_REPO}"
+
+ROOT="/"
+ACTION=""
+SNAPSHOT=""
+TAG=""
+COMMIT=""
+SANDBOX=0
+LOG_FILE=""
+
+readonly LEGACY_TIMERS=(
+    boudyos-health.timer
+    boudyos-update-check.timer
+    boudyos-backup.timer
+    boudyos-deploy.path
+)
+readonly LEGACY_UNITS=(
+    boudyos.service
+    boudyos-health.service
+    boudyos-health.timer
+    boudyos-backup.service
+    boudyos-backup.timer
+    boudyos-update-check.service
+    boudyos-update-check.timer
+    boudyos-deploy.service
+    boudyos-deploy.path
+    boudyos-paths.service
+)
+readonly NEW_TIMERS=(
+    dockyard-health.timer
+    dockyard-backup.timer
+    dockyard-update-check.timer
+    dockyard-deploy.path
+)
+readonly NEW_HELPERS=(
+    dockyard-deploy
+    dockyard-health
+    dockyard-backup
+    dockyard-restore-verify
+    dockyard-rename-service
+    dockyard-migrate-ultroid
+)
+
+usage() {
+    cat <<'EOF'
+Usage:
+  dockyard-migrate-host plan     [--snapshot DIR] [--tag vX.Y.Z --commit 40hex]
+  dockyard-migrate-host apply    [--snapshot DIR] [--tag vX.Y.Z --commit 40hex]
+  dockyard-migrate-host verify   [--snapshot DIR]
+  dockyard-migrate-host rollback --snapshot DIR
+
+Global option:
+  --root DIR    Host root to operate on (default /). Exported as
+                DOCKYARD_MIGRATE_ROOT. A non-/ root skips systemctl, visudo,
+                systemd-tmpfiles and chown-style calls.
+EOF
+}
+
+die() {
+    printf 'error: %s\n' "$*" >&2
+    exit 2
+}
+
+fail() {
+    printf 'error: %s\n' "$*" >&2
+    return 1
+}
+
+parse_args() {
+    while (( $# )); do
+        case "$1" in
+            --root)
+                [[ $# -ge 2 ]] || die "--root requires a directory"
+                ROOT="$2"
+                shift 2
+                ;;
+            --root=*)
+                ROOT="${1#--root=}"
+                shift
+                ;;
+            --snapshot)
+                [[ $# -ge 2 ]] || die "--snapshot requires a directory"
+                SNAPSHOT="$2"
+                shift 2
+                ;;
+            --snapshot=*)
+                SNAPSHOT="${1#--snapshot=}"
+                shift
+                ;;
+            --tag)
+                [[ $# -ge 2 ]] || die "--tag requires a value"
+                TAG="$2"
+                shift 2
+                ;;
+            --tag=*)
+                TAG="${1#--tag=}"
+                shift
+                ;;
+            --commit)
+                [[ $# -ge 2 ]] || die "--commit requires a value"
+                COMMIT="$2"
+                shift 2
+                ;;
+            --commit=*)
+                COMMIT="${1#--commit=}"
+                shift
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            plan|apply|verify|rollback)
+                [[ -z "$ACTION" ]] || die "only one action may be requested"
+                ACTION="$1"
+                shift
+                ;;
+            *)
+                die "unknown argument: $1"
+                ;;
+        esac
+    done
+
+    [[ -n "$ACTION" ]] || die "an action is required"
+    [[ "$ROOT" == /* ]] || die "--root must be an absolute path"
+    ROOT="${ROOT%/}"
+    [[ -n "$ROOT" ]] || ROOT="/"
+    if [[ "$ROOT" == "/" ]]; then
+        SANDBOX=0
+    else
+        SANDBOX=1
+    fi
+    export DOCKYARD_MIGRATE_ROOT="$ROOT"
+
+    if [[ -n "$SNAPSHOT" ]]; then
+        SNAPSHOT="${SNAPSHOT%/}"
+        [[ -n "$SNAPSHOT" ]] || SNAPSHOT="/"
+    fi
+}
+
+rooted() {
+    if [[ "$ROOT" == "/" ]]; then
+        printf '/%s\n' "$1"
+    else
+        printf '%s/%s\n' "$ROOT" "$1"
+    fi
+}
+
+set_paths() {
+    LEGACY_ETC="$(rooted etc/boudyos)"
+    LEGACY_OPT="$(rooted opt/boudyos)"
+    LEGACY_VARLIB="$(rooted var/lib/boudyos)"
+    LEGACY_BACKUPS="$(rooted var/backups/boudyos)"
+    LEGACY_SUDOERS="$(rooted etc/sudoers.d/boudyos-deploy)"
+
+    NEW_ETC="$(rooted etc/dockyard)"
+    NEW_OPT="$(rooted opt/dockyard)"
+    NEW_VARLIB="$(rooted var/lib/dockyard)"
+    NEW_BACKUPS="$(rooted var/backups/dockyard)"
+    NEW_USRSBIN="$(rooted usr/local/sbin)"
+    NEW_USRLIB="$(rooted usr/local/lib/dockyard)"
+    NEW_UNIT_DIR="$(rooted etc/systemd/system)"
+    NEW_SUDOERS="$(rooted etc/sudoers.d/dockyard-deploy)"
+    NEW_TMPFILES="$(rooted usr/lib/tmpfiles.d/dockyard.conf)"
+    LEGACY_READY="$(rooted run/boudyos/ready)"
+    LEGACY_HEALTH="$(rooted usr/local/sbin/boudyos-health)"
+}
+
+log() {
+    local line
+    line="$(date -u +%Y-%m-%dT%H:%M:%SZ) $*"
+    printf '%s\n' "$line"
+    if [[ -n "$LOG_FILE" ]]; then
+        printf '%s\n' "$line" >>"$LOG_FILE"
+    fi
+}
+
+start_log() {
+    [[ -n "$SNAPSHOT" ]] || fail "--snapshot is required"
+    [[ -d "$SNAPSHOT" ]] || fail "snapshot directory does not exist: $SNAPSHOT"
+    LOG_FILE="$SNAPSHOT/migration.log"
+    : >>"$LOG_FILE"
+    chmod 0600 "$LOG_FILE"
+}
+
+run_priv() {
+    local rendered
+    if (( SANDBOX )); then
+        rendered="$(printf '%q ' "$@")"
+        log "[sandbox] would run: ${rendered% }"
+    else
+        "$@"
+    fi
+}
+
+require_root() {
+    if (( ! SANDBOX && EUID != 0 )); then
+        fail "migration actions require root when --root is /"
+    fi
+}
+
+require_snapshot_archive() {
+    [[ -n "$SNAPSHOT" ]] || fail "--snapshot is required"
+    [[ -d "$SNAPSHOT" ]] || fail "snapshot directory does not exist: $SNAPSHOT"
+    [[ -f "$SNAPSHOT/host-artifacts.tar.gz" ]] ||
+        fail "snapshot is missing host-artifacts.tar.gz: $SNAPSHOT"
+}
+
+precheck_common() {
+    require_root
+    require_snapshot_archive
+    validate_archive "$SNAPSHOT/host-artifacts.tar.gz"
+
+    [[ -d "$LEGACY_ETC" ]] || fail "legacy layout is missing: $LEGACY_ETC"
+    [[ -d "$LEGACY_OPT" ]] || fail "legacy layout is missing: $LEGACY_OPT"
+    [[ -d "$LEGACY_VARLIB" ]] || fail "legacy layout is missing: $LEGACY_VARLIB"
+
+    local path
+    for path in "$NEW_ETC" "$NEW_OPT" "$NEW_VARLIB"; do
+        if [[ -e "$path" || -L "$path" ]]; then
+            fail "Dockyard layout already exists: $path"
+        fi
+    done
+
+    [[ -d "$REPO" ]] || fail "repository checkout is not available: $REPO"
+    for path in \
+        ops/systemd/dockyard.service.example \
+        ops/dockyard_ops.py \
+        ops/tmpfiles.d/dockyard.conf; do
+        [[ -f "$REPO/$path" ]] || fail "repository checkout is missing: $path"
+    done
+}
+
+validate_pin() {
+    if [[ -z "$TAG" && -z "$COMMIT" ]]; then
+        return 0
+    fi
+    [[ -n "$TAG" && -n "$COMMIT" ]] ||
+        fail "--tag and --commit must be supplied together"
+    [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] ||
+        fail "--tag must match vX.Y.Z"
+    [[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]] ||
+        fail "--commit must be a 40-character lowercase hex commit"
+}
+
+unit_exists() {
+    local name="$1"
+    [[ -e "$ROOT/etc/systemd/system/$name" ||
+       -L "$ROOT/etc/systemd/system/$name" ||
+       -e "$ROOT/usr/lib/systemd/system/$name" ||
+       -L "$ROOT/usr/lib/systemd/system/$name" ||
+       -e "$ROOT/lib/systemd/system/$name" ||
+       -L "$ROOT/lib/systemd/system/$name" ]]
+}
+
+ensure_dir() {
+    local path="$1" mode="$2"
+    log "create directory $path ($mode)"
+    install -d -m "$mode" "$path"
+    run_priv chown root:root "$path"
+}
+
+install_file() {
+    local source="$1" destination="$2" mode="$3"
+    log "install $source -> $destination ($mode)"
+    install -m "$mode" -- "$source" "$destination"
+    run_priv chown root:root "$destination"
+}
+
+move_tree() {
+    local source="$1" destination="$2" mode="$3"
+    if [[ ! -e "$source" && ! -L "$source" ]]; then
+        log "skip absent legacy tree $source"
+        return 0
+    fi
+    log "move $source -> $destination"
+    if [[ -e "$destination" || -L "$destination" ]]; then
+        if [[ -d "$destination" && ! -L "$destination" ]] &&
+            [[ -z "$(find "$destination" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+            rmdir -- "$destination"
+        else
+            fail "destination is not empty: $destination"
+        fi
+    fi
+    mv -- "$source" "$destination"
+    chmod "$mode" "$destination"
+}
+
+rewrite_symlink() {
+    local link="$1" target_root="$2" require_target="${3:-1}" target name
+    if [[ ! -L "$link" ]]; then
+        log "skip non-symlink $link"
+        return 0
+    fi
+    target="$(readlink -- "$link")"
+    if [[ "$target" != /* ]]; then
+        log "keep relative symlink $link"
+        return 0
+    fi
+    name="$(basename -- "$target")"
+    [[ -n "$name" && "$name" != "/" ]] || fail "cannot derive symlink target name: $link"
+    new_target="$target_root/$name"
+    if (( require_target )) && [[ ! -e "$new_target" ]]; then
+        fail "symlink target does not exist: $new_target (for $link)"
+    fi
+    ln -sfn -- "$new_target" "$link"
+    log "rewrite symlink $link -> $new_target"
+}
+
+rewrite_runtime_links() {
+    rewrite_symlink "$NEW_VARLIB/current" "$NEW_VARLIB/workspaces"
+    local source
+    shopt -s nullglob
+    for source in "$NEW_VARLIB"/workspaces/*/source; do
+        rewrite_symlink "$source" "$NEW_OPT/releases"
+    done
+    shopt -u nullglob
+}
+
+restore_legacy_links() {
+    rewrite_symlink "$LEGACY_VARLIB/current" "$LEGACY_VARLIB/workspaces" 0
+    local source
+    shopt -s nullglob
+    for source in "$LEGACY_VARLIB"/workspaces/*/source; do
+        rewrite_symlink "$source" "$LEGACY_OPT/releases" 0
+    done
+    shopt -u nullglob
+}
+
+transform_config() {
+    log "rewrite BoudyOS names and paths in $NEW_ETC"
+    local count
+    count="$(python3 - "$NEW_ETC" "$SANDBOX" <<'PY'
+import os
+import stat
+import sys
+import tempfile
+
+directory, sandbox = sys.argv[1], sys.argv[2] == "1"
+replacements = (
+    (b"BOUDYOS_", b"DOCKYARD_"),
+    (b"/opt/boudyos", b"/opt/dockyard"),
+    (b"/var/lib/boudyos", b"/var/lib/dockyard"),
+    (b"/var/backups/boudyos", b"/var/backups/dockyard"),
+    (b"/run/boudyos", b"/run/dockyard"),
+    (b"/usr/local/lib/boudyos", b"/usr/local/lib/dockyard"),
+    (b"/etc/boudyos", b"/etc/dockyard"),
+    (b"boudyos.service", b"dockyard.service"),
+    (b"boudyos-health", b"dockyard-health"),
+    (b"boudyos-backup", b"dockyard-backup"),
+    (b"boudyos-deploy", b"dockyard-deploy"),
+    (b"boudyos-update-check", b"dockyard-update-check"),
+    (b"boudyos-paths", b"dockyard-paths"),
+)
+
+changed = 0
+for name in sorted(os.listdir(directory)):
+    path = os.path.join(directory, name)
+    info = os.lstat(path)
+    if not stat.S_ISREG(info.st_mode):
+        continue
+    with open(path, "rb") as stream:
+        original = stream.read()
+    updated = original
+    for old, new in replacements:
+        updated = updated.replace(old, new)
+    if updated == original:
+        continue
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=".migrate.", dir=directory
+    )
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(updated)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.chmod(temporary, stat.S_IMODE(info.st_mode))
+        if not sandbox:
+            os.chown(temporary, info.st_uid, info.st_gid)
+        os.replace(temporary, path)
+    finally:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+    changed += 1
+print(changed)
+PY
+)"
+    log "rewrote $count configuration file(s)"
+
+    if [[ -f "$NEW_ETC/deploy.conf" ]]; then
+        chmod 0640 "$NEW_ETC/deploy.conf"
+        run_priv chown root:root "$NEW_ETC/deploy.conf"
+    fi
+}
+
+set_release_pin() {
+    [[ -n "$TAG" && -n "$COMMIT" ]] || return 0
+    [[ -f "$NEW_ETC/deploy.conf" ]] ||
+        fail "cannot set the release pin: $NEW_ETC/deploy.conf is missing"
+    log "set DOCKYARD_RELEASE_TAG and DOCKYARD_RELEASE_COMMIT in deploy.conf"
+    python3 - "$NEW_ETC/deploy.conf" "$TAG" "$COMMIT" "$SANDBOX" <<'PY'
+import os
+import stat
+import sys
+import tempfile
+
+path, tag, commit, sandbox_value = sys.argv[1:]
+sandbox = sandbox_value == "1"
+with open(path, "rb") as stream:
+    original = stream.read()
+lines = original.splitlines(keepends=True)
+wanted = {
+    b"DOCKYARD_RELEASE_TAG": tag.encode(),
+    b"DOCKYARD_RELEASE_COMMIT": commit.encode(),
+}
+seen = set()
+updated = []
+for line in lines:
+    stripped = line.rstrip(b"\r\n")
+    key = stripped.split(b"=", 1)[0] if b"=" in stripped else b""
+    if key in wanted:
+        ending = line[len(stripped):]
+        updated.append(key + b"=" + wanted[key] + ending)
+        seen.add(key)
+    else:
+        updated.append(line)
+for key, value in wanted.items():
+    if key not in seen:
+        if updated and not updated[-1].endswith((b"\n", b"\r")):
+            updated[-1] += b"\n"
+        updated.append(key + b"=" + value + b"\n")
+info = os.stat(path, follow_symlinks=False)
+descriptor, temporary = tempfile.mkstemp(prefix=".pin.", dir=os.path.dirname(path))
+try:
+    with os.fdopen(descriptor, "wb") as stream:
+        stream.write(b"".join(updated))
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.chmod(temporary, stat.S_IMODE(info.st_mode))
+    if not sandbox:
+        os.chown(temporary, info.st_uid, info.st_gid)
+    os.replace(temporary, path)
+finally:
+    try:
+        os.unlink(temporary)
+    except FileNotFoundError:
+        pass
+PY
+}
+
+install_repository_assets() {
+    local helper name source destination
+    ensure_dir "$NEW_USRSBIN" 0755
+    ensure_dir "$NEW_USRLIB" 0755
+    ensure_dir "$NEW_UNIT_DIR" 0755
+    ensure_dir "$(dirname "$NEW_TMPFILES")" 0755
+    ensure_dir "$(dirname "$NEW_SUDOERS")" 0755
+
+    for helper in "${NEW_HELPERS[@]}"; do
+        source="$REPO/ops/$helper"
+        [[ -f "$source" ]] || fail "repository checkout is missing: ops/$helper"
+        install_file "$source" "$NEW_USRSBIN/$helper" 0755
+    done
+
+    install_file "$REPO/ops/dockyard_ops.py" "$NEW_USRLIB/dockyard_ops.py" 0644
+
+    shopt -s nullglob
+    for source in \
+        "$REPO"/ops/systemd/dockyard-*.service \
+        "$REPO"/ops/systemd/dockyard-*.timer \
+        "$REPO"/ops/systemd/dockyard-*.path; do
+        [[ "$source" == *.example ]] && continue
+        name="$(basename -- "$source")"
+        install_file "$source" "$NEW_UNIT_DIR/$name" 0644
+    done
+    shopt -u nullglob
+    install_file \
+        "$REPO/ops/systemd/dockyard.service.example" \
+        "$NEW_UNIT_DIR/dockyard.service" \
+        0644
+
+    install_file "$REPO/ops/tmpfiles.d/dockyard.conf" "$NEW_TMPFILES" 0644
+
+    if (( SANDBOX )); then
+        run_priv visudo -cf "$REPO/ops/sudoers/dockyard-deploy"
+    else
+        command -v visudo >/dev/null 2>&1 ||
+            fail "visudo is required to validate the sudoers file"
+        visudo -cf "$REPO/ops/sudoers/dockyard-deploy" ||
+            fail "the Dockyard sudoers file failed visudo validation"
+    fi
+    install_file "$REPO/ops/sudoers/dockyard-deploy" "$NEW_SUDOERS" 0440
+}
+
+remove_legacy_assets() {
+    local name path directory
+    log "remove superseded BoudyOS units and sudoers file"
+    for directory in \
+        "$ROOT/etc/systemd/system" \
+        "$ROOT/usr/lib/systemd/system" \
+        "$ROOT/lib/systemd/system"; do
+        for name in "${LEGACY_UNITS[@]}"; do
+            for path in \
+                "$directory/$name" \
+                "$directory/timers.target.wants/$name" \
+                "$directory/multi-user.target.wants/$name" \
+                "$directory/paths.target.wants/$name"; do
+                if [[ -e "$path" || -L "$path" ]]; then
+                    rm -rf -- "$path"
+                    log "removed $path"
+                fi
+            done
+        done
+        if [[ -e "$directory/boudyos.service.d" ]]; then
+            rm -rf -- "$directory/boudyos.service.d"
+            log "removed $directory/boudyos.service.d"
+        fi
+    done
+    if [[ -e "$LEGACY_SUDOERS" || -L "$LEGACY_SUDOERS" ]]; then
+        rm -f -- "$LEGACY_SUDOERS"
+        log "removed $LEGACY_SUDOERS"
+    fi
+}
+
+wait_for_stop() {
+    local deadline pid
+    if (( SANDBOX )); then
+        log "[sandbox] would wait for boudyos.service to stop"
+        return 0
+    fi
+    deadline=$((SECONDS + 30))
+    while (( SECONDS < deadline )); do
+        pid="$(systemctl show boudyos.service --property=MainPID --value 2>/dev/null || true)"
+        if [[ -z "$pid" || "$pid" == "0" ]]; then
+            return 0
+        fi
+        sleep 1
+    done
+    fail "boudyos.service did not stop within 30 seconds"
+}
+
+apply_steps() {
+    local unit
+
+    log "1. stop and disable superseded BoudyOS timers and path unit"
+    for unit in "${LEGACY_TIMERS[@]}"; do
+        if unit_exists "$unit"; then
+            run_priv systemctl stop "$unit"
+            run_priv systemctl disable "$unit"
+        else
+            log "skip absent unit $unit"
+        fi
+    done
+
+    log "2. stop boudyos.service"
+    run_priv systemctl stop boudyos.service || true
+    wait_for_stop
+
+    log "3. create the Dockyard directory trees"
+    ensure_dir "$NEW_ETC" 0700
+    ensure_dir "$NEW_OPT" 0755
+    ensure_dir "$NEW_VARLIB" 0755
+    ensure_dir "$NEW_BACKUPS" 0700
+    ensure_dir "$NEW_USRLIB" 0755
+
+    log "4. move the legacy trees onto the Dockyard layout"
+    move_tree "$LEGACY_OPT" "$NEW_OPT" 0755
+    move_tree "$LEGACY_VARLIB" "$NEW_VARLIB" 0755
+    move_tree "$LEGACY_ETC" "$NEW_ETC" 0700
+    move_tree "$LEGACY_BACKUPS" "$NEW_BACKUPS" 0700
+
+    log "5. rewrite absolute runtime symlinks"
+    rewrite_runtime_links
+
+    log "6. transform configuration files"
+    transform_config
+
+    log "7. pin the release when requested"
+    set_release_pin
+
+    log "8. install Dockyard helpers, units, tmpfiles and sudoers"
+    install_repository_assets
+
+    log "9. remove legacy units and activate the new timers"
+    remove_legacy_assets
+    run_priv systemctl daemon-reload
+    run_priv systemd-tmpfiles --create "$NEW_TMPFILES"
+    for unit in "${NEW_TIMERS[@]}"; do
+        run_priv systemctl enable "$unit"
+    done
+    run_priv systemctl enable dockyard-paths.service
+    run_priv systemctl daemon-reload
+
+    log "10. migration complete; dockyard.service intentionally remains stopped"
+    printf 'Next step (service intentionally stopped):\n'
+    if [[ -n "$TAG" && -n "$COMMIT" ]]; then
+        printf '  sudo %s deploy  # pinned %s at %s\n' \
+            "$NEW_USRSBIN/dockyard-deploy" "$TAG" "$COMMIT"
+        printf 'Pinned release: %s @ %s\n' "$TAG" "$COMMIT"
+    else
+        printf '  sudo %s deploy\n' "$NEW_USRSBIN/dockyard-deploy"
+        local pin_tag pin_commit
+        pin_tag="$(grep -E '^DOCKYARD_RELEASE_TAG=' "$NEW_ETC/deploy.conf" 2>/dev/null |
+            tail -n 1 | cut -d= -f2- || true)"
+        pin_commit="$(grep -E '^DOCKYARD_RELEASE_COMMIT=' "$NEW_ETC/deploy.conf" 2>/dev/null |
+            tail -n 1 | cut -d= -f2- || true)"
+        if [[ -n "$pin_tag" && -n "$pin_commit" ]]; then
+            printf 'Pinned release: %s @ %s\n' "$pin_tag" "$pin_commit"
+        fi
+    fi
+    printf 'Then run: sudo %s verify\n' "$0"
+}
+
+plan_output() {
+    local helper source name pin
+
+    printf 'plan: migrate the BoudyOS layout to Dockyard under %s\n' "$ROOT"
+    printf 'snapshot: %s\n' "$SNAPSHOT"
+    printf '\nOrdered actions:\n'
+    printf '  1. stop and disable: %s\n' "${LEGACY_TIMERS[*]}"
+    printf '  2. stop boudyos.service and wait up to 30s for its main PID to exit\n'
+    printf '  3. create: %s (0700), %s (0755), %s (0755), %s (0700), %s (0755)\n' \
+        "$NEW_ETC" "$NEW_OPT" "$NEW_VARLIB" "$NEW_BACKUPS" "$NEW_USRLIB"
+    printf '  4. move: %s -> %s; %s -> %s; %s -> %s; %s -> %s\n' \
+        "$LEGACY_OPT" "$NEW_OPT" "$LEGACY_VARLIB" "$NEW_VARLIB" \
+        "$LEGACY_ETC" "$NEW_ETC" "$LEGACY_BACKUPS" "$NEW_BACKUPS"
+    printf '  5. rewrite absolute symlinks: %s/current and %s/workspaces/*/source\n' \
+        "$NEW_VARLIB" "$NEW_VARLIB"
+    printf '  6. rewrite BOUDYOS_* keys and legacy paths/service names in %s\n' "$NEW_ETC"
+    printf '  7. set the release pin in %s/deploy.conf\n' "$NEW_ETC"
+    printf '  8. install repository assets (commands shown below)\n'
+    printf '  9. remove legacy units and sudoers, reload systemd, create tmpfiles, enable timers\n'
+    printf '     and dockyard-paths.service; dockyard.service is not enabled or started\n'
+    printf ' 10. print the pinned deploy command and leave the service stopped\n'
+
+    printf '\nCommands to install:\n'
+    for helper in "${NEW_HELPERS[@]}"; do
+        printf '  install -m 0755 %s/ops/%s %s/%s\n' \
+            "$REPO" "$helper" "$NEW_USRSBIN" "$helper"
+    done
+    printf '  install -m 0644 %s/ops/dockyard_ops.py %s/dockyard_ops.py\n' \
+        "$REPO" "$NEW_USRLIB"
+    shopt -s nullglob
+    for source in \
+        "$REPO"/ops/systemd/dockyard-*.service \
+        "$REPO"/ops/systemd/dockyard-*.timer \
+        "$REPO"/ops/systemd/dockyard-*.path; do
+        [[ "$source" == *.example ]] && continue
+        name="$(basename -- "$source")"
+        printf '  install -m 0644 %s %s/%s\n' "$source" "$NEW_UNIT_DIR" "$name"
+    done
+    shopt -u nullglob
+    printf '  install -m 0644 %s/ops/systemd/dockyard.service.example %s/dockyard.service\n' \
+        "$REPO" "$NEW_UNIT_DIR"
+    printf '  install -m 0644 %s/ops/tmpfiles.d/dockyard.conf %s\n' \
+        "$REPO" "$NEW_TMPFILES"
+    printf '  visudo -cf %s/ops/sudoers/dockyard-deploy\n' "$REPO"
+    printf '  install -m 0440 %s/ops/sudoers/dockyard-deploy %s\n' \
+        "$REPO" "$NEW_SUDOERS"
+
+    printf '\nCommands to run:\n'
+    for name in "${LEGACY_TIMERS[@]}"; do
+        printf '  systemctl stop %s\n' "$name"
+        printf '  systemctl disable %s\n' "$name"
+    done
+    printf '  systemctl stop boudyos.service\n'
+    printf '  systemctl daemon-reload\n'
+    printf '  systemd-tmpfiles --create %s\n' "$NEW_TMPFILES"
+    for name in "${NEW_TIMERS[@]}"; do
+        printf '  systemctl enable %s\n' "$name"
+    done
+    printf '  systemctl enable dockyard-paths.service\n'
+    printf '  systemctl daemon-reload\n'
+
+    printf '\nNext step after apply:\n'
+    printf '  sudo %s deploy\n' "$NEW_USRSBIN/dockyard-deploy"
+    if [[ -n "$TAG" && -n "$COMMIT" ]]; then
+        printf 'Pinned release: %s @ %s\n' "$TAG" "$COMMIT"
+    else
+        pin=""
+        [[ -f "$LEGACY_ETC/deploy.conf" ]] &&
+            pin="$(grep -E '^BOUDYOS_RELEASE_TAG=' "$LEGACY_ETC/deploy.conf" 2>/dev/null |
+                tail -n 1 | cut -d= -f2- || true)"
+        if [[ -n "$pin" ]]; then
+            printf 'Existing release pin in deploy.conf: %s\n' "$pin"
+        fi
+    fi
+}
+
+check_ok() {
+    printf 'ok: %s\n' "$1"
+}
+
+check_failed() {
+    printf 'FAIL: %s\n' "$1"
+    CHECK_FAILURES=$((CHECK_FAILURES + 1))
+}
+
+verify_units_removed() {
+    local directory found=""
+    for directory in \
+        "$ROOT/etc/systemd/system" \
+        "$ROOT/usr/lib/systemd/system" \
+        "$ROOT/lib/systemd/system"; do
+        [[ -d "$directory" ]] || continue
+        while IFS= read -r -d '' path; do
+            found="$path"
+            break
+        done < <(find "$directory" -mindepth 1 -maxdepth 2 \
+            \( -name 'boudyos*' -o -name 'boudyos*@*' \) -print0 2>/dev/null)
+        [[ -z "$found" ]] || break
+    done
+    if [[ -n "$found" ]]; then
+        check_failed "legacy unit still present: $found"
+    else
+        check_ok "no BoudyOS unit files remain"
+    fi
+}
+
+verify_config_strings() {
+    if grep -rIq -E 'BOUDYOS_|/opt/boudyos|/var/lib/boudyos' "$NEW_ETC" 2>/dev/null; then
+        check_failed "legacy BOUDYOS_ or BoudyOS path remains under $NEW_ETC"
+    else
+        check_ok "no legacy configuration strings remain under $NEW_ETC"
+    fi
+}
+
+verify_modes() {
+    local path expected actual
+    for path in "$NEW_ETC:0700" "$NEW_OPT:0755" "$NEW_VARLIB:0755" "$NEW_BACKUPS:0700"; do
+        expected="${path##*:}"
+        path="${path%:*}"
+        if [[ ! -d "$path" ]]; then
+            check_failed "missing directory: $path"
+            continue
+        fi
+        actual="$(stat -c %a "$path")"
+        actual="$(printf '%04o' "$((8#$actual))")"
+        if [[ "$actual" == "$expected" ]]; then
+            check_ok "$path has mode $expected"
+        else
+            check_failed "$path has mode $actual, expected $expected"
+        fi
+    done
+}
+
+verify_symlinks() {
+    local link source
+    link="$NEW_VARLIB/current"
+    if [[ ! -L "$link" ]]; then
+        check_failed "missing runtime symlink: $link"
+    elif [[ ! -e "$link" ]]; then
+        check_failed "runtime symlink does not resolve: $link -> $(readlink -- "$link")"
+    else
+        check_ok "runtime symlink resolves: $link"
+    fi
+
+    shopt -s nullglob
+    for source in "$NEW_VARLIB"/workspaces/*/source; do
+        [[ -L "$source" ]] || continue
+        if [[ ! -e "$source" ]]; then
+            check_failed "workspace source does not resolve: $source -> $(readlink -- "$source")"
+        else
+            check_ok "workspace source resolves: $source"
+        fi
+    done
+    shopt -u nullglob
+}
+
+verify_python_import() {
+    if env PYTHONPATH="$NEW_USRLIB" python3 -c 'import dockyard_ops' >/dev/null 2>&1; then
+        check_ok "dockyard_ops imports from $NEW_USRLIB"
+    else
+        check_failed "dockyard_ops does not import from $NEW_USRLIB"
+    fi
+}
+
+verify_sudoers() {
+    if [[ ! -f "$NEW_SUDOERS" ]]; then
+        check_failed "installed sudoers file is missing: $NEW_SUDOERS"
+        return 0
+    fi
+    if (( SANDBOX )); then
+        printf '[sandbox] would run: visudo -cf %q\n' "$NEW_SUDOERS"
+        check_ok "sudoers validation skipped in sandbox"
+    elif visudo -cf "$NEW_SUDOERS" >/dev/null 2>&1; then
+        check_ok "installed sudoers file passes visudo"
+    else
+        check_failed "installed sudoers file fails visudo"
+    fi
+}
+
+verify_pin() {
+    local result
+    if result="$(python3 - "$NEW_ETC/deploy.conf" <<'PY'
+import re
+import sys
+
+try:
+    with open(sys.argv[1], encoding="utf-8") as stream:
+        lines = stream.read().splitlines()
+except OSError:
+    print("deploy.conf is missing")
+    raise SystemExit(1)
+
+def value(key):
+    found = [line.split("=", 1)[1] for line in lines
+             if line.startswith(key + "=")]
+    return found[-1] if found else ""
+
+tag = value("DOCKYARD_RELEASE_TAG")
+commit = value("DOCKYARD_RELEASE_COMMIT")
+if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag):
+    print("DOCKYARD_RELEASE_TAG is not a valid vX.Y.Z tag")
+    raise SystemExit(1)
+if not re.fullmatch(r"[0-9a-f]{40}", commit) or commit == "0" * 40:
+    print("DOCKYARD_RELEASE_COMMIT is not a valid 40-hex commit")
+    raise SystemExit(1)
+PY
+)"; then
+        check_ok "deploy.conf pins a valid tag and commit"
+    else
+        check_failed "${result:-deploy.conf does not pin a valid tag and commit}"
+    fi
+}
+
+run_verify() {
+    require_root
+    CHECK_FAILURES=0
+    verify_units_removed
+    verify_config_strings
+    verify_modes
+    verify_symlinks
+    verify_python_import
+    verify_sudoers
+    verify_pin
+    if (( CHECK_FAILURES > 0 )); then
+        printf 'verify: %d check(s) failed\n' "$CHECK_FAILURES"
+        return 1
+    fi
+    printf 'verify: all checks passed\n'
+}
+
+restore_tree() {
+    local source="$1" destination="$2" mode="$3"
+    local entries=()
+    if [[ ! -e "$source" && ! -L "$source" ]]; then
+        log "skip absent Dockyard tree $source"
+        return 0
+    fi
+    log "move $source -> $destination"
+    if [[ -e "$destination" || -L "$destination" ]]; then
+        shopt -s dotglob nullglob
+        entries=("$source"/*)
+        shopt -u dotglob nullglob
+        if (( ${#entries[@]} )); then
+            mv -f -- "${entries[@]}" "$destination"/
+        fi
+        rmdir -- "$source"
+    else
+        mv -- "$source" "$destination"
+    fi
+    chmod "$mode" "$destination"
+}
+
+remove_new_assets() {
+    local helper path
+    log "remove Dockyard assets installed by the migration"
+    shopt -s nullglob
+    for path in \
+        "$NEW_UNIT_DIR"/dockyard*.service \
+        "$NEW_UNIT_DIR"/dockyard*.timer \
+        "$NEW_UNIT_DIR"/dockyard*.path \
+        "$ROOT/etc/systemd/system/timers.target.wants"/dockyard*.timer \
+        "$ROOT/etc/systemd/system/multi-user.target.wants"/dockyard*.service \
+        "$ROOT/etc/systemd/system/multi-user.target.wants"/dockyard*.path; do
+        rm -f -- "$path"
+        log "removed $path"
+    done
+    shopt -u nullglob
+
+    for helper in "${NEW_HELPERS[@]}"; do
+        path="$NEW_USRSBIN/$helper"
+        if [[ -e "$path" || -L "$path" ]]; then
+            rm -f -- "$path"
+            log "removed $path"
+        fi
+    done
+    if [[ -d "$NEW_USRLIB" ]]; then
+        rm -rf -- "$NEW_USRLIB"
+        log "removed $NEW_USRLIB"
+    fi
+    if [[ -e "$NEW_SUDOERS" || -L "$NEW_SUDOERS" ]]; then
+        rm -f -- "$NEW_SUDOERS"
+        log "removed $NEW_SUDOERS"
+    fi
+}
+
+validate_archive() {
+    local archive="$1" entry normalized
+    while IFS= read -r entry; do
+        [[ -n "$entry" ]] || continue
+        normalized="${entry#./}"
+        case "/$normalized/" in
+            */../*)
+                fail "snapshot archive contains a traversal entry: $entry"
+                ;;
+        esac
+        case "$normalized" in
+            etc|etc/*|usr/local|usr/local/*|usr/lib/tmpfiles.d|usr/lib/tmpfiles.d/*) ;;
+            *)
+                fail "snapshot archive contains an unsupported entry: $entry"
+                ;;
+        esac
+    done < <(tar -tzf "$archive")
+}
+
+restore_archive() {
+    local archive="$SNAPSHOT/host-artifacts.tar.gz"
+    log "restore $archive over etc, usr/local and usr/lib/tmpfiles.d"
+    tar -xzf "$archive" -C "$ROOT"
+}
+
+wait_legacy_ready() {
+    local deadline pid ready_value
+    if (( SANDBOX )); then
+        if [[ -x "$LEGACY_HEALTH" ]]; then
+            run_priv "$LEGACY_HEALTH"
+        else
+            log "[sandbox] would wait for $LEGACY_READY"
+        fi
+        return 0
+    fi
+    deadline=$((SECONDS + 30))
+    while (( SECONDS < deadline )); do
+        if [[ -x "$LEGACY_HEALTH" ]] && "$LEGACY_HEALTH" >/dev/null 2>&1; then
+            return 0
+        fi
+        pid="$(systemctl show boudyos.service --property=MainPID --value 2>/dev/null || true)"
+        if [[ "$pid" =~ ^[1-9][0-9]*$ && -f "$LEGACY_READY" ]]; then
+            ready_value="$(python3 - "$LEGACY_READY" "$pid" <<'PY' 2>/dev/null || true
+import json
+import sys
+import time
+try:
+    with open(sys.argv[1], encoding="ascii") as stream:
+        value = json.load(stream)
+    fresh = 0 <= time.time() - int(value["timestamp"]) <= 45
+    print("ready" if value.get("schema_version") == 1
+          and int(value["pid"]) == int(sys.argv[2]) and fresh else "")
+except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
+    print("")
+PY
+)"
+            if [[ "$ready_value" == "ready" ]]; then
+                return 0
+            fi
+        fi
+        sleep 1
+    done
+    fail "boudyos.service did not become ready within 30 seconds"
+}
+
+run_rollback() {
+    require_root
+    require_snapshot_archive
+    validate_archive "$SNAPSHOT/host-artifacts.tar.gz"
+    start_log
+
+    local unit
+    for unit in \
+        dockyard.service \
+        dockyard-health.timer \
+        dockyard-health.service \
+        dockyard-backup.timer \
+        dockyard-backup.service \
+        dockyard-update-check.timer \
+        dockyard-update-check.service \
+        dockyard-deploy.path \
+        dockyard-deploy.service \
+        dockyard-paths.service; do
+        if unit_exists "$unit"; then
+            run_priv systemctl stop "$unit" || true
+            run_priv systemctl disable "$unit" || true
+        fi
+    done
+
+    restore_tree "$NEW_OPT" "$LEGACY_OPT" 0755
+    restore_tree "$NEW_VARLIB" "$LEGACY_VARLIB" 0755
+    restore_tree "$NEW_ETC" "$LEGACY_ETC" 0700
+    restore_tree "$NEW_BACKUPS" "$LEGACY_BACKUPS" 0700
+
+    # Undo the path rewrite before the archive restores etc/.
+    if [[ -d "$LEGACY_VARLIB" ]]; then
+        restore_legacy_links
+    fi
+
+    remove_new_assets
+    restore_archive
+    run_priv systemctl daemon-reload
+    if [[ -e "$NEW_TMPFILES" ]]; then
+        rm -f -- "$NEW_TMPFILES"
+        log "removed $NEW_TMPFILES"
+    fi
+    run_priv systemctl start boudyos.service || true
+    if unit_exists boudyos.service; then
+        wait_legacy_ready
+    else
+        log "boudyos.service is not installed; readiness check skipped"
+    fi
+
+    log "rollback complete"
+    printf 'Rollback complete. Verify Redis, session login and media writes.\n'
+}
+
+run_apply() {
+    precheck_common
+    validate_pin
+    start_log
+    log "apply: starting host migration under $ROOT"
+
+    local status=0
+    set +e
+    ( set -euo pipefail; apply_steps )
+    status=$?
+    set -e
+    if (( status != 0 )); then
+        local rollback_status=0
+        log "apply failed; starting automatic rollback"
+        set +e
+        ( set -euo pipefail; run_rollback )
+        rollback_status=$?
+        set -e
+        if (( rollback_status == 0 )); then
+            log "automatic rollback completed"
+            fail "apply failed; the host was rolled back to BoudyOS"
+        else
+            fail "apply failed and automatic rollback also failed"
+        fi
+    fi
+}
+
+main() {
+    parse_args "$@"
+    set_paths
+    case "$ACTION" in
+        plan)
+            precheck_common
+            validate_pin
+            plan_output
+            ;;
+        apply)
+            run_apply
+            ;;
+        verify)
+            run_verify
+            ;;
+        rollback)
+            run_rollback
+            ;;
+        *)
+            die "unknown action: $ACTION"
+            ;;
+    esac
+}
+
+main "$@"
