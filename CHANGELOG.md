@@ -1,5 +1,28 @@
 # Changelog
 
+## BoudyOS 2.4.1
+
+- Ported the applicable upstream `TeamUltroid/Ultroid` #512 and #513 fixes into
+  the code BoudyOS still ships. Upstream-only changes touching plugins BoudyOS
+  removed were deliberately not ported.
+- Telethon is capped below 1.45, so a fresh install no longer crashes while
+  importing `telethonpatch`.
+- `.alive` and update output now work from a detached checkout or archive
+  checkout with no active branch.
+- `.shift` gained `-m` to shift media only, accepts a message link as the start
+  post, and trims channel arguments.
+- `.zip` no longer raises after a successful upload, because
+  `fast_uploader(to_delete=True)` has already removed the archive.
+- `.poll` and the suggestions poll now send `correct_answers` as an index and
+  include `hash=0`.
+- `KeyManager` no longer re-casts stored falsy values such as `0` or `False`.
+- Expired sessions (`AuthKeyNotFound`) now exit cleanly instead of dumping a
+  traceback, and a dead `VC_SESSION` is dropped.
+- `mediainfo` no longer relabels every streamable video as "video as doc".
+- Corrected `Image.size`, chat invite export, and snips handler registration.
+- Release verification keeps `.git/index` inside the immutable mode policy and
+  stops refreshing it during checks.
+
 ## BoudyOS 2.4.0 - clean release
 
 - Removed unmaintained, redundant, and experimental plugins: `aiwrapper`,
