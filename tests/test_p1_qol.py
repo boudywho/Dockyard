@@ -157,7 +157,7 @@ class PluginControlsTests(unittest.TestCase):
             self.assertIn("core", db.values["INCLUDE_ONLY"].split())
             self.assertIn("core", db.values["EXCLUDE_OFFICIAL"].split())
             db.values = {"PLUGIN_PROFILES": "core", "PLUGIN_PROFILE_POLICY": "new-safe-v1"}
-            event = Event(" devtools")
+            event = Event(" mute")
             asyncio.run(mod.enable_plugin(event))
             self.assertIn("profile", event.messages[-1].lower())
             self.assertNotIn("**Enabled**", event.messages[-1])

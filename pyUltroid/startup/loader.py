@@ -22,7 +22,6 @@ from . import *
 from .utils import load_addons
 from ..security.addons import AddonInstallError, load_registry
 from ..security.profiles import (
-    ASSISTANT_PROFILE_PLUGINS,
     PROFILE_POLICY_LEGACY,
     excluded_for_profiles,
     resolve_profiles,
@@ -112,18 +111,6 @@ def load_other_plugins(addons=None, pmbot=None, manager=None, vcbot=None):
     # for assistant
     if not USER_MODE and not udB.get_key("DISABLE_AST_PLUGINS"):
         _ast_exc = ["pmbot"]
-        experimental_selected = (
-            not _in_only
-            and "selection" in locals()
-            and (
-                selection.legacy_all
-                or ASSISTANT_PROFILE_PLUGINS["games"] in selection.names
-            )
-        )
-        if (_in_only and "games" not in _in_only) or (
-            not _in_only and not experimental_selected
-        ):
-            _ast_exc.append("games")
         Loader(path=OFFICIAL_ASSISTANT).load(
             log=False, exclude=_ast_exc, after_load=_after_load
         )

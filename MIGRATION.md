@@ -12,10 +12,11 @@ The first 2.2 load writes `PLUGIN_PROFILE_POLICY=legacy-all-v1` independently
 of `INIT_DEPLOY` and `LOG_OFF`. Only new provisioning writes
 `new-safe-v1` with `core,media`.
 
-Leave `ALLOW_DANGEROUS_DEV_EXEC` and `ALLOW_UNTRUSTED_PLUGINS` false. Developer
-shell/eval require the `developer` profile, owner identity, and the dangerous
-execution opt-in. Attachment, raw URL, plugin-channel, and unverified local
-code load paths require owner-controlled untrusted-plugin opt-in.
+Leave `ALLOW_DANGEROUS_DEV_EXEC` and `ALLOW_UNTRUSTED_PLUGINS` false. The
+owner shell and eval commands were removed in 2.4.0; the dangerous execution
+opt-in is retained only as a compatibility key. Attachment, raw URL,
+plugin-channel, and unverified local code load paths require owner-controlled
+untrusted-plugin opt-in.
 
 ## Exact legacy production layout
 

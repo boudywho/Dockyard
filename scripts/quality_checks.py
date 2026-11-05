@@ -76,10 +76,6 @@ def main():
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Name)
                 and node.func.id == "exec"
-                and (
-                    path.relative_to(ROOT).as_posix() != "plugins/devtools.py"
-                    or "ALLOW_DANGEROUS_DEV_EXEC" not in text
-                )
             ):
                 errors.append(
                     f"{path.relative_to(ROOT)}: generic runtime exec is forbidden"

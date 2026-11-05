@@ -43,13 +43,15 @@ class ProfileTests(unittest.TestCase):
         self.assertTrue(old.legacy_all)
         new = profiles.resolve_profiles(None, existing_install=False)
         self.assertEqual(new.names, ("core", "media"))
-        self.assertNotIn("devtools", new.include)
+        self.assertNotIn("mute", new.include)
 
-    def test_developer_requires_explicit_profile(self):
-        selected = profiles.resolve_profiles("core,developer", existing_install=False)
-        self.assertIn("devtools", selected.include)
+    def test_unknown_profile_is_rejected(self):
+        selected = profiles.resolve_profiles("core,media", existing_install=False)
+        self.assertIn("afk", selected.include)
         with self.assertRaises(ValueError):
             profiles.resolve_profiles("core,unknown", existing_install=False)
+        self.assertNotIn("developer", profiles.PROFILE_PLUGINS)
+        self.assertNotIn("experimental", profiles.PROFILE_PLUGINS)
 
     def test_official_inventory_is_exact_and_assistant_games_is_separate(self):
         actual = {
@@ -64,8 +66,25 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(set(assigned), actual)
         self.assertTrue(all(len(values) == 1 for values in assigned.values()))
         self.assertNotIn("games", assigned)
+        self.assertEqual(profiles.ASSISTANT_PROFILE_PLUGINS, {})
+
+    def test_profile_membership_matches_plugins_directory(self):
+        actual = {
+            path.stem
+            for path in (ROOT / "plugins").glob("*.py")
+            if path.name != "__init__.py"
+        }
+        for profile, names in profiles.PROFILE_PLUGINS.items():
+            for name in names:
+                with self.subTest(profile=profile, plugin=name):
+                    self.assertTrue(
+                        (ROOT / "plugins" / f"{name}.py").is_file(),
+                        f"{name} is listed in profile {profile} but has no plugin file",
+                    )
+        all_profiles = ",".join(profiles.PROFILE_PLUGINS)
+        selection = profiles.resolve_profiles(all_profiles, existing_install=False)
         self.assertEqual(
-            profiles.ASSISTANT_PROFILE_PLUGINS, {"games": "experimental"}
+            profiles.excluded_for_profiles(actual, selection), frozenset()
         )
 
     def test_unset_profile_uses_explicit_policy_not_init_deploy(self):

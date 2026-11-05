@@ -276,13 +276,6 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn('private_workspace(Path.cwd(), ".boudyos-unzip-")', source)
         self.assertNotIn('shutil.rmtree("unzip"', source)
 
-    def test_native_eval_is_owner_opt_in_and_uses_private_workspace(self):
-        source = (ROOT / "plugins/devtools.py").read_text("utf-8")
-        native = source[source.index('@ultroid_cmd(pattern="cpp"'):]
-        self.assertIn("ALLOW_DANGEROUS_DEV_EXEC", native)
-        self.assertIn("sender_id != owner_id", native)
-        self.assertIn('private_workspace(Path.cwd(), ".boudyos-cpp-")', native)
-
     def test_workflows_are_read_only_and_actions_are_sha_pinned(self):
         workflows = list((ROOT / ".github/workflows").glob("*.y*ml"))
         self.assertGreaterEqual(len(workflows), 2)

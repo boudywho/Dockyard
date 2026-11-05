@@ -43,14 +43,14 @@ def summarize_load_report(logger=None):
     if missing:
         lines.append("Missing dependencies:")
         for group, name, dep in missing[:20]:
-            lines.append("  • [{}] {} → package '{}'".format(group, name, dep))
+            lines.append("  [{}] {} → package '{}'".format(group, name, dep))
         if len(missing) > 20:
             lines.append("  … and {} more".format(len(missing) - 20))
     if failed:
         lines.append("Failed:")
         for group, name, reason in failed[:20]:
             short = reason.splitlines()[0][:120]
-            lines.append("  • [{}] {}: {}".format(group, name, short))
+            lines.append("  [{}] {}: {}".format(group, name, short))
         if len(failed) > 20:
             lines.append("  … and {} more".format(len(failed) - 20))
     text = "\n".join(lines)
@@ -94,7 +94,7 @@ class Loader:
         _single = os.path.isfile(self.path)
         if include:
             if log:
-                self._logger.info("Including: {}".format("• ".join(include)))
+                self._logger.info("Including: {}".format("".join(include)))
             files = glob.glob(f"{self.path}/_*.py")
             for file in include:
                 if file in (exclude or ()):
@@ -116,7 +116,7 @@ class Loader:
                             files.remove(f"{self.path}/{path}.py")
         if log and not _single:
             self._logger.info(
-                f"• Installing {self.key} Plugins || Count : {len(files)} •"
+                f"Installing {self.key} Plugins || Count : {len(files)} "
             )
         for plugin in sorted(files):
             plugin_path = plugin
@@ -127,14 +127,7 @@ class Loader:
                 modl = func(plugin)
             except ModuleNotFoundError as er:
                 modl = None
-                if plugin == "assistant.games" and (
-                    er.name == "akipy" or (er.name or "").startswith("akipy.")
-                ):
-                    self._logger.warning(
-                        "Optional games plugin skipped: install 'akipy' to enable it."
-                    )
-                else:
-                    self._logger.error(f"{plugin}: '{er.name}' not installed!")
+                self._logger.error(f"{plugin}: '{er.name}' not installed!")
                 dep = getattr(er, "name", None) or str(er)
                 self.missing_deps.append((display, dep))
                 LOAD_REPORT["skipped_missing_dep"].append((self.key, display, dep))

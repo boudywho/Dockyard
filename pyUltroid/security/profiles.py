@@ -10,41 +10,36 @@ PROFILE_PLUGINS = {
             "_chatactions", "_help", "_inline", "_ultroid", "_userlogs", "_wspr",
             "afk", "asstcmd", "bot", "button", "calculator", "chats", "core",
             "database", "doctor", "pluginsctl", "downloadupload", "extra", "filter", "fontgen",
-            "greetings", "misc", "notes", "other", "pmpermit", "polls",
+            "greetings", "notes", "other", "pmpermit", "polls",
             "profile", "sudo", "tools", "usage", "utilities", "variables",
             "warn",
         )
     ),
     "media": frozenset(
         (
-            "audiotools", "beautify", "compressor", "converter", "fileshare",
+            "audiotools", "compressor", "converter", "fileshare",
             "giftools", "imagetools", "mediatools", "pdftools", "qrcode",
-            "resize", "search", "stickertools", "unsplash", "videotools",
-            "webupload", "words", "writer", "youtube", "ytdl", "ziptools",
+            "resize", "search", "stickertools", "videotools",
+            "webupload", "writer", "youtube", "ytdl", "ziptools",
         )
     ),
     "admin": frozenset(
         (
             "admintools", "antiflood", "autoban", "blacklist", "broadcast",
             "channelhacks", "forcesubscribe", "globaltools", "locks", "mute",
-            "nightmode", "nsfwfilter", "profanityfilter", "vctools",
+            "vctools",
         )
     ),
     "automation": frozenset(
         (
-            "autopic", "cleanaction", "delayspam", "echo", "fakeaction",
-            "schedulemsg", "snips", "tag",
+            "echo", "schedulemsg", "snips", "tag",
         )
-    ),
-    "developer": frozenset(("devtools", "glitch", "specialtools")),
-    "experimental": frozenset(
-        ("aiwrapper", "chatbot", "gdrive", "logo", "stories", "twitter", "weather")
     ),
 }
 DEFAULT_NEW_PROFILES = ("core", "media")
 PROFILE_POLICY_NEW = "new-safe-v1"
 PROFILE_POLICY_LEGACY = "legacy-all-v1"
-ASSISTANT_PROFILE_PLUGINS = {"games": "experimental"}
+ASSISTANT_PROFILE_PLUGINS = {}
 
 
 @dataclass(frozen=True)

@@ -13,11 +13,10 @@ immediately previous 2.x release during its migration window.
 
 ## Dangerous owner capabilities
 
-The `.eval` and `.bash` commands execute with full account/process authority.
-Both require the explicit `developer` profile,
-`ALLOW_DANGEROUS_DEV_EXEC=true`, and owner identity; sudo users cannot invoke
-them. Shell timeout kills and reaps the whole process group. Prefer
-`core,media` and do not enable `developer` on unattended accounts.
+The owner shell and Python evaluation commands were removed in BoudyOS 2.4.0.
+`ALLOW_DANGEROUS_DEV_EXEC` remains a compatibility setting but no shipped
+plugin executes arbitrary code. Sudo users could never invoke those commands.
+Prefer `core,media` on unattended accounts.
 
 ## Add-on trust model
 

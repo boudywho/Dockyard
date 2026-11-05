@@ -2,10 +2,9 @@
 
 ## Profiles and dependency constraints
 
-`PLUGIN_PROFILES` accepts `core`, `media`, `admin`, `automation`, `developer`,
-and `experimental`. Every loadable file under `plugins/` belongs to exactly one
-profile; assistant modules are separate and assistant `games` follows
-`experimental`.
+`PLUGIN_PROFILES` accepts `core`, `media`, `admin`, and `automation`. Every
+loadable file under `plugins/` belongs to exactly one profile. Assistant
+modules are separate and are loaded independently of plugin profiles.
 
 New provisioning writes:
 
