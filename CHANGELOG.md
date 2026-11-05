@@ -1,5 +1,14 @@
 # Changelog
 
+## Dockyard 3.1.1
+
+- Quote cards now autofit display names and handles: the header measures the
+  quote mark and steps the text down from its base size to a floor before
+  ellipsizing, so long names such as `Abdulrahman ElKenany` are no longer
+  truncated while the layout stays put.
+- Quote messages avoid widow lines by moving one word from the previous line
+  onto a lone final word when it still fits the wrap width.
+
 ## Dockyard 3.1.0
 
 - Added `.q`, which turns a replied message into a dark-glass quote sticker
