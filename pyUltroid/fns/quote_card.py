@@ -33,6 +33,7 @@ _QUIVIRA = _FONT_ROOT / "Quivira.otf"
 _MAX_STICKER_CHARS = 140
 _MAX_SHARE_CHARS = 260
 _EMPTY_TEXT = "No text"
+_QUOTE_GAP = 10
 
 _FILL = (30, 33, 38, 240)
 _BORDER = (228, 234, 245, 115)
@@ -67,7 +68,10 @@ class _Layout:
     avatar: int
     gap: int
     name_size: int
+    name_min_size: int
     handle_size: int
+    handle_mid_size: int
+    handle_min_size: int
     handle_gap: int
     quote_size: int
     message_size: int
@@ -95,7 +99,10 @@ _STICKER = _Layout(
     avatar=80,
     gap=16,
     name_size=26,
+    name_min_size=22,
     handle_size=19,
+    handle_mid_size=17,
+    handle_min_size=16,
     handle_gap=4,
     quote_size=66,
     message_size=38,
@@ -123,7 +130,10 @@ _SHARE = _Layout(
     avatar=160,
     gap=32,
     name_size=52,
+    name_min_size=44,
     handle_size=38,
+    handle_mid_size=34,
+    handle_min_size=32,
     handle_gap=8,
     quote_size=132,
     message_size=62,
@@ -242,10 +252,35 @@ def _wrap(
         if current:
             lines.append(current)
 
-    if len(lines) > max_lines:
+    if len(lines) <= max_lines:
+        _avoid_widow(draw, lines, font, width)
+    else:
         lines = lines[:max_lines]
         lines[-1] = _ellipsize(draw, lines[-1], font, width)
     return [line for line in lines] or [_EMPTY_TEXT]
+
+
+def _avoid_widow(
+    draw: ImageDraw.ImageDraw,
+    lines: list[str],
+    font,
+    width: int,
+) -> None:
+    """Move one word down so the last line is not a lone word."""
+    if len(lines) < 2:
+        return
+    last_words = lines[-1].split()
+    previous_words = lines[-2].split()
+    if len(last_words) != 1 or len(previous_words) <= 1:
+        return
+    candidate = f"{previous_words[-1]} {lines[-1]}"
+    if _text_width(draw, candidate, font) > width:
+        return
+    remaining = " ".join(previous_words[:-1]).strip()
+    if not remaining:
+        return
+    lines[-2] = remaining
+    lines[-1] = candidate
 
 
 def _avatar_image(source: bytes, size: int, *, blur: bool) -> Image.Image:
@@ -290,10 +325,105 @@ def _initials_avatar(name: str, size: int) -> Image.Image:
     return image
 
 
-def _token_width(draw: ImageDraw.ImageDraw, text: str, font, width: int) -> str:
-    if _text_width(draw, text, font) <= width:
-        return text
-    return _ellipsize(draw, text, font, width)
+def _name_sizes(layout: _Layout) -> tuple[int, ...]:
+    scale = layout.scale
+    return tuple(
+        range(
+            layout.name_size * scale,
+            (layout.name_min_size - 1) * scale,
+            -scale,
+        )
+    )
+
+
+def _handle_sizes(layout: _Layout) -> tuple[int, ...]:
+    return tuple(
+        size * layout.scale
+        for size in (layout.handle_size, layout.handle_mid_size, layout.handle_min_size)
+    )
+
+
+def _fit_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    path: Path,
+    sizes: tuple[int, ...],
+    width: int,
+) -> tuple[str, ImageFont.FreeTypeFont, int]:
+    """Return the largest size that fits, ellipsizing only at the floor."""
+    for size in sizes:
+        font = _font(path, size)
+        if _text_width(draw, text, font) <= width:
+            return text, font, size
+    font = _font(path, sizes[-1])
+    return _ellipsize(draw, text, font, width), font, sizes[-1]
+
+
+@dataclass(frozen=True)
+class _Identity:
+    name_text: str
+    name_font: ImageFont.FreeTypeFont
+    name_size: int
+    handle_text: str
+    handle_font: ImageFont.FreeTypeFont
+    handle_size: int
+    text_left: int
+    content_right: int
+    identity_width: int
+    quote_font: ImageFont.FreeTypeFont
+
+
+def _identity_fit(
+    draw: ImageDraw.ImageDraw,
+    card: QuoteCard,
+    layout: _Layout,
+) -> _Identity:
+    """Measure the header once so the name and handle autofit together."""
+    scale = layout.scale
+    content_left = (layout.card_left + layout.pad_x) * scale
+    content_right = (layout.card_left + layout.card_width - layout.pad_x) * scale
+    text_left = content_left + (layout.avatar + layout.gap) * scale
+    quote_font = _quote_font(layout.quote_size * scale)
+    quote_width = _text_width(draw, "\u201c", quote_font)
+    identity_right = content_right - int(quote_width) - _QUOTE_GAP * scale
+    identity_width = max(1, int(identity_right - text_left))
+
+    name = " ".join((card.name or "").split()) or "Telegram user"
+    name_text, name_font, name_size = _fit_text(
+        draw,
+        name,
+        _ROBOTO_MEDIUM,
+        _name_sizes(layout),
+        identity_width,
+    )
+
+    secondary = " ".join((card.handle or "").split()) or " ".join(
+        (card.timestamp or "").split()
+    )
+    if secondary:
+        handle_text, handle_font, handle_size = _fit_text(
+            draw,
+            secondary,
+            _ROBOTO_REGULAR,
+            _handle_sizes(layout),
+            identity_width,
+        )
+    else:
+        handle_text, handle_size = "", layout.handle_size
+        handle_font = _font(_ROBOTO_REGULAR, layout.handle_size * scale)
+
+    return _Identity(
+        name_text=name_text,
+        name_font=name_font,
+        name_size=name_size,
+        handle_text=handle_text,
+        handle_font=handle_font,
+        handle_size=handle_size,
+        text_left=text_left,
+        content_right=content_right,
+        identity_width=identity_width,
+        quote_font=quote_font,
+    )
 
 
 def _draw_card(
@@ -308,23 +438,24 @@ def _draw_card(
 
     pad = layout.pad_x * scale
     avatar_size = layout.avatar * scale
-    gap = layout.gap * scale
     radius = layout.radius * scale
     card_left = layout.card_left * scale
     card_width = layout.card_width * scale
     min_height = layout.min_card_height * scale
     content_width = layout.wrap_width * scale
 
-    name_font = _font(_ROBOTO_MEDIUM, layout.name_size * scale)
-    handle_font = _font(_ROBOTO_REGULAR, layout.handle_size * scale)
-    quote_font = _quote_font(layout.quote_size * scale)
     message_font = _font(_ROBOTO_REGULAR, layout.message_size * scale)
 
     probe = ImageDraw.Draw(canvas)
-    name_line = int(layout.name_size * 1.15 * scale)
-    identity_height = name_line + layout.handle_gap * scale
-    handle_line = int(layout.handle_size * 1.2 * scale)
-    identity_height += handle_line
+    # The identity block is measured from the base fonts so shrinking the
+    # autofit sizes never moves the name baseline or the handle gap.
+    base_name_font = _font(_ROBOTO_MEDIUM, layout.name_size * scale)
+    base_handle_font = _font(_ROBOTO_REGULAR, layout.handle_size * scale)
+    name_ascent, name_descent = base_name_font.getmetrics()
+    name_line = name_ascent + name_descent
+    handle_ascent, handle_descent = base_handle_font.getmetrics()
+    handle_line = handle_ascent + handle_descent
+    identity_height = name_line + layout.handle_gap * scale + handle_line
     header_height = max(avatar_size, identity_height)
 
     message_text = _prepare_text(card.text, min(limit, layout.char_limit))
@@ -397,7 +528,6 @@ def _draw_card(
     canvas.alpha_composite(rim)
 
     content_left = card_left + pad
-    content_right = card_left + card_width - pad
     content_top = card_top + (card_height - content_height) // 2
 
     avatar_x = content_left
@@ -423,37 +553,31 @@ def _draw_card(
     )
     canvas.alpha_composite(ring_layer)
 
-    text_left = avatar_x + avatar_size + gap
-    quote_text = "\u201c"
-    quote_width = int(_text_width(probe, quote_text, quote_font)) + 4 * scale
-    identity_right = content_right - quote_width - 8 * scale
-    identity_width = max(1, identity_right - text_left)
-
-    name_text = _token_width(probe, " ".join((card.name or "").split()) or "Telegram user", name_font, identity_width)
-    secondary = " ".join((card.handle or "").split()) or " ".join((card.timestamp or "").split())
-    handle_text = _token_width(probe, secondary, handle_font, identity_width) if secondary else ""
+    identity = _identity_fit(probe, card, layout)
 
     identity_top = content_top + (header_height - identity_height) // 2 - 4 * scale
+    name_baseline = identity_top + name_ascent
     draw.text(
-        (text_left, identity_top),
-        name_text,
-        font=name_font,
+        (identity.text_left, name_baseline),
+        identity.name_text,
+        font=identity.name_font,
         fill=_TEXT,
-        anchor="la",
+        anchor="ls",
     )
-    if handle_text:
+    if identity.handle_text:
+        handle_top = identity_top + name_line + layout.handle_gap * scale
         draw.text(
-            (text_left, identity_top + name_line + layout.handle_gap * scale),
-            handle_text,
-            font=handle_font,
+            (identity.text_left, handle_top + handle_ascent),
+            identity.handle_text,
+            font=identity.handle_font,
             fill=_MUTED,
-            anchor="la",
+            anchor="ls",
         )
 
     draw.text(
-        (content_right - 4 * scale, content_top - 2 * scale),
-        quote_text,
-        font=quote_font,
+        (identity.content_right, content_top - 2 * scale),
+        "\u201c",
+        font=identity.quote_font,
         fill=_MUTED,
         anchor="ra",
     )

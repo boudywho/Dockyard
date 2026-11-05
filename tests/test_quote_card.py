@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -62,6 +62,73 @@ class QuoteCardRenderTests(unittest.TestCase):
         lines = quote_card._message_lines(self.card(text=text))
         self.assertLessEqual(len(lines), 5)
         self.assertTrue(lines[-1].endswith("\u2026"))
+
+    def test_twenty_character_name_autofits_without_ellipsis(self):
+        probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+        identity = quote_card._identity_fit(
+            probe,
+            self.card(name="Abdulrahman ElKenany"),
+            quote_card._STICKER,
+        )
+        self.assertNotIn("\u2026", identity.name_text)
+        self.assertGreaterEqual(
+            identity.name_size,
+            quote_card._STICKER.name_min_size * quote_card._STICKER.scale,
+        )
+
+    def test_longer_name_uses_a_smaller_size(self):
+        probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+        short = quote_card._identity_fit(
+            probe,
+            self.card(name="Alex Morgan"),
+            quote_card._STICKER,
+        )
+        long = quote_card._identity_fit(
+            probe,
+            self.card(name="A" * 48),
+            quote_card._STICKER,
+        )
+        self.assertLess(long.name_size, short.name_size)
+
+    def test_absurd_name_ellipsizes_at_the_size_floor(self):
+        probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+        identity = quote_card._identity_fit(
+            probe,
+            self.card(name="A" * 200),
+            quote_card._STICKER,
+        )
+        self.assertEqual(
+            identity.name_size,
+            quote_card._STICKER.name_min_size * quote_card._STICKER.scale,
+        )
+        self.assertTrue(identity.name_text.endswith("\u2026"))
+
+    def test_message_avoids_a_single_word_final_line(self):
+        lines = quote_card._message_lines(
+            self.card(
+                text=(
+                    "shipping the quote sticker pack tonight, "
+                    "then sleeping for a week"
+                )
+            )
+        )
+        self.assertGreater(len(lines[-1].split()), 1)
+
+    def test_widow_control_keeps_previous_line_and_line_cap(self):
+        probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+        font = quote_card._font(
+            quote_card._ROBOTO_REGULAR,
+            quote_card._STICKER.message_size * quote_card._STICKER.scale,
+        )
+        lines = ["keeps this line", "word"]
+        quote_card._avoid_widow(probe, lines, font, 10_000)
+        self.assertTrue(lines[0].strip())
+        self.assertEqual(len(lines), 2)
+
+        long_lines = quote_card._message_lines(
+            self.card(text="The quick brown fox jumps over the lazy dog. " * 12)
+        )
+        self.assertLessEqual(len(long_lines), quote_card._STICKER.max_lines)
 
     def test_text_caps_are_enforced(self):
         long_text = "word " * 200
