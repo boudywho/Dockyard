@@ -51,6 +51,14 @@ readonly NEW_HELPERS=(
     dockyard-rename-service
     dockyard-migrate-ultroid
 )
+# legacy unit -> new unit; the new unit keeps the legacy unit's enablement.
+readonly ENABLE_MAP=(
+    "boudyos-health.timer:dockyard-health.timer"
+    "boudyos-update-check.timer:dockyard-update-check.timer"
+    "boudyos-backup.timer:dockyard-backup.timer"
+    "boudyos-deploy.path:dockyard-deploy.path"
+    "boudyos-paths.service:dockyard-paths.service"
+)
 
 usage() {
     cat <<'EOF'
@@ -261,6 +269,44 @@ unit_exists() {
        -L "$ROOT/usr/lib/systemd/system/$name" ||
        -e "$ROOT/lib/systemd/system/$name" ||
        -L "$ROOT/lib/systemd/system/$name" ]]
+}
+
+unit_is_enabled() {
+    local name="$1" state directory
+    # An absent unit means a fresh install: let the new unit start enabled.
+    if ! unit_exists "$name"; then
+        return 0
+    fi
+    if (( SANDBOX )); then
+        # Sandbox mode must not call systemctl, so infer enablement from the
+        # target.wants links that systemctl enable would create.
+        for directory in \
+            "$ROOT/etc/systemd/system" \
+            "$ROOT/usr/lib/systemd/system" \
+            "$ROOT/lib/systemd/system"; do
+            if [[ -L "$directory/timers.target.wants/$name" ||
+                  -L "$directory/paths.target.wants/$name" ||
+                  -L "$directory/multi-user.target.wants/$name" ]]; then
+                return 0
+            fi
+        done
+        return 1
+    fi
+    state="$(systemctl is-enabled "$name" 2>/dev/null || true)"
+    case "$state" in
+        enabled|enabled-runtime) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+legacy_unit_for() {
+    local mapping
+    for mapping in "${ENABLE_MAP[@]}"; do
+        [[ "${mapping#*:}" == "$1" ]] || continue
+        printf '%s\n' "${mapping%%:*}"
+        return 0
+    done
+    return 1
 }
 
 ensure_dir() {
@@ -552,7 +598,23 @@ wait_for_stop() {
 }
 
 apply_steps() {
-    local unit
+    local unit mapping legacy new
+    local -A legacy_enabled=()
+    local -A legacy_name=()
+
+    log "record legacy unit enablement before stopping anything"
+    for mapping in "${ENABLE_MAP[@]}"; do
+        legacy="${mapping%%:*}"
+        new="${mapping#*:}"
+        legacy_name["$new"]="$legacy"
+        if unit_is_enabled "$legacy"; then
+            legacy_enabled["$new"]=1
+            log "record $legacy as enabled ($new will be enabled)"
+        else
+            legacy_enabled["$new"]=0
+            log "record $legacy as disabled ($new will stay disabled)"
+        fi
+    done
 
     log "1. stop and disable superseded BoudyOS timers and path unit"
     for unit in "${LEGACY_TIMERS[@]}"; do
@@ -598,9 +660,19 @@ apply_steps() {
     run_priv systemctl daemon-reload
     run_priv systemd-tmpfiles --create "$NEW_TMPFILES"
     for unit in "${NEW_TIMERS[@]}"; do
-        run_priv systemctl enable "$unit"
+        if (( legacy_enabled[$unit] )); then
+            run_priv systemctl enable "$unit"
+            log "enable $unit (${legacy_name[$unit]} was enabled)"
+        else
+            log "keep $unit disabled (${legacy_name[$unit]} was disabled)"
+        fi
     done
-    run_priv systemctl enable dockyard-paths.service
+    if [[ "${legacy_enabled[dockyard-paths.service]:-0}" == "1" ]]; then
+        run_priv systemctl enable dockyard-paths.service
+        log "enable dockyard-paths.service (boudyos-paths.service was enabled)"
+    else
+        log "keep dockyard-paths.service disabled (boudyos-paths.service was disabled)"
+    fi
     run_priv systemctl daemon-reload
 
     log "10. migration complete; dockyard.service intentionally remains stopped"
@@ -641,8 +713,9 @@ plan_output() {
     printf '  6. rewrite BOUDYOS_* keys and legacy paths/service names in %s\n' "$NEW_ETC"
     printf '  7. set the release pin in %s/deploy.conf\n' "$NEW_ETC"
     printf '  8. install repository assets (commands shown below)\n'
-    printf '  9. remove legacy units and sudoers, reload systemd, create tmpfiles, enable timers\n'
-    printf '     and dockyard-paths.service; dockyard.service is not enabled or started\n'
+    printf '  9. remove legacy units and sudoers, reload systemd, create tmpfiles and enable\n'
+    printf '     each new unit only if its legacy counterpart was enabled; dockyard.service\n'
+    printf '     is not enabled or started\n'
     printf ' 10. print the pinned deploy command and leave the service stopped\n'
 
     printf '\nCommands to install:\n'
@@ -679,9 +752,10 @@ plan_output() {
     printf '  systemctl daemon-reload\n'
     printf '  systemd-tmpfiles --create %s\n' "$NEW_TMPFILES"
     for name in "${NEW_TIMERS[@]}"; do
-        printf '  systemctl enable %s\n' "$name"
+        printf '  systemctl enable %s (only if %s was enabled)\n' \
+            "$name" "$(legacy_unit_for "$name")"
     done
-    printf '  systemctl enable dockyard-paths.service\n'
+    printf '  systemctl enable dockyard-paths.service (only if boudyos-paths.service was enabled)\n'
     printf '  systemctl daemon-reload\n'
 
     printf '\nNext step after apply:\n'

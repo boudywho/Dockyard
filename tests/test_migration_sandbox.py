@@ -109,6 +109,16 @@ class HostMigrationSandboxTests(unittest.TestCase):
             "boudyos-paths.service",
         ):
             (fake / "etc/systemd/system" / name).write_text(unit, "utf-8")
+        for name, target in (
+            ("boudyos-health.timer", "timers.target"),
+            ("boudyos-update-check.timer", "timers.target"),
+            ("boudyos-backup.timer", "timers.target"),
+            ("boudyos-deploy.path", "paths.target"),
+            ("boudyos-paths.service", "multi-user.target"),
+        ):
+            wants = fake / "etc/systemd/system" / f"{target}.wants"
+            wants.mkdir(parents=True, exist_ok=True)
+            os.symlink(f"/etc/systemd/system/{name}", wants / name)
         (fake / "etc/systemd/system/boudyos.service.d/legacy.conf").write_text(
             "[Service]\nEnvironment=LEGACY=1\n", "utf-8"
         )
@@ -179,7 +189,16 @@ class HostMigrationSandboxTests(unittest.TestCase):
         self.assertIn("plan:", result.stdout)
         self.assertIn("v3.0.0", result.stdout)
         self.assertIn("install -m 0755", result.stdout)
-        self.assertIn("systemctl enable dockyard-paths.service", result.stdout)
+        self.assertIn(
+            "systemctl enable dockyard-backup.timer "
+            "(only if boudyos-backup.timer was enabled)",
+            result.stdout,
+        )
+        self.assertIn(
+            "systemctl enable dockyard-paths.service "
+            "(only if boudyos-paths.service was enabled)",
+            result.stdout,
+        )
         self.assertFalse((fake / "etc/dockyard").exists())
         self.assertFalse((fake / "opt/dockyard").exists())
         self.assertFalse((snapshot / "migration.log").exists())
@@ -292,6 +311,42 @@ class HostMigrationSandboxTests(unittest.TestCase):
         self.assertIn("verify: all checks passed", verify.stdout)
         self.assertIn("ok: no BoudyOS unit files remain", verify.stdout)
         self.assertNotIn(SECRET, verify.stdout + verify.stderr)
+
+    def test_apply_preserves_disabled_legacy_units(self):
+        fake, snapshot, environment, marker = self.make_fixture()
+        disabled = (
+            fake / "etc/systemd/system/timers.target.wants/boudyos-backup.timer"
+        )
+        disabled.unlink()
+
+        result = self.run_script(
+            "apply",
+            "--root", fake,
+            "--snapshot", snapshot,
+            "--tag", "v3.0.0",
+            "--commit", COMMIT,
+            environment=environment,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        log = (snapshot / "migration.log").read_text("utf-8")
+        self.assertIn(
+            "keep dockyard-backup.timer disabled "
+            "(boudyos-backup.timer was disabled)",
+            log,
+        )
+        for unit, legacy in (
+            ("dockyard-health.timer", "boudyos-health.timer"),
+            ("dockyard-update-check.timer", "boudyos-update-check.timer"),
+            ("dockyard-deploy.path", "boudyos-deploy.path"),
+            ("dockyard-paths.service", "boudyos-paths.service"),
+        ):
+            self.assertIn(
+                f"[sandbox] would run: systemctl enable {unit}", log
+            )
+            self.assertIn(f"enable {unit} ({legacy} was enabled)", log)
+        self.assertNotIn("systemctl enable dockyard-backup.timer", log)
+        self.assertFalse(marker.exists(), "systemctl was invoked in the sandbox")
 
     def test_rollback_restores_the_legacy_layout_and_is_idempotent(self):
         fake, snapshot, environment, marker = self.make_fixture()
